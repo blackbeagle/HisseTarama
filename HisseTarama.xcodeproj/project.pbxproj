@@ -1,0 +1,406 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 55;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1C645C9A2F773189007E1F5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645C992F773189007E1F5C /* AppDelegate.swift */; };
+		1C645C9C2F773189007E1F5C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645C9B2F773189007E1F5C /* ViewController.swift */; };
+		1C645C9E2F77318B007E1F5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C645C9D2F77318B007E1F5C /* Assets.xcassets */; };
+		1C645CA12F77318B007E1F5C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1C645C9F2F77318B007E1F5C /* Main.storyboard */; };
+		1C645CA92F7735F0007E1F5C /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CA82F7735F0007E1F5C /* SidebarViewController.swift */; };
+		1C645CAC2F77360F007E1F5C /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CAA2F77360F007E1F5C /* DetailViewController.swift */; };
+		1C645CAF2F7736D3007E1F5C /* SidebarViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CAE2F7736D3007E1F5C /* SidebarViewModel.swift */; };
+		1C645CB12F773712007E1F5C /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CB02F773712007E1F5C /* Protocols.swift */; };
+		1C645CB32F773766007E1F5C /* MainSplitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CB22F773766007E1F5C /* MainSplitViewController.swift */; };
+		1C645CB52F7820D0007E1F5C /* Candlestick.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CB42F7820CF007E1F5C /* Candlestick.swift */; };
+		1C645CB92F78210E007E1F5C /* CandlestickChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CB82F78210E007E1F5C /* CandlestickChartView.swift */; };
+		1C645CBB2F782132007E1F5C /* ChartDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CBA2F782132007E1F5C /* ChartDetailViewController.swift */; };
+		1C645CBD2F7862EA007E1F5C /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 1C645CBC2F7862EA007E1F5C /* Info.plist */; };
+		1C645CC12F787B91007E1F5C /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CC02F787B91007E1F5C /* Stock.swift */; };
+		1C645CC92F7884F2007E1F5C /* IsYatirimResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */; };
+		1C645CCB2F788528007E1F5C /* IsYatirimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CCA2F788528007E1F5C /* IsYatirimService.swift */; };
+		1C76A9DB2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */; };
+		1CFA03312F798352008D3A52 /* IndicatorCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */; };
+		1CFA03332F798392008D3A52 /* IndicatorPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1C645C962F773189007E1F5C /* HisseTarama.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HisseTarama.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C645C992F773189007E1F5C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		1C645C9B2F773189007E1F5C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		1C645C9D2F77318B007E1F5C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		1C645CA02F77318B007E1F5C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		1C645CA22F77318B007E1F5C /* HisseTarama.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HisseTarama.entitlements; sourceTree = "<group>"; };
+		1C645CA82F7735F0007E1F5C /* SidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewController.swift; sourceTree = "<group>"; };
+		1C645CAA2F77360F007E1F5C /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
+		1C645CAE2F7736D3007E1F5C /* SidebarViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarViewModel.swift; sourceTree = "<group>"; };
+		1C645CB02F773712007E1F5C /* Protocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
+		1C645CB22F773766007E1F5C /* MainSplitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainSplitViewController.swift; sourceTree = "<group>"; };
+		1C645CB42F7820CF007E1F5C /* Candlestick.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Candlestick.swift; sourceTree = "<group>"; };
+		1C645CB82F78210E007E1F5C /* CandlestickChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandlestickChartView.swift; sourceTree = "<group>"; };
+		1C645CBA2F782132007E1F5C /* ChartDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartDetailViewController.swift; sourceTree = "<group>"; };
+		1C645CBC2F7862EA007E1F5C /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		1C645CC02F787B91007E1F5C /* Stock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
+		1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsYatirimResponse.swift; sourceTree = "<group>"; };
+		1C645CCA2F788528007E1F5C /* IsYatirimService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsYatirimService.swift; sourceTree = "<group>"; };
+		1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyCandleStickBuilder.swift; sourceTree = "<group>"; };
+		1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorCalculator.swift; sourceTree = "<group>"; };
+		1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorPopupViewController.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1C645C932F773189007E1F5C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1C645C8D2F773189007E1F5C = {
+			isa = PBXGroup;
+			children = (
+				1C645C982F773189007E1F5C /* HisseTarama */,
+				1C645C972F773189007E1F5C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1C645C972F773189007E1F5C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1C645C962F773189007E1F5C /* HisseTarama.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1C645C982F773189007E1F5C /* HisseTarama */ = {
+			isa = PBXGroup;
+			children = (
+				1C645CBC2F7862EA007E1F5C /* Info.plist */,
+				1C645C9F2F77318B007E1F5C /* Main.storyboard */,
+				1C645C9D2F77318B007E1F5C /* Assets.xcassets */,
+				1C645CA22F77318B007E1F5C /* HisseTarama.entitlements */,
+				1C645C992F773189007E1F5C /* AppDelegate.swift */,
+				1C645C9B2F773189007E1F5C /* ViewController.swift */,
+				1C645CA82F7735F0007E1F5C /* SidebarViewController.swift */,
+				1C645CAA2F77360F007E1F5C /* DetailViewController.swift */,
+				1C645CAE2F7736D3007E1F5C /* SidebarViewModel.swift */,
+				1C645CB02F773712007E1F5C /* Protocols.swift */,
+				1C645CB22F773766007E1F5C /* MainSplitViewController.swift */,
+				1C645CB42F7820CF007E1F5C /* Candlestick.swift */,
+				1C645CB82F78210E007E1F5C /* CandlestickChartView.swift */,
+				1C645CBA2F782132007E1F5C /* ChartDetailViewController.swift */,
+				1C645CC02F787B91007E1F5C /* Stock.swift */,
+				1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */,
+				1C645CCA2F788528007E1F5C /* IsYatirimService.swift */,
+				1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */,
+				1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */,
+				1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */,
+			);
+			path = HisseTarama;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1C645C952F773189007E1F5C /* HisseTarama */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1C645CA52F77318B007E1F5C /* Build configuration list for PBXNativeTarget "HisseTarama" */;
+			buildPhases = (
+				1C645C922F773189007E1F5C /* Sources */,
+				1C645C932F773189007E1F5C /* Frameworks */,
+				1C645C942F773189007E1F5C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HisseTarama;
+			productName = HisseTarama;
+			productReference = 1C645C962F773189007E1F5C /* HisseTarama.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1C645C8E2F773189007E1F5C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1320;
+				LastUpgradeCheck = 1320;
+				TargetAttributes = {
+					1C645C952F773189007E1F5C = {
+						CreatedOnToolsVersion = 13.2.1;
+					};
+				};
+			};
+			buildConfigurationList = 1C645C912F773189007E1F5C /* Build configuration list for PBXProject "HisseTarama" */;
+			compatibilityVersion = "Xcode 13.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1C645C8D2F773189007E1F5C;
+			productRefGroup = 1C645C972F773189007E1F5C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1C645C952F773189007E1F5C /* HisseTarama */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1C645C942F773189007E1F5C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C645C9E2F77318B007E1F5C /* Assets.xcassets in Resources */,
+				1C645CA12F77318B007E1F5C /* Main.storyboard in Resources */,
+				1C645CBD2F7862EA007E1F5C /* Info.plist in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1C645C922F773189007E1F5C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C645CBB2F782132007E1F5C /* ChartDetailViewController.swift in Sources */,
+				1C645C9C2F773189007E1F5C /* ViewController.swift in Sources */,
+				1C645CB52F7820D0007E1F5C /* Candlestick.swift in Sources */,
+				1C645CAF2F7736D3007E1F5C /* SidebarViewModel.swift in Sources */,
+				1CFA03332F798392008D3A52 /* IndicatorPopupViewController.swift in Sources */,
+				1C645CCB2F788528007E1F5C /* IsYatirimService.swift in Sources */,
+				1C645CC12F787B91007E1F5C /* Stock.swift in Sources */,
+				1C645CA92F7735F0007E1F5C /* SidebarViewController.swift in Sources */,
+				1C645CC92F7884F2007E1F5C /* IsYatirimResponse.swift in Sources */,
+				1C645CB32F773766007E1F5C /* MainSplitViewController.swift in Sources */,
+				1C76A9DB2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift in Sources */,
+				1C645CB12F773712007E1F5C /* Protocols.swift in Sources */,
+				1CFA03312F798352008D3A52 /* IndicatorCalculator.swift in Sources */,
+				1C645C9A2F773189007E1F5C /* AppDelegate.swift in Sources */,
+				1C645CAC2F77360F007E1F5C /* DetailViewController.swift in Sources */,
+				1C645CB92F78210E007E1F5C /* CandlestickChartView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		1C645C9F2F77318B007E1F5C /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				1C645CA02F77318B007E1F5C /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		1C645CA32F77318B007E1F5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.7;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		1C645CA42F77318B007E1F5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 11.7;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		1C645CA62F77318B007E1F5C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HisseTarama/HisseTarama.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B26L8UZT9W;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dgnkartal.HisseTarama;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		1C645CA72F77318B007E1F5C /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = HisseTarama/HisseTarama.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = B26L8UZT9W;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dgnkartal.HisseTarama;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1C645C912F773189007E1F5C /* Build configuration list for PBXProject "HisseTarama" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1C645CA32F77318B007E1F5C /* Debug */,
+				1C645CA42F77318B007E1F5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1C645CA52F77318B007E1F5C /* Build configuration list for PBXNativeTarget "HisseTarama" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1C645CA62F77318B007E1F5C /* Debug */,
+				1C645CA72F77318B007E1F5C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1C645C8E2F773189007E1F5C /* Project object */;
+}
