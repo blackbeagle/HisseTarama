@@ -7,6 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C4ED35D2FFA8E7A00DC0AAC /* ChartViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED35C2FFA8E7A00DC0AAC /* ChartViewport.swift */; };
+		1C4ED35F2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED35E2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift */; };
+		1C4ED36C2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED36B2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift */; };
+		1C4ED36E2FFAE39E00DC0AAC /* CandleRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED36D2FFAE39E00DC0AAC /* CandleRenderer.swift */; };
+		1C4ED3702FFAE46800DC0AAC /* ChartTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED36F2FFAE46800DC0AAC /* ChartTheme.swift */; };
+		1C4ED3722FFAEA3F00DC0AAC /* SMARenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED3712FFAEA3F00DC0AAC /* SMARenderer.swift */; };
+		1C4ED3742FFAEB5500DC0AAC /* AxisRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED3732FFAEB5500DC0AAC /* AxisRenderer.swift */; };
 		1C645C9A2F773189007E1F5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645C992F773189007E1F5C /* AppDelegate.swift */; };
 		1C645C9C2F773189007E1F5C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645C9B2F773189007E1F5C /* ViewController.swift */; };
 		1C645C9E2F77318B007E1F5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C645C9D2F77318B007E1F5C /* Assets.xcassets */; };
@@ -29,6 +36,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1C4ED35C2FFA8E7A00DC0AAC /* ChartViewport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartViewport.swift; sourceTree = "<group>"; };
+		1C4ED35E2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCoordinateSystem.swift; sourceTree = "<group>"; };
+		1C4ED36B2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionOverlayRenderer.swift; sourceTree = "<group>"; };
+		1C4ED36D2FFAE39E00DC0AAC /* CandleRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CandleRenderer.swift; sourceTree = "<group>"; };
+		1C4ED36F2FFAE46800DC0AAC /* ChartTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTheme.swift; sourceTree = "<group>"; };
+		1C4ED3712FFAEA3F00DC0AAC /* SMARenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMARenderer.swift; sourceTree = "<group>"; };
+		1C4ED3732FFAEB5500DC0AAC /* AxisRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisRenderer.swift; sourceTree = "<group>"; };
 		1C645C962F773189007E1F5C /* HisseTarama.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HisseTarama.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C645C992F773189007E1F5C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1C645C9B2F773189007E1F5C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -63,6 +77,127 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1C4ED3592FFA8E0C00DC0AAC /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1C645CB42F7820CF007E1F5C /* Candlestick.swift */,
+				1C645CC02F787B91007E1F5C /* Stock.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		1C4ED35A2FFA8E4300DC0AAC /* Charts */ = {
+			isa = PBXGroup;
+			children = (
+				1C4ED3682FFA994B00DC0AAC /* Utility */,
+				1C4ED3672FFA993D00DC0AAC /* Interaction */,
+				1C4ED3662FFA993100DC0AAC /* Renderers */,
+				1C4ED35B2FFA8E6000DC0AAC /* Core */,
+			);
+			path = Charts;
+			sourceTree = "<group>";
+		};
+		1C4ED35B2FFA8E6000DC0AAC /* Core */ = {
+			isa = PBXGroup;
+			children = (
+				1C645CB82F78210E007E1F5C /* CandlestickChartView.swift */,
+				1C4ED35C2FFA8E7A00DC0AAC /* ChartViewport.swift */,
+				1C4ED35E2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift */,
+				1C4ED36F2FFAE46800DC0AAC /* ChartTheme.swift */,
+			);
+			path = Core;
+			sourceTree = "<group>";
+		};
+		1C4ED3602FFA904B00DC0AAC /* Indicators */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Indicators;
+			sourceTree = "<group>";
+		};
+		1C4ED3612FFA906700DC0AAC /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */,
+				1C645CCA2F788528007E1F5C /* IsYatirimService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		1C4ED3622FFA908200DC0AAC /* Scanner */ = {
+			isa = PBXGroup;
+			children = (
+				1C4ED36A2FFA996E00DC0AAC /* Engine */,
+				1C4ED3692FFA996500DC0AAC /* Rules */,
+			);
+			path = Scanner;
+			sourceTree = "<group>";
+		};
+		1C4ED3632FFA90A500DC0AAC /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				1C645CA82F7735F0007E1F5C /* SidebarViewController.swift */,
+				1C645CAA2F77360F007E1F5C /* DetailViewController.swift */,
+				1C645CB22F773766007E1F5C /* MainSplitViewController.swift */,
+				1C645CBA2F782132007E1F5C /* ChartDetailViewController.swift */,
+				1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */,
+			);
+			path = "View Controllers";
+			sourceTree = "<group>";
+		};
+		1C4ED3642FFA90BE00DC0AAC /* Views */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		1C4ED3652FFA90CE00DC0AAC /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		1C4ED3662FFA993100DC0AAC /* Renderers */ = {
+			isa = PBXGroup;
+			children = (
+				1C4ED36B2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift */,
+				1C4ED36D2FFAE39E00DC0AAC /* CandleRenderer.swift */,
+				1C4ED3712FFAEA3F00DC0AAC /* SMARenderer.swift */,
+				1C4ED3732FFAEB5500DC0AAC /* AxisRenderer.swift */,
+			);
+			path = Renderers;
+			sourceTree = "<group>";
+		};
+		1C4ED3672FFA993D00DC0AAC /* Interaction */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Interaction;
+			sourceTree = "<group>";
+		};
+		1C4ED3682FFA994B00DC0AAC /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Utility;
+			sourceTree = "<group>";
+		};
+		1C4ED3692FFA996500DC0AAC /* Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Rules;
+			sourceTree = "<group>";
+		};
+		1C4ED36A2FFA996E00DC0AAC /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
 		1C645C8D2F773189007E1F5C = {
 			isa = PBXGroup;
 			children = (
@@ -82,25 +217,23 @@
 		1C645C982F773189007E1F5C /* HisseTarama */ = {
 			isa = PBXGroup;
 			children = (
+				1C4ED3652FFA90CE00DC0AAC /* Utilities */,
+				1C4ED3642FFA90BE00DC0AAC /* Views */,
+				1C4ED3632FFA90A500DC0AAC /* View Controllers */,
+				1C4ED3622FFA908200DC0AAC /* Scanner */,
+				1C4ED3612FFA906700DC0AAC /* Services */,
+				1C4ED3602FFA904B00DC0AAC /* Indicators */,
+				1C4ED3592FFA8E0C00DC0AAC /* Models */,
+				1C4ED35A2FFA8E4300DC0AAC /* Charts */,
 				1C645CBC2F7862EA007E1F5C /* Info.plist */,
 				1C645C9F2F77318B007E1F5C /* Main.storyboard */,
 				1C645C9D2F77318B007E1F5C /* Assets.xcassets */,
 				1C645CA22F77318B007E1F5C /* HisseTarama.entitlements */,
 				1C645C992F773189007E1F5C /* AppDelegate.swift */,
 				1C645C9B2F773189007E1F5C /* ViewController.swift */,
-				1C645CA82F7735F0007E1F5C /* SidebarViewController.swift */,
-				1C645CAA2F77360F007E1F5C /* DetailViewController.swift */,
 				1C645CAE2F7736D3007E1F5C /* SidebarViewModel.swift */,
 				1C645CB02F773712007E1F5C /* Protocols.swift */,
-				1C645CB22F773766007E1F5C /* MainSplitViewController.swift */,
-				1C645CB42F7820CF007E1F5C /* Candlestick.swift */,
-				1C645CB82F78210E007E1F5C /* CandlestickChartView.swift */,
-				1C645CBA2F782132007E1F5C /* ChartDetailViewController.swift */,
-				1C645CC02F787B91007E1F5C /* Stock.swift */,
-				1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */,
-				1C645CCA2F788528007E1F5C /* IsYatirimService.swift */,
 				1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */,
-				1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */,
 				1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */,
 			);
 			path = HisseTarama;
@@ -178,18 +311,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				1C645CBB2F782132007E1F5C /* ChartDetailViewController.swift in Sources */,
+				1C4ED35F2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift in Sources */,
 				1C645C9C2F773189007E1F5C /* ViewController.swift in Sources */,
 				1C645CB52F7820D0007E1F5C /* Candlestick.swift in Sources */,
 				1C645CAF2F7736D3007E1F5C /* SidebarViewModel.swift in Sources */,
+				1C4ED36E2FFAE39E00DC0AAC /* CandleRenderer.swift in Sources */,
 				1CFA03332F798392008D3A52 /* IndicatorPopupViewController.swift in Sources */,
 				1C645CCB2F788528007E1F5C /* IsYatirimService.swift in Sources */,
 				1C645CC12F787B91007E1F5C /* Stock.swift in Sources */,
 				1C645CA92F7735F0007E1F5C /* SidebarViewController.swift in Sources */,
+				1C4ED3722FFAEA3F00DC0AAC /* SMARenderer.swift in Sources */,
 				1C645CC92F7884F2007E1F5C /* IsYatirimResponse.swift in Sources */,
+				1C4ED3742FFAEB5500DC0AAC /* AxisRenderer.swift in Sources */,
+				1C4ED3702FFAE46800DC0AAC /* ChartTheme.swift in Sources */,
 				1C645CB32F773766007E1F5C /* MainSplitViewController.swift in Sources */,
 				1C76A9DB2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift in Sources */,
 				1C645CB12F773712007E1F5C /* Protocols.swift in Sources */,
+				1C4ED35D2FFA8E7A00DC0AAC /* ChartViewport.swift in Sources */,
 				1CFA03312F798352008D3A52 /* IndicatorCalculator.swift in Sources */,
+				1C4ED36C2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift in Sources */,
 				1C645C9A2F773189007E1F5C /* AppDelegate.swift in Sources */,
 				1C645CAC2F77360F007E1F5C /* DetailViewController.swift in Sources */,
 				1C645CB92F78210E007E1F5C /* CandlestickChartView.swift in Sources */,

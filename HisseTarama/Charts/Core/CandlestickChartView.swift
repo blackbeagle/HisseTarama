@@ -2,13 +2,19 @@
 import Cocoa
 
 class CandlestickChartView: NSView {
-    
+   
     // MARK: - Properties
+    /*
     var candlesticks: [Candlestick] = [] {
         didSet {
             needsDisplay = true
         }
     }
+    */
+    
+    private let theme = ChartTheme.default
+    
+    private let smaRenderer = SMARenderer()
     
     // Grafik kenar boşlukları
     private let leftMargin: CGFloat = 55
@@ -24,16 +30,33 @@ class CandlestickChartView: NSView {
     
     
     var activeSMAs: [Int: [Double?]] = [:]
-    
-    
-    // Görüntülenecek bar sayısı
-    var visibleBarCount = 150
+  
+    private let viewport = ChartViewport()
 
-    // İlk gösterilen barın index'i
-    private var firstVisibleBar = 0
-
+    private let coordinateSystem = ChartCoordinateSystem()
+     
     // Fare sürükleme
     private var lastDragPoint: NSPoint?
+    
+    private let candleRenderer = CandleRenderer()
+    
+    var candlesticks: [Candlestick] = [] {
+        didSet {
+
+            firstVisibleBar = max(0, candlesticks.count - visibleBarCount)
+
+            needsDisplay = true
+        }
+    }
+    
+    private var visibleCandles: [Candlestick] {
+        guard !candlesticks.isEmpty else { return [] }
+
+        let start = max(0, firstVisibleBar)
+        let end = min(start + visibleBarCount, candlesticks.count)
+
+        return Array(candlesticks[start..<end])
+    }
     
     // MARK: - Initialization
     override init(frame frameRect: NSRect) {
@@ -47,6 +70,8 @@ class CandlestickChartView: NSView {
     }
     
     private func setupView() {
+        
+        window?.makeFirstResponder(self)
         wantsLayer = true
         layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
         autoresizingMask = [.width, .height]
@@ -98,13 +123,77 @@ class CandlestickChartView: NSView {
         needsDisplay = true
     }
     
-    
+    /*
     override func mouseDown(with event: NSEvent) {
         let location = convert(event.locationInWindow, from: nil)
         
         if let index = getIndexAtPoint(location) {
             showDetailForCandlestick(at: index)
         }
+    }
+    */
+    override func mouseDown(with event: NSEvent) {
+
+        lastDragPoint = convert(event.locationInWindow, from: nil)
+    }
+    override func mouseDragged(with event: NSEvent) {
+
+        guard let last = lastDragPoint else { return }
+
+        let point = convert(event.locationInWindow, from: nil)
+
+        let delta = point.x - last.x
+
+        let barWidth = getChartRect().width / CGFloat(visibleBarCount)
+
+        let shift = Int(delta / barWidth)
+
+        if shift != 0 {
+
+            firstVisibleBar -= shift
+
+            firstVisibleBar = max(
+                0,
+                min(firstVisibleBar,
+                    candlesticks.count - visibleBarCount)
+            )
+
+            lastDragPoint = point
+
+            needsDisplay = true
+        }
+    }
+    
+    override func mouseUp(with event: NSEvent) {
+
+        lastDragPoint = nil
+    }
+    
+    override var acceptsFirstResponder: Bool {
+        true
+    }
+    
+    override func keyDown(with event: NSEvent) {
+
+        switch event.keyCode {
+
+        case 123:      // ←
+
+            firstVisibleBar = max(0, firstVisibleBar - 20)
+
+        case 124:      // →
+
+            firstVisibleBar = min(
+                candlesticks.count - visibleBarCount,
+                firstVisibleBar + 20
+            )
+
+        default:
+            super.keyDown(with: event)
+            return
+        }
+
+        needsDisplay = true
     }
     
     private func updateHighlightedIndex(at point: NSPoint) {
@@ -176,103 +265,72 @@ class CandlestickChartView: NSView {
     
     // MARK: - Drawing
     override func draw(_ dirtyRect: NSRect) {
-        // Arkaplanı temizle
+
         guard let context = NSGraphicsContext.current?.cgContext else { return }
+
         context.setFillColor(NSColor.controlBackgroundColor.cgColor)
         context.fill(dirtyRect)
-        
+
         guard !candlesticks.isEmpty else {
             drawEmptyState()
             return
         }
         
-        // Fiyat aralığını bul
-        let allMax = candlesticks.map { $0.max }.max() ?? 0
-        let allMin = candlesticks.map { $0.min }.min() ?? 0
-        let priceRange = allMax - allMin
+       
+        candleRenderer.coordinateSystem = coordinateSystem
+        candleRenderer.theme = theme
+        candleRenderer.draw()
         
-        // Eğer fiyat aralığı çok küçükse (tüm fiyatlar aynı), bir miktar padding ekle
-        let padding = priceRange == 0 ? 10 : priceRange * 0.05
-        let yMax = allMax + padding
-        let yMin = allMin - padding
+        smaRenderer.coordinateSystem = coordinateSystem
+        smaRenderer.theme = theme
+        smaRenderer.activeSMAs = activeSMAs
+        smaRenderer.draw()
         
-        // Çizim alanı
-        let chartRect = getChartRect()
+        theme.bullColor.setStroke()
+        theme.bearColor.setStroke()
+        //wick.lineWidth = theme.candleLineWidth
         
-        // Eğer çizim alanı geçersizse çizme
-        guard chartRect.width > 0, chartRect.height > 0 else { return }
-        
-        // Y ekseni (fiyat) skalasını hesapla
-        let yScale = chartRect.height / CGFloat(yMax - yMin)
-        
-        // X ekseni (zaman) skalası
-        let xScale = chartRect.width / CGFloat(candlesticks.count - 1)
-        
-        // Arkaplan ızgarasını çiz
-        drawGrid(chartRect: chartRect, yMin: yMin, yMax: yMax, yScale: yScale)
-        
-        // Her bir mum için çizim yap
-        for (index, stick) in candlesticks.enumerated() {
-            let x = chartRect.minX + CGFloat(index) * xScale
-            let yMinPrice = CGFloat(stick.min - yMin) * yScale + chartRect.minY
-            let yMaxPrice = CGFloat(stick.max - yMin) * yScale + chartRect.minY
-            let yWeightedAvg = CGFloat(stick.weightedAverage - yMin) * yScale + chartRect.minY
-            
-            // Mum rengini belirle (önceki güne göre)
-            let previousAvg = index > 0 ? candlesticks[index-1].weightedAverage : stick.weightedAverage
-            let isRising = stick.weightedAverage >= previousAvg
-            
-            // Mum çubuğu (max-min arası çizgi)
-            let linePath = NSBezierPath()
-            linePath.move(to: NSPoint(x: x, y: yMinPrice))
-            linePath.line(to: NSPoint(x: x, y: yMaxPrice))
-            linePath.lineWidth = 1
-            
-            // Mum rengini ayarla
-            if isRising {
-                NSColor.systemGreen.setStroke()
-            } else {
-                NSColor.systemRed.setStroke()
-            }
-            linePath.stroke()
-            
-            // Ağırlıklı ortalama için yatay kısa çizgi
-            let avgLinePath = NSBezierPath()
-            let lineLength: CGFloat = 8.0
-            avgLinePath.move(to: NSPoint(x: x - lineLength/2, y: yWeightedAvg))
-            avgLinePath.line(to: NSPoint(x: x + lineLength/2, y: yWeightedAvg))
-            avgLinePath.lineWidth = 1.2
-            
-            if isRising {
-                NSColor.systemGreen.withAlphaComponent(0.9).setStroke()
-            } else {
-                NSColor.systemRed.withAlphaComponent(0.9).setStroke()
-            }
-            avgLinePath.stroke()
+
+        //----------------------------------------------------
+        // Viewport
+        //----------------------------------------------------
+
+        viewport.update(totalBars: candlesticks.count)
+
+        //----------------------------------------------------
+        // Coordinate System
+        //----------------------------------------------------
+
+        coordinateSystem.viewport = viewport
+        coordinateSystem.candles = candlesticks
+        coordinateSystem.chartRect = getChartRect()
+
+        guard !coordinateSystem.visibleCandles.isEmpty else {
+            return
         }
-        
-        // Highlight varsa göster
-        if let highlightedIndex = highlightedIndex {
-            drawHighlight(for: highlightedIndex, chartRect: chartRect, yMin: yMin, yMax: yMax, yScale: yScale, xScale: xScale)
-        }
-        
-        //drawMouseCrosshair(chartRect: chartRect)
-        drawMouseCrosshair(
-            chartRect: chartRect,
-            yMin: yMin,
-            yMax: yMax,
-            xScale: xScale
-        )
-        drawSMAs(chartRect: chartRect, yMin: yMin, yMax: yMax, yScale: yScale, xScale: xScale)
-        
-        // Eksen etiketlerini çiz
-        drawAxisLabels(chartRect: chartRect, yMin: yMin, yMax: yMax)
-        
-        // Grafik başlığını çiz
+
+        //----------------------------------------------------
+        // Render
+        //----------------------------------------------------
+
+        drawGrid()
+
+        //drawCandles()
+
+        //drawSMAs()
+
+        //drawHighlight()
+
+        //drawMouseCrosshair()
+
+        drawAxisLabels()
+
         drawChartTitle()
     }
     
     // MARK: - Drawing Helpers
+    
+   
     private func drawEmptyState() {
         let emptyText = "📊 Veri bulunmuyor\n\nHisse kodu girip 'Veri Getir' butonuna tıklayın" as NSString
         let attributes: [NSAttributedString.Key: Any] = [
@@ -292,35 +350,88 @@ class CandlestickChartView: NSView {
         emptyText.draw(in: textRect, withAttributes: attributes)
     }
     
-    private func drawGrid(chartRect: NSRect, yMin: Double, yMax: Double, yScale: CGFloat) {
-        NSColor.separatorColor.withAlphaComponent(0.3).setStroke()
-        
-        // Yatay çizgiler (5 adet)
-        let gridLineCount = 5
-        for i in 0...gridLineCount {
-            let yValue = yMin + (yMax - yMin) * Double(i) / Double(gridLineCount)
-            let y = CGFloat(yValue - yMin) * yScale + chartRect.minY
-            
-            let linePath = NSBezierPath()
-            linePath.move(to: NSPoint(x: chartRect.minX, y: y))
-            linePath.line(to: NSPoint(x: chartRect.maxX, y: y))
-            linePath.lineWidth = 0.5
-            linePath.stroke()
+    private func drawGrid() {
+
+        let chartRect = coordinateSystem.chartRect
+
+        guard !chartRect.isEmpty else { return }
+
+        //--------------------------------------------------
+        // Grid rengi
+        //--------------------------------------------------
+
+        NSColor.separatorColor
+            .withAlphaComponent(0.28)
+            .setStroke()
+
+        //--------------------------------------------------
+        // Yatay Grid
+        //--------------------------------------------------
+
+        let horizontalLines = 5
+
+        for i in 0...horizontalLines {
+
+            let y = chartRect.minY
+                + CGFloat(i)
+                * chartRect.height
+                / CGFloat(horizontalLines)
+
+            let path = NSBezierPath()
+
+            path.move(to: NSPoint(
+                x: chartRect.minX,
+                y: y))
+
+            path.line(to: NSPoint(
+                x: chartRect.maxX,
+                y: y))
+
+            path.lineWidth = 0.5
+
+            path.stroke()
         }
-        
-        // Dikey çizgiler (her 10 mumda bir veya minimum 5 çizgi)
-        let verticalLineCount = min(10, candlesticks.count)
-        let step = max(1, candlesticks.count / verticalLineCount)
-        
-        for i in stride(from: 0, to: candlesticks.count, by: step) {
-            let x = chartRect.minX + CGFloat(i) * (chartRect.width / CGFloat(candlesticks.count - 1))
-            let linePath = NSBezierPath()
-            linePath.move(to: NSPoint(x: x, y: chartRect.minY))
-            linePath.line(to: NSPoint(x: x, y: chartRect.maxY))
-            linePath.lineWidth = 0.5
-            linePath.stroke()
+
+        //--------------------------------------------------
+        // Dikey Grid
+        //--------------------------------------------------
+
+        let visibleCount = coordinateSystem.visibleCandles.count
+
+        guard visibleCount > 1 else { return }
+
+        // Yaklaşık 8-10 dikey çizgi
+        let desiredLineCount = 9
+
+        let step = max(
+            1,
+            visibleCount / desiredLineCount
+        )
+
+        for index in stride(
+            from: 0,
+            to: visibleCount,
+            by: step
+        ) {
+
+            let x = coordinateSystem.x(forVisibleIndex: index)
+
+            let path = NSBezierPath()
+
+            path.move(to: NSPoint(
+                x: x,
+                y: chartRect.minY))
+
+            path.line(to: NSPoint(
+                x: x,
+                y: chartRect.maxY))
+
+            path.lineWidth = 0.5
+
+            path.stroke()
         }
     }
+     
     private func colorForSMA(period: Int) -> NSColor {
 
         switch period {
@@ -338,43 +449,8 @@ class CandlestickChartView: NSView {
             return .systemOrange
         }
     }
-    private func drawSMAs(chartRect: NSRect, yMin: Double, yMax: Double, yScale: CGFloat, xScale: CGFloat) {
-        guard !activeSMAs.isEmpty else { return }
-        
-        //let colors: [NSColor] = [.systemBlue, .systemPurple, .systemOrange, .systemBrown, .systemTeal]
-        //var colorIndex = 0
-        
-        for (period, smaValues) in activeSMAs.sorted(by: { $0.key < $1.key }) {
-            guard smaValues.count == candlesticks.count else { continue }
-            
-           // let color = colors[colorIndex % colors.count]
-            let color = colorForSMA(period: period)
-            
-            color.setStroke()
-            
-            let path = NSBezierPath()
-            var isFirstPoint = true
-            
-            for (index, smaValue) in smaValues.enumerated() {
-                guard let value = smaValue else { continue }
-                
-                let x = chartRect.minX + CGFloat(index) * xScale
-                let y = CGFloat(value - yMin) * yScale + chartRect.minY
-                
-                if isFirstPoint {
-                    path.move(to: NSPoint(x: x, y: y))
-                    isFirstPoint = false
-                } else {
-                    path.line(to: NSPoint(x: x, y: y))
-                }
-            }
-            
-            path.lineWidth = 0.75
-            path.stroke()
-            
-            //colorIndex += 1
-        }
-    }
+   
+    
     
     private func drawHighlight(for index: Int, chartRect: NSRect, yMin: Double, yMax: Double, yScale: CGFloat, xScale: CGFloat) {
         let stick = candlesticks[index]
@@ -415,61 +491,130 @@ class CandlestickChartView: NSView {
         (infoText as NSString).draw(in: textRect, withAttributes: attributes)
     }
     
-    private func drawAxisLabels(chartRect: NSRect, yMin: Double, yMax: Double) {
+    
+    private func drawAxisLabels() {
+
+        let chartRect = coordinateSystem.chartRect
+        let candles = coordinateSystem.visibleCandles
+
+        guard !candles.isEmpty else { return }
+
         let attributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: 11),
             .foregroundColor: NSColor.secondaryLabelColor
         ]
-        
-        // Y ekseni etiketleri (fiyatlar)
+
+        //--------------------------------------------------
+        // Y EKSENİ
+        //--------------------------------------------------
+
         let labelCount = 5
+
         for i in 0...labelCount {
-            let yValue = yMin + (yMax - yMin) * Double(i) / Double(labelCount)
-            let y = chartRect.minY + CGFloat(i) * (chartRect.height / CGFloat(labelCount))
-            let label = String(format: "%.2f", yValue) as NSString
-            label.draw(at: NSPoint(x: 8, y: y - 7), withAttributes: attributes)
+
+            let ratio = Double(i) / Double(labelCount)
+
+            let price = coordinateSystem.minPrice +
+                (coordinateSystem.maxPrice - coordinateSystem.minPrice) * ratio
+
+            let y = chartRect.minY +
+                CGFloat(ratio) * chartRect.height
+
+            let label = NSString(format: "%.2f", price)
+
+            let size = label.size(withAttributes: attributes)
+
+            label.draw(
+                at: NSPoint(
+                    x: 8,
+                    y: y - size.height / 2
+                ),
+                withAttributes: attributes
+            )
         }
-        
-        // X ekseni etiketleri (tarihler)
-        if candlesticks.count > 1,
-           let firstDate = candlesticks.first?.date,
-           let lastDate = candlesticks.last?.date {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "dd MMM"
-            dateFormatter.locale = Locale(identifier: "tr_TR")
-            
-            let firstLabel = dateFormatter.string(from: firstDate) as NSString
-            let lastLabel = dateFormatter.string(from: lastDate) as NSString
-            
-            let firstLabelSize = firstLabel.size(withAttributes: attributes)
-            let lastLabelSize = lastLabel.size(withAttributes: attributes)
-            
-            firstLabel.draw(at: NSPoint(x: chartRect.minX - 5, y: bounds.height - bottomMargin + 8), withAttributes: attributes)
-            lastLabel.draw(at: NSPoint(x: chartRect.maxX - lastLabelSize.width + 5, y: bounds.height - bottomMargin + 8), withAttributes: attributes)
-            
-            // Ortadaki bir tarihi de göster
-            let middleIndex = candlesticks.count / 2
-            if middleIndex > 0 && middleIndex < candlesticks.count - 1 {
-                let middleDate = candlesticks[middleIndex].date
-                let middleLabel = dateFormatter.string(from: middleDate) as NSString
-                let middleX = chartRect.minX + CGFloat(middleIndex) * (chartRect.width / CGFloat(candlesticks.count - 1))
-                let middleLabelSize = middleLabel.size(withAttributes: attributes)
-                middleLabel.draw(at: NSPoint(x: middleX - middleLabelSize.width / 2, y: bounds.height - bottomMargin + 8), withAttributes: attributes)
-            }
+
+        //--------------------------------------------------
+        // X EKSENİ
+        //--------------------------------------------------
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MMM"
+        formatter.locale = Locale(identifier: "tr_TR")
+
+        let first = candles.first!
+        let last = candles.last!
+
+        let firstLabel = formatter.string(from: first.date) as NSString
+        let lastLabel = formatter.string(from: last.date) as NSString
+
+        let firstSize = firstLabel.size(withAttributes: attributes)
+        let lastSize = lastLabel.size(withAttributes: attributes)
+
+        firstLabel.draw(
+            at: NSPoint(
+                x: chartRect.minX,
+                y: chartRect.maxY + 8
+            ),
+            withAttributes: attributes
+        )
+
+        lastLabel.draw(
+            at: NSPoint(
+                x: chartRect.maxX - lastSize.width,
+                y: chartRect.maxY + 8
+            ),
+            withAttributes: attributes
+        )
+
+        //--------------------------------------------------
+        // ORTA TARİH
+        //--------------------------------------------------
+
+        let middleIndex = candles.count / 2
+
+        if middleIndex > 0 && middleIndex < candles.count {
+
+            let middle = candles[middleIndex]
+
+            let middleLabel =
+                formatter.string(from: middle.date) as NSString
+
+            let middleSize =
+                middleLabel.size(withAttributes: attributes)
+
+            let x =
+                coordinateSystem.x(forVisibleIndex: middleIndex)
+
+            middleLabel.draw(
+                at: NSPoint(
+                    x: x - middleSize.width / 2,
+                    y: chartRect.maxY + 8
+                ),
+                withAttributes: attributes
+            )
         }
-        
-        // Y ekseni etiketi
-        let yAxisLabel = "Fiyat (₺)" as NSString
-        let yAxisAttributes: [NSAttributedString.Key: Any] = [
+
+        //--------------------------------------------------
+        // Başlıklar
+        //--------------------------------------------------
+
+        let smallAttributes: [NSAttributedString.Key: Any] = [
             .font: NSFont.systemFont(ofSize: 10),
-            .foregroundColor: NSColor.secondaryLabelColor
+            .foregroundColor: NSColor.tertiaryLabelColor
         ]
-        yAxisLabel.draw(at: NSPoint(x: 8, y: bounds.height - 20), withAttributes: yAxisAttributes)
-        
-        // X ekseni etiketi
-        let xAxisLabel = "Zaman (Gün)" as NSString
-        let xAxisSize = xAxisLabel.size(withAttributes: yAxisAttributes)
-        xAxisLabel.draw(at: NSPoint(x: bounds.width - xAxisSize.width - 10, y: 8), withAttributes: yAxisAttributes)
+
+        ("Fiyat (₺)" as NSString).draw(
+            at: NSPoint(x: 8, y: bounds.height - 18),
+            withAttributes: smallAttributes
+        )
+
+        ("Zaman" as NSString).draw(
+            at: NSPoint(
+                x: bounds.width - 55,
+                y: 8
+            ),
+            withAttributes: smallAttributes
+        )
     }
     
     private func drawChartTitle() {
