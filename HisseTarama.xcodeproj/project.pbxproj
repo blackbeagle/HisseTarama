@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1C3246DC30027FEB00C2230B /* AdaptiveGridCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3246DB30027FEB00C2230B /* AdaptiveGridCalculator.swift */; };
+		1C3246DE3002801700C2230B /* GridRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3246DD3002801700C2230B /* GridRenderer.swift */; };
 		1C4ED35D2FFA8E7A00DC0AAC /* ChartViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED35C2FFA8E7A00DC0AAC /* ChartViewport.swift */; };
 		1C4ED35F2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED35E2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift */; };
 		1C4ED36C2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED36B2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift */; };
@@ -37,6 +39,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1C3246DB30027FEB00C2230B /* AdaptiveGridCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveGridCalculator.swift; sourceTree = "<group>"; };
+		1C3246DD3002801700C2230B /* GridRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridRenderer.swift; sourceTree = "<group>"; };
 		1C4ED35C2FFA8E7A00DC0AAC /* ChartViewport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartViewport.swift; sourceTree = "<group>"; };
 		1C4ED35E2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCoordinateSystem.swift; sourceTree = "<group>"; };
 		1C4ED36B2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionOverlayRenderer.swift; sourceTree = "<group>"; };
@@ -157,6 +161,7 @@
 		1C4ED3652FFA90CE00DC0AAC /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				1C3246DB30027FEB00C2230B /* AdaptiveGridCalculator.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -168,6 +173,7 @@
 				1C4ED36D2FFAE39E00DC0AAC /* CandleRenderer.swift */,
 				1C4ED3712FFAEA3F00DC0AAC /* SMARenderer.swift */,
 				1C4ED3732FFAEB5500DC0AAC /* AxisRenderer.swift */,
+				1C3246DD3002801700C2230B /* GridRenderer.swift */,
 			);
 			path = Renderers;
 			sourceTree = "<group>";
@@ -318,6 +324,8 @@
 				1C4ED3762FFAEE0400DC0AAC /* ChartInteractionController.swift in Sources */,
 				1C645C9C2F773189007E1F5C /* ViewController.swift in Sources */,
 				1C645CB52F7820D0007E1F5C /* Candlestick.swift in Sources */,
+				1C3246DC30027FEB00C2230B /* AdaptiveGridCalculator.swift in Sources */,
+				1C3246DE3002801700C2230B /* GridRenderer.swift in Sources */,
 				1C645CAF2F7736D3007E1F5C /* SidebarViewModel.swift in Sources */,
 				1C4ED36E2FFAE39E00DC0AAC /* CandleRenderer.swift in Sources */,
 				1CFA03332F798392008D3A52 /* IndicatorPopupViewController.swift in Sources */,

@@ -4,21 +4,28 @@ import Cocoa
 class CandlestickChartView: NSView {
    
     // MARK: - Properties
-    /*
-    var candlesticks: [Candlestick] = [] {
-        didSet {
-            needsDisplay = true
-        }
-    }
-    */
+   
+    // MARK: - Chart Core
+    private let viewport = ChartViewport()
+
+    private let coordinateSystem = ChartCoordinateSystem()
+
+    private let interaction = ChartInteractionController()
+
+    private let theme = ChartTheme.default
+
+    // MARK: - Renderers
+    private let gridRenderer = GridRenderer()
+
+    private let candleRenderer = CandleRenderer()
+
+    private let smaRenderer = SMARenderer()
+
+    private let selectionRenderer = SelectionOverlayRenderer()
+
+    private let axisRenderer = AxisRenderer()
     
     private var mouseLocation: CGPoint = .zero
-    
-    private let interaction = ChartInteractionController()
-    
-    private let theme = ChartTheme.default
-    
-    private let smaRenderer = SMARenderer()
     
     // Grafik kenar boşlukları
     private let leftMargin: CGFloat = 55
@@ -30,19 +37,10 @@ class CandlestickChartView: NSView {
     private var trackingArea: NSTrackingArea?
     private var highlightedIndex: Int?
     
-    private var mouseLocation: NSPoint?
-    
-    
     var activeSMAs: [Int: [Double?]] = [:]
   
-    private let viewport = ChartViewport()
-
-    private let coordinateSystem = ChartCoordinateSystem()
-     
     // Fare sürükleme
     private var lastDragPoint: NSPoint?
-    
-    private let candleRenderer = CandleRenderer()
     
     var candlesticks: [Candlestick] = [] {
         didSet {
@@ -234,29 +232,14 @@ class CandlestickChartView: NSView {
             return
         }
         
-       
-        candleRenderer.coordinateSystem = coordinateSystem
-        candleRenderer.theme = theme
-        candleRenderer.draw()
-        
-        smaRenderer.coordinateSystem = coordinateSystem
-        smaRenderer.theme = theme
-        smaRenderer.activeSMAs = activeSMAs
-        smaRenderer.draw()
-        
-        theme.bullColor.setStroke()
-        theme.bearColor.setStroke()
-        //wick.lineWidth = theme.candleLineWidth
-        
-
         //----------------------------------------------------
         // Viewport
         //----------------------------------------------------
 
         viewport.update(totalBars: candlesticks.count)
-
+        
         //----------------------------------------------------
-        // Coordinate System
+        //Coordinate System
         //----------------------------------------------------
 
         coordinateSystem.viewport = viewport
@@ -267,22 +250,37 @@ class CandlestickChartView: NSView {
             return
         }
 
+        
         //----------------------------------------------------
         // Render
         //----------------------------------------------------
 
-        drawGrid()
+        // GRID
+        gridRenderer.coordinateSystem = coordinateSystem
+        gridRenderer.theme = theme
+        gridRenderer.draw()
+        
+        candleRenderer.coordinateSystem = coordinateSystem
+        candleRenderer.theme = theme
+        candleRenderer.draw()
+        
+        smaRenderer.coordinateSystem = coordinateSystem
+        smaRenderer.theme = theme
+        smaRenderer.activeSMAs = activeSMAs
+        smaRenderer.draw()
+        
+        selectionRenderer.coordinateSystem = coordinateSystem
+        selectionRenderer.theme = theme
+        selectionRenderer.view = self
+        selectionRenderer.highlightedIndex = highlightedIndex
+        selectionRenderer.draw()
 
-        //drawCandles()
+        axisRenderer.coordinateSystem = coordinateSystem
+        axisRenderer.theme = theme
+        axisRenderer.view = self
+        axisRenderer.draw()
 
-        //drawSMAs()
-
-        //drawHighlight()
-
-        //drawMouseCrosshair()
-
-        drawAxisLabels()
-
+        
         drawChartTitle()
     }
     
@@ -308,87 +306,8 @@ class CandlestickChartView: NSView {
         emptyText.draw(in: textRect, withAttributes: attributes)
     }
     
-    private func drawGrid() {
-
-        let chartRect = coordinateSystem.chartRect
-
-        guard !chartRect.isEmpty else { return }
-
-        //--------------------------------------------------
-        // Grid rengi
-        //--------------------------------------------------
-
-        NSColor.separatorColor
-            .withAlphaComponent(0.28)
-            .setStroke()
-
-        //--------------------------------------------------
-        // Yatay Grid
-        //--------------------------------------------------
-
-        let horizontalLines = 5
-
-        for i in 0...horizontalLines {
-
-            let y = chartRect.minY
-                + CGFloat(i)
-                * chartRect.height
-                / CGFloat(horizontalLines)
-
-            let path = NSBezierPath()
-
-            path.move(to: NSPoint(
-                x: chartRect.minX,
-                y: y))
-
-            path.line(to: NSPoint(
-                x: chartRect.maxX,
-                y: y))
-
-            path.lineWidth = 0.5
-
-            path.stroke()
-        }
-
-        //--------------------------------------------------
-        // Dikey Grid
-        //--------------------------------------------------
-
-        let visibleCount = coordinateSystem.visibleCandles.count
-
-        guard visibleCount > 1 else { return }
-
-        // Yaklaşık 8-10 dikey çizgi
-        let desiredLineCount = 9
-
-        let step = max(
-            1,
-            visibleCount / desiredLineCount
-        )
-
-        for index in stride(
-            from: 0,
-            to: visibleCount,
-            by: step
-        ) {
-
-            let x = coordinateSystem.x(forVisibleIndex: index)
-
-            let path = NSBezierPath()
-
-            path.move(to: NSPoint(
-                x: x,
-                y: chartRect.minY))
-
-            path.line(to: NSPoint(
-                x: x,
-                y: chartRect.maxY))
-
-            path.lineWidth = 0.5
-
-            path.stroke()
-        }
-    }
+    gridRenderer.coordinateSystem = coordinateSystem
+    gridRenderer.draw()
      
     private func colorForSMA(period: Int) -> NSColor {
 
