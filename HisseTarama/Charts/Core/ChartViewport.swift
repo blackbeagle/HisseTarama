@@ -11,6 +11,8 @@ final class ChartViewport {
             clamp()
         }
     }
+    
+    
 
     /// Toplam bar sayısı
     private(set) var totalBarCount: Int = 0
@@ -117,22 +119,18 @@ final class ChartViewport {
 
     // MARK: - Helpers
 
-    private func clamp() {
+    func clamp() {
 
-        guard totalBarCount > 0 else {
-
-            firstVisibleBar = 0
-            return
-        }
-
-        firstVisibleBar = min(
-            firstVisibleBar,
-            max(0, totalBarCount - visibleBarCount)
-        )
-
-        firstVisibleBar = max(
-            0,
-            firstVisibleBar
-        )
+        firstVisibleBar =
+            max(
+                0,
+                min(
+                    firstVisibleBar,
+                    max(
+                        0,
+                        totalBars - visibleBarCount
+                    )
+                )
+            )
     }
 }

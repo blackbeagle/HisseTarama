@@ -12,6 +12,10 @@ class CandlestickChartView: NSView {
     }
     */
     
+    private var mouseLocation: CGPoint = .zero
+    
+    private let interaction = ChartInteractionController()
+    
     private let theme = ChartTheme.default
     
     private let smaRenderer = SMARenderer()
@@ -70,11 +74,23 @@ class CandlestickChartView: NSView {
     }
     
     private func setupView() {
-        
-        window?.makeFirstResponder(self)
+
         wantsLayer = true
-        layer?.backgroundColor = NSColor.controlBackgroundColor.cgColor
+        layer?.backgroundColor = theme.backgroundColor.cgColor
+
         autoresizingMask = [.width, .height]
+
+        interaction.viewport = viewport
+
+        interaction.onViewportChanged = { [weak self] in
+            self?.needsDisplay = true
+        }
+    }
+    
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+
+        window?.makeFirstResponder(self)
     }
     
     // MARK: - Mouse Tracking
@@ -96,77 +112,59 @@ class CandlestickChartView: NSView {
             addTrackingArea(trackingArea)
         }
     }
-    /*
+ 
+  
     override func mouseMoved(with event: NSEvent) {
-        let location = convert(event.locationInWindow, from: nil)
-        updateHighlightedIndex(at: location)
-        needsDisplay = true
-    }
-    */
-    override func mouseMoved(with event: NSEvent) {
+
         let location = convert(event.locationInWindow, from: nil)
 
         mouseLocation = location
-        updateHighlightedIndex(at: location)
 
-        needsDisplay = true
-    }
-    /*
-    override func mouseExited(with event: NSEvent) {
-        highlightedIndex = nil
-        needsDisplay = true
-    }
-    */
-    override func mouseExited(with event: NSEvent) {
-        highlightedIndex = nil
-        mouseLocation = nil
+        highlightedIndex =
+            coordinateSystem.visibleIndex(atX: location.x)
+
         needsDisplay = true
     }
     
-    /*
+    override func mouseExited(with event: NSEvent) {
+
+        highlightedIndex = nil
+
+        needsDisplay = true
+    }
+    
+    
     override func mouseDown(with event: NSEvent) {
+
         let location = convert(event.locationInWindow, from: nil)
-        
-        if let index = getIndexAtPoint(location) {
-            showDetailForCandlestick(at: index)
-        }
-    }
-    */
-    override func mouseDown(with event: NSEvent) {
 
-        lastDragPoint = convert(event.locationInWindow, from: nil)
-    }
-    override func mouseDragged(with event: NSEvent) {
+        interaction.mouseDown(at: location)
 
-        guard let last = lastDragPoint else { return }
-
-        let point = convert(event.locationInWindow, from: nil)
-
-        let delta = point.x - last.x
-
-        let barWidth = getChartRect().width / CGFloat(visibleBarCount)
-
-        let shift = Int(delta / barWidth)
-
-        if shift != 0 {
-
-            firstVisibleBar -= shift
-
-            firstVisibleBar = max(
-                0,
-                min(firstVisibleBar,
-                    candlesticks.count - visibleBarCount)
-            )
-
-            lastDragPoint = point
-
+        // Mouse üzerindeki mumu da seç
+        if let index = coordinateSystem.visibleIndex(atX: location.x) {
+            highlightedIndex = index
             needsDisplay = true
         }
     }
     
+    override func mouseDragged(with event: NSEvent) {
+
+        let location = convert(event.locationInWindow, from: nil)
+
+        interaction.mouseDragged(
+            to: location,
+            chartWidth: coordinateSystem.chartRect.width
+        )
+
+        // Drag sırasında highlight'ı değiştirmiyoruz.
+        // TradingView davranışı.
+    }
+    
+  
+    
     override func mouseUp(with event: NSEvent) {
 
-        lastDragPoint = nil
+        interaction.mouseUp()
     }
     
     override var acceptsFirstResponder: Bool {
@@ -177,61 +175,21 @@ class CandlestickChartView: NSView {
 
         switch event.keyCode {
 
-        case 123:      // ←
+        case 123:   // ←
 
-            firstVisibleBar = max(0, firstVisibleBar - 20)
+            interaction.moveLeft()
 
-        case 124:      // →
+        case 124:   // →
 
-            firstVisibleBar = min(
-                candlesticks.count - visibleBarCount,
-                firstVisibleBar + 20
-            )
+            interaction.moveRight()
 
         default:
-            super.keyDown(with: event)
-            return
-        }
 
-        needsDisplay = true
-    }
-    
-    private func updateHighlightedIndex(at point: NSPoint) {
-        guard !candlesticks.isEmpty else {
-            highlightedIndex = nil
-            return
-        }
-        
-        let chartRect = getChartRect()
-        
-        guard chartRect.contains(point) else {
-            highlightedIndex = nil
-            return
-        }
-        
-        let xScale = chartRect.width / CGFloat(candlesticks.count - 1)
-        let index = Int((point.x - chartRect.minX) / xScale)
-        
-        if index >= 0 && index < candlesticks.count {
-            highlightedIndex = index
-        } else {
-            highlightedIndex = nil
+            super.keyDown(with: event)
         }
     }
     
-    private func getIndexAtPoint(_ point: NSPoint) -> Int? {
-        guard !candlesticks.isEmpty else { return nil }
-        
-        let chartRect = getChartRect()
-        
-        guard chartRect.contains(point) else { return nil }
-        
-        let xScale = chartRect.width / CGFloat(candlesticks.count - 1)
-        let index = Int((point.x - chartRect.minX) / xScale)
-        
-        return (index >= 0 && index < candlesticks.count) ? index : nil
-    }
-    
+   
     private func showDetailForCandlestick(at index: Int) {
         let stick = candlesticks[index]
         

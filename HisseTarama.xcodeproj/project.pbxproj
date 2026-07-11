@@ -14,6 +14,7 @@
 		1C4ED3702FFAE46800DC0AAC /* ChartTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED36F2FFAE46800DC0AAC /* ChartTheme.swift */; };
 		1C4ED3722FFAEA3F00DC0AAC /* SMARenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED3712FFAEA3F00DC0AAC /* SMARenderer.swift */; };
 		1C4ED3742FFAEB5500DC0AAC /* AxisRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED3732FFAEB5500DC0AAC /* AxisRenderer.swift */; };
+		1C4ED3762FFAEE0400DC0AAC /* ChartInteractionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED3752FFAEE0400DC0AAC /* ChartInteractionController.swift */; };
 		1C645C9A2F773189007E1F5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645C992F773189007E1F5C /* AppDelegate.swift */; };
 		1C645C9C2F773189007E1F5C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645C9B2F773189007E1F5C /* ViewController.swift */; };
 		1C645C9E2F77318B007E1F5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C645C9D2F77318B007E1F5C /* Assets.xcassets */; };
@@ -43,6 +44,7 @@
 		1C4ED36F2FFAE46800DC0AAC /* ChartTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartTheme.swift; sourceTree = "<group>"; };
 		1C4ED3712FFAEA3F00DC0AAC /* SMARenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMARenderer.swift; sourceTree = "<group>"; };
 		1C4ED3732FFAEB5500DC0AAC /* AxisRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AxisRenderer.swift; sourceTree = "<group>"; };
+		1C4ED3752FFAEE0400DC0AAC /* ChartInteractionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionController.swift; sourceTree = "<group>"; };
 		1C645C962F773189007E1F5C /* HisseTarama.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HisseTarama.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C645C992F773189007E1F5C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1C645C9B2F773189007E1F5C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -235,6 +237,7 @@
 				1C645CB02F773712007E1F5C /* Protocols.swift */,
 				1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */,
 				1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */,
+				1C4ED3752FFAEE0400DC0AAC /* ChartInteractionController.swift */,
 			);
 			path = HisseTarama;
 			sourceTree = "<group>";
@@ -312,6 +315,7 @@
 			files = (
 				1C645CBB2F782132007E1F5C /* ChartDetailViewController.swift in Sources */,
 				1C4ED35F2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift in Sources */,
+				1C4ED3762FFAEE0400DC0AAC /* ChartInteractionController.swift in Sources */,
 				1C645C9C2F773189007E1F5C /* ViewController.swift in Sources */,
 				1C645CB52F7820D0007E1F5C /* Candlestick.swift in Sources */,
 				1C645CAF2F7736D3007E1F5C /* SidebarViewModel.swift in Sources */,
