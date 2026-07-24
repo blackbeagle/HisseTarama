@@ -14,7 +14,7 @@ final class ChartCoordinateSystem {
     
     var bodyWidth: CGFloat {
 
-        min(10, xScale * 0.55)
+        max(2, min(10, xScale * 0.55))
     }
 
     // MARK: - Visible Data
@@ -30,7 +30,10 @@ final class ChartCoordinateSystem {
 
         let range = viewport.visibleRange()
 
-        guard range.lowerBound < candles.count else {
+        guard
+            range.lowerBound < candles.count,
+            range.upperBound <= candles.count
+        else {
             return []
         }
 
@@ -116,6 +119,10 @@ final class ChartCoordinateSystem {
             )
         )
 
+        guard xScale > 0 else {
+            return nil
+        }
+        
         guard value >= 0,
               value < visibleCandles.count
         else {
@@ -127,20 +134,17 @@ final class ChartCoordinateSystem {
 
     func globalIndex(fromVisibleIndex index: Int) -> Int {
 
-        guard let viewport else {
-
+        guard let viewport = viewport else {
             return index
         }
 
         return viewport.firstVisibleBar + index
     }
-
     func visibleIndex(fromGlobalIndex index: Int) -> Int? {
 
-        guard let viewport else {
-
-            return nil
-        }
+        guard let viewport = viewport else {
+                return nil
+            }
 
         guard
             index >= viewport.firstVisibleBar,
@@ -178,4 +182,15 @@ final class ChartCoordinateSystem {
 
         return candles[index]
     }
+    
+    // MARK: - Prepare
+
+    func prepare() {
+
+        // Şimdilik boş.
+        // İleride visible candles, min/max,
+        // xScale ve yScale burada cache'lenecek.
+    }
+    
+    
 }

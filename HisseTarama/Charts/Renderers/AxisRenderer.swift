@@ -7,11 +7,20 @@ final class AxisRenderer {
     var coordinateSystem: ChartCoordinateSystem!
 
     var theme: ChartTheme = .default
+    
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "tr_TR")
+        formatter.dateFormat = "dd MMM"
+        return formatter
+    }()
 
     func draw() {
 
-        guard let view else { return }
-
+        //guard let view else { return }
+        guard let view = view else { return }
+        guard let coordinateSystem = coordinateSystem else { return }
+        
         let chartRect = coordinateSystem.chartRect
         let candles = coordinateSystem.visibleCandles
 
@@ -51,7 +60,7 @@ final class AxisRenderer {
 
             text.draw(
                 at: NSPoint(
-                    x: 8,
+                    x: chartRect.minX - 50,
                     y: y - size.height / 2
                 ),
                 withAttributes: labelAttributes
@@ -62,22 +71,22 @@ final class AxisRenderer {
         // X AXIS
         //----------------------------------------------------
 
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "tr_TR")
-        formatter.dateFormat = "dd MMM"
+      //  let formatter = DateFormatter()
+        //formatter.locale = Locale(identifier: "tr_TR")
+       // formatter.dateFormat = "dd MMM"
 
         let first = candles.first!
         let last = candles.last!
 
         drawDate(
-            formatter.string(from: first.date),
+            dateFormatter.string(from: first.date),
             x: chartRect.minX,
             chartRect: chartRect,
             attributes: labelAttributes
         )
 
         drawDate(
-            formatter.string(from: last.date),
+            dateFormatter.string(from: last.date),
             x: chartRect.maxX,
             chartRect: chartRect,
             attributes: labelAttributes,
@@ -89,7 +98,7 @@ final class AxisRenderer {
         if middle > 0 {
 
             drawDate(
-                formatter.string(from: candles[middle].date),
+                dateFormatter.string(from: candles[middle].date),
                 x: coordinateSystem.x(forVisibleIndex: middle),
                 chartRect: chartRect,
                 attributes: labelAttributes,
@@ -112,7 +121,7 @@ final class AxisRenderer {
         ("Fiyat (₺)" as NSString).draw(
             at: NSPoint(
                 x: 8,
-                y: view.bounds.height - 18
+                y: chartRect.maxY + 20
             ),
             withAttributes: titleAttributes
         )
@@ -123,7 +132,7 @@ final class AxisRenderer {
 
         time.draw(
             at: NSPoint(
-                x: view.bounds.width - size.width - 10,
+                x: chartRect.maxX - size.width - 10,
                 y: 8
             ),
             withAttributes: titleAttributes

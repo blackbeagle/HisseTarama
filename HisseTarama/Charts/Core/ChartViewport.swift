@@ -128,9 +128,17 @@ final class ChartViewport {
                     firstVisibleBar,
                     max(
                         0,
-                        totalBars - visibleBarCount
+                        totalBarCount - visibleBarCount
                     )
                 )
             )
     }
+    
+    func setFirstVisibleBar(_ index: Int) {
+
+        firstVisibleBar = index
+
+        clamp()
+    }
+    
 }

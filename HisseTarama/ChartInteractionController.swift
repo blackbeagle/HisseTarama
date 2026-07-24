@@ -43,8 +43,7 @@ final class ChartInteractionController {
         let deltaBars =
             Int(round(Double(dx) * barsPerPixel))
 
-        viewport.firstVisibleBar =
-            dragStartFirstBar - deltaBars
+        viewport.setFirstVisibleBar(dragStartFirstBar - deltaBars)
 
         viewport.clamp()
 
@@ -60,18 +59,18 @@ final class ChartInteractionController {
 
     func moveLeft() {
 
-        viewport.firstVisibleBar -= keyboardStep
-
-        viewport.clamp()
+        viewport.scrollLeft(by: keyboardStep)
 
         onViewportChanged?()
+
+        
     }
 
     func moveRight() {
 
-        viewport.firstVisibleBar += keyboardStep
+        viewport.scrollRight(by: keyboardStep)
 
-        viewport.clamp()
+        onViewportChanged?()
 
         onViewportChanged?()
     }
@@ -82,9 +81,9 @@ final class ChartInteractionController {
 
         guard deltaX != 0 else { return }
 
-        viewport.firstVisibleBar += Int(deltaX)
+        viewport.scroll(by: Int(deltaX))
 
-        viewport.clamp()
+        onViewportChanged?()
 
         onViewportChanged?()
     }
