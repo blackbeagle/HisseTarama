@@ -38,25 +38,39 @@ final class AxisRenderer {
 
         ]
 
-        let labelCount = 5
+        let calculator = AdaptiveGridCalculator()
 
-        for i in 0...labelCount {
+        let targetLines =
+            calculator.horizontalGridCount(
+                visibleBars: candles.count
+            )
 
-            let ratio = Double(i) / Double(labelCount)
+        let levels =
+            calculator.priceLevels(
+                minPrice: coordinateSystem.minPrice,
+                maxPrice: coordinateSystem.maxPrice,
+                targetLines: targetLines
+            )
 
-            let price =
-            coordinateSystem.minPrice +
-            (coordinateSystem.maxPrice - coordinateSystem.minPrice) * ratio
+        for price in levels {
 
             let y =
-            chartRect.minY +
-            CGFloat(ratio) * chartRect.height
+                coordinateSystem.y(
+                    forPrice: price
+                )
+
+            guard
+                y >= chartRect.minY,
+                y <= chartRect.maxY
+            else {
+                continue
+            }
 
             let text =
-            NSString(format: "%.2f", price)
+                NSString(format: "%.2f", price)
 
             let size =
-            text.size(withAttributes: labelAttributes)
+                text.size(withAttributes: labelAttributes)
 
             text.draw(
                 at: NSPoint(

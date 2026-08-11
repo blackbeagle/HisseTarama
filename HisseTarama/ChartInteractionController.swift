@@ -71,8 +71,6 @@ final class ChartInteractionController {
         viewport.scrollRight(by: keyboardStep)
 
         onViewportChanged?()
-
-        onViewportChanged?()
     }
 
     // MARK: - Mouse Wheel (ileride zoom olacak)
@@ -82,8 +80,6 @@ final class ChartInteractionController {
         guard deltaX != 0 else { return }
 
         viewport.scroll(by: Int(deltaX))
-
-        onViewportChanged?()
 
         onViewportChanged?()
     }
@@ -104,3 +100,5 @@ final class ChartInteractionController {
         onViewportChanged?()
     }
 }
+
+
