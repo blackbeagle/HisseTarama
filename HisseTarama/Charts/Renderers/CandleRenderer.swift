@@ -9,7 +9,9 @@ final class CandleRenderer {
 
         let candles = coordinateSystem.visibleCandles
 
-        guard !candles.isEmpty else { return }
+        guard !candles.isEmpty else {
+            return
+        }
 
         let bodyWidth = coordinateSystem.bodyWidth
 
@@ -23,7 +25,7 @@ final class CandleRenderer {
         }
     }
 
-    // MARK: -
+    // MARK: - Single Candle
 
     private func drawSingleCandle(
         candle: Candlestick,
@@ -31,13 +33,29 @@ final class CandleRenderer {
         bodyWidth: CGFloat
     ) {
 
-        let x = coordinateSystem.x(forVisibleIndex: visibleIndex)
+        let x =
+            coordinateSystem.x(
+                forVisibleIndex: visibleIndex
+            )
 
-        let yLow = coordinateSystem.y(forPrice: candle.min)
+        let yLow =
+            coordinateSystem.y(
+                forPrice: candle.min
+            )
 
-        let yHigh = coordinateSystem.y(forPrice: candle.max)
+        let yHigh =
+            coordinateSystem.y(
+                forPrice: candle.max
+            )
 
-        let yAverage = coordinateSystem.y(forPrice: candle.weightedAverage)
+        let yAverage =
+            coordinateSystem.y(
+                forPrice: candle.weightedAverage
+            )
+
+        //--------------------------------------------------
+        // Previous Average
+        //--------------------------------------------------
 
         let previousAverage: Double
 
@@ -72,52 +90,67 @@ final class CandleRenderer {
         let rising =
             candle.weightedAverage >= previousAverage
 
-        //---------------------------------------
+        //--------------------------------------------------
+        // Candle Color
+        //--------------------------------------------------
+
+        let candleColor =
+            rising
+            ? theme.bullColor
+            : theme.bearColor
+
+        //--------------------------------------------------
         // Wick
-        //---------------------------------------
+        //--------------------------------------------------
 
         let wick = NSBezierPath()
 
-        wick.move(to: NSPoint(x: x, y: yLow))
+        wick.move(
+            to: NSPoint(
+                x: x,
+                y: yLow
+            )
+        )
 
-        wick.line(to: NSPoint(x: x, y: yHigh))
+        wick.line(
+            to: NSPoint(
+                x: x,
+                y: yHigh
+            )
+        )
 
         wick.lineWidth = 1
 
-        (rising
-            ? NSColor.systemGreen
-            : NSColor.systemRed)
-            .setStroke()
+        candleColor.setStroke()
 
         wick.stroke()
 
-        //---------------------------------------
-        // Ortalama çizgisi
-        //---------------------------------------
+        //--------------------------------------------------
+        // Weighted Average
+        //--------------------------------------------------
 
-        let avg = NSBezierPath()
+        let averageLine = NSBezierPath()
 
-        avg.move(
+        averageLine.move(
             to: NSPoint(
                 x: x - bodyWidth / 2,
                 y: yAverage
             )
         )
 
-        avg.line(
+        averageLine.line(
             to: NSPoint(
                 x: x + bodyWidth / 2,
                 y: yAverage
             )
         )
 
-        avg.lineWidth = 1.3
+        averageLine.lineWidth = 1.3
 
-        (rising
-            ? NSColor.systemGreen.withAlphaComponent(0.95)
-            : NSColor.systemRed.withAlphaComponent(0.95))
-            .setStroke()
+        candleColor.withAlphaComponent(0.95).setStroke()
 
-        avg.stroke()
+        averageLine.stroke()
     }
 }
+
+

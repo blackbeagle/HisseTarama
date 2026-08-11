@@ -6,8 +6,7 @@ final class GridRenderer {
 
     var theme: ChartTheme = .default
 
-    private let calculator =
-        AdaptiveGridCalculator()
+    private let calculator = AdaptiveGridCalculator()
 
     func draw() {
 
@@ -82,6 +81,7 @@ private extension GridRenderer {
 
         while index < chart.visibleCandles.count {
 
+            
             let x =
             chart.x(
                 forVisibleIndex: index

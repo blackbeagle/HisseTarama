@@ -12,84 +12,55 @@ final class ChartCoordinateSystem {
 
     var topPadding: Double = 0.05
     
+    // MARK: - Cached Values
+
+    private(set) var cachedVisibleCandles: [Candlestick] = []
+
+    private(set) var cachedMinPrice: Double = 0
+
+    private(set) var cachedMaxPrice: Double = 0
+
+    private(set) var cachedPriceRange: Double = 1
+
+    private(set) var cachedXScale: CGFloat = 1
+
+    private(set) var cachedYScale: CGFloat = 1
+
+    private(set) var cachedBodyWidth: CGFloat = 6
+    
     var bodyWidth: CGFloat {
 
-        max(2, min(10, xScale * 0.55))
+        cachedBodyWidth
     }
 
     // MARK: - Visible Data
-
     var visibleCandles: [Candlestick] {
-
-        guard
-            let viewport = viewport,
-            !candles.isEmpty
-        else {
-            return []
-        }
-
-        let range = viewport.visibleRange()
-
-        guard
-            range.lowerBound < candles.count,
-            range.upperBound <= candles.count
-        else {
-            return []
-        }
-
-        return Array(candles[range])
+        cachedVisibleCandles
     }
-
+    
     // MARK: - Price Range
 
     var minPrice: Double {
-
-        let value = visibleCandles.map(\.min).min() ?? 0
-        let range = maxPriceRaw - value
-
-        return value - range * topPadding
+        cachedMinPrice
     }
 
     var maxPrice: Double {
-
-        let value = visibleCandles.map(\.max).max() ?? 0
-        let range = value - minPriceRaw
-
-        return value + range * topPadding
-    }
-
-    private var minPriceRaw: Double {
-        visibleCandles.map(\.min).min() ?? 0
-    }
-
-    private var maxPriceRaw: Double {
-        visibleCandles.map(\.max).max() ?? 0
+        cachedMaxPrice
     }
 
     // MARK: - Scale
 
     var xScale: CGFloat {
-
-        guard visibleCandles.count > 1 else {
-
-            return chartRect.width
-        }
-
-        return chartRect.width /
-        CGFloat(visibleCandles.count - 1)
+        cachedXScale
     }
 
     var yScale: CGFloat {
-
-        let range = maxPrice - minPrice
-
-        guard range > 0 else {
-
-            return 1
-        }
-
-        return chartRect.height / CGFloat(range)
+        cachedYScale
     }
+
+
+
+
 
     // MARK: - Coordinate Conversion
 
@@ -183,13 +154,133 @@ final class ChartCoordinateSystem {
         return candles[index]
     }
     
-    // MARK: - Prepare
+// MARK: - Prepare
 
     func prepare() {
 
-        // Şimdilik boş.
-        // İleride visible candles, min/max,
-        // xScale ve yScale burada cache'lenecek.
+        // ---------------------------------------------
+        // 1. Cache sıfırlama
+        // ---------------------------------------------
+
+        cachedVisibleCandles = []
+        cachedMinPrice = 0
+        cachedMaxPrice = 0
+        cachedPriceRange = 1
+        cachedXScale = 1
+        cachedYScale = 1
+        cachedBodyWidth = 6
+
+        // ---------------------------------------------
+        // 2. Viewport kontrolü
+        // ---------------------------------------------
+
+        guard
+            let viewport = viewport,
+            !candles.isEmpty,
+            chartRect.width > 0,
+            chartRect.height > 0
+        else {
+            return
+        }
+
+        // ---------------------------------------------
+        // 3. Visible Range
+        // ---------------------------------------------
+
+        let range = viewport.visibleRange()
+
+        guard !range.isEmpty else {
+            return
+        }
+
+        guard
+            range.lowerBound >= 0,
+            range.upperBound <= candles.count
+        else {
+            return
+        }
+
+        // ---------------------------------------------
+        // 4. Visible Candles
+        // ---------------------------------------------
+
+        cachedVisibleCandles = Array(candles[range])
+
+        guard !cachedVisibleCandles.isEmpty else {
+            return
+        }
+
+        // ---------------------------------------------
+        // 5. Raw Price Range
+        // ---------------------------------------------
+
+        let rawMinPrice =
+            cachedVisibleCandles
+                .map(\.min)
+                .min() ?? 0
+
+        let rawMaxPrice =
+            cachedVisibleCandles
+                .map(\.max)
+                .max() ?? 0
+
+        // ---------------------------------------------
+        // 6. Price Padding
+        // ---------------------------------------------
+
+        let rawRange =
+            max(
+                rawMaxPrice - rawMinPrice,
+                0.000001
+            )
+
+        cachedMinPrice =
+            rawMinPrice -
+            rawRange * topPadding
+
+        cachedMaxPrice =
+            rawMaxPrice +
+            rawRange * topPadding
+
+        cachedPriceRange =
+            max(
+                cachedMaxPrice - cachedMinPrice,
+                0.000001
+            )
+
+        // ---------------------------------------------
+        // 7. X Scale
+        // ---------------------------------------------
+
+        if cachedVisibleCandles.count > 1 {
+
+            cachedXScale =
+                chartRect.width /
+                CGFloat(cachedVisibleCandles.count - 1)
+
+        } else {
+
+            cachedXScale =
+                chartRect.width
+        }
+
+        // ---------------------------------------------
+        // 8. Y Scale
+        // ---------------------------------------------
+
+        cachedYScale =
+            chartRect.height /
+            CGFloat(cachedPriceRange)
+
+        // ---------------------------------------------
+        // 9. Candle Body Width
+        // ---------------------------------------------
+
+        cachedBodyWidth =
+            min(
+                10,
+                cachedXScale * 0.55
+            )
     }
     
     
