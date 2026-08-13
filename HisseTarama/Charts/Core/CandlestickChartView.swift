@@ -179,27 +179,36 @@ final class CandlestickChartView: NSView {
 
     }
 
+   
     override func mouseDown(with event: NSEvent) {
 
-        let point = convert(event.locationInWindow, from: nil)
+        let point =
+            convert(
+                event.locationInWindow,
+                from: nil
+            )
+
+        let chartRect =
+            coordinateSystem.chartRect
+
+        guard chartRect.contains(point) else {
+
+            highlightedGlobalIndex = nil
+            needsDisplay = true
+
+            return
+        }
 
         interaction.mouseDown(at: point)
 
-        let chartRect = coordinateSystem.chartRect
+        if let visibleIndex =
+            coordinateSystem.visibleIndex(atX: point.x)
+        {
 
-        if chartRect.contains(point) {
-
-            if let visibleIndex =
-                coordinateSystem.visibleIndex(atX: point.x)
-            {
-                highlightedGlobalIndex =
-                    coordinateSystem.globalIndex(
-                        fromVisibleIndex: visibleIndex
-                    )
-            } else {
-
-                highlightedGlobalIndex = nil
-            }
+            highlightedGlobalIndex =
+                coordinateSystem.globalIndex(
+                    fromVisibleIndex: visibleIndex
+                )
 
         } else {
 
@@ -207,9 +216,7 @@ final class CandlestickChartView: NSView {
         }
 
         needsDisplay = true
-        
     }
-
     override func mouseDragged(with event: NSEvent) {
 
         let point = convert(event.locationInWindow, from: nil)

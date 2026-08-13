@@ -18,7 +18,7 @@ final class AxisRenderer {
     func draw() {
 
         //guard let view else { return }
-        guard let view = view else { return }
+        guard view != nil else { return }
         guard let coordinateSystem = coordinateSystem else { return }
         
         let chartRect = coordinateSystem.chartRect
