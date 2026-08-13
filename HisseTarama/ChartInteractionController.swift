@@ -24,9 +24,11 @@ final class ChartInteractionController {
         dragStartFirstBar = viewport.firstVisibleBar
     }
 
-    func mouseDragged(to point: CGPoint,
-                      chartWidth: CGFloat)
-    {
+    func mouseDragged(
+        to point: CGPoint,
+        chartWidth: CGFloat
+    ) {
+
         guard
             let start = dragStartPoint,
             chartWidth > 0
@@ -41,9 +43,16 @@ final class ChartInteractionController {
             Double(chartWidth)
 
         let deltaBars =
-            Int(round(Double(dx) * barsPerPixel))
+            Int(
+                round(
+                    Double(dx) *
+                    barsPerPixel
+                )
+            )
 
-        viewport.setFirstVisibleBar(dragStartFirstBar - deltaBars)
+        viewport.setFirstVisibleBar(
+            dragStartFirstBar - deltaBars
+        )
 
         viewport.clamp()
 
@@ -59,46 +68,88 @@ final class ChartInteractionController {
 
     func moveLeft() {
 
-        viewport.scrollLeft(by: keyboardStep)
+        viewport.scrollLeft(
+            by: keyboardStep
+        )
 
         onViewportChanged?()
-
-        
     }
 
     func moveRight() {
 
-        viewport.scrollRight(by: keyboardStep)
+        viewport.scrollRight(
+            by: keyboardStep
+        )
 
         onViewportChanged?()
     }
 
-    // MARK: - Mouse Wheel (ileride zoom olacak)
+    // MARK: - Mouse Wheel Zoom
 
-    func scrollWheel(deltaX: CGFloat) {
+    func zoomWithWheel(
+        delta: CGFloat
+    ) {
 
-        guard deltaX != 0 else { return }
+        guard delta != 0 else {
+            return
+        }
 
-        viewport.scroll(by: Int(deltaX))
+        let zoomAmount =
+            max(
+                1,
+                Int(
+                    abs(delta)
+                )
+            )
+
+        if delta > 0 {
+
+            // Wheel yukarı:
+            // daha fazla bar göster → uzaklaş
+
+            viewport.visibleBarCount +=
+                zoomAmount
+
+        } else {
+
+            // Wheel aşağı:
+            // daha az bar göster → yakınlaş
+
+            viewport.visibleBarCount -=
+                zoomAmount
+        }
+
+        viewport.visibleBarCount =
+            max(
+                20,
+                min(
+                    500,
+                    viewport.visibleBarCount
+                )
+            )
+
+        viewport.clamp()
 
         onViewportChanged?()
     }
 
-    // MARK: - Zoom (şimdilik kullanılmayacak)
+    // MARK: - Zoom
 
     func zoom(by delta: Int) {
 
         viewport.visibleBarCount -= delta
 
         viewport.visibleBarCount =
-            max(20,
-                min(500,
-                    viewport.visibleBarCount))
+            max(
+                20,
+                min(
+                    500,
+                    viewport.visibleBarCount
+                )
+            )
 
         viewport.clamp()
 
         onViewportChanged?()
     }
 }
-
-

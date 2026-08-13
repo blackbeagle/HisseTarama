@@ -27,30 +27,34 @@ final class CandlestickChartView: NSView {
     // MARK: - Layout
 
     private let leftMargin: CGFloat = 55
-    private let rightMargin: CGFloat = 35
+    private let rightMargin: CGFloat = 75
     private let topMargin: CGFloat = 35
-    private let bottomMargin: CGFloat = 45
+    private let bottomMargin: CGFloat = 58
 
     // MARK: - Tracking
 
     private var trackingArea: NSTrackingArea?
 
-    
     private var highlightedGlobalIndex: Int?
-    
+
+    private var crosshairPoint: CGPoint?
+
     // MARK: - Data
 
     var candlesticks: [Candlestick] = [] {
 
         didSet {
 
-            viewport.update(totalBars: candlesticks.count)
+            viewport.update(
+                totalBars: candlesticks.count
+            )
 
             needsDisplay = true
         }
     }
 
-    var activeSMAs: [Int : [Double?]] = [:]
+    var activeSMAs: [Int: [Double?]] = [:]
+
     var symbol: String = ""
 
     // MARK: - Initialization
@@ -75,9 +79,13 @@ final class CandlestickChartView: NSView {
 
         wantsLayer = true
 
-        layer?.backgroundColor = theme.backgroundColor.cgColor
+        layer?.backgroundColor =
+            theme.backgroundColor.cgColor
 
-        autoresizingMask = [.width, .height]
+        autoresizingMask = [
+            .width,
+            .height
+        ]
 
         interaction.viewport = viewport
 
@@ -115,12 +123,10 @@ final class CandlestickChartView: NSView {
             rect: bounds,
 
             options: [
-
                 .activeAlways,
                 .mouseMoved,
                 .mouseEnteredAndExited,
                 .inVisibleRect
-
             ],
 
             owner: self,
@@ -136,23 +142,36 @@ final class CandlestickChartView: NSView {
 
     // MARK: - Mouse
 
-    override func mouseMoved(with event: NSEvent) {
+    override func mouseMoved(
+        with event: NSEvent
+    ) {
 
-        let point = convert(event.locationInWindow, from: nil)
+        let point =
+            convert(
+                event.locationInWindow,
+                from: nil
+            )
 
-        let chartRect = coordinateSystem.chartRect
+        let chartRect =
+            coordinateSystem.chartRect
 
         guard chartRect.contains(point) else {
 
             highlightedGlobalIndex = nil
+
+            crosshairPoint = nil
 
             needsDisplay = true
 
             return
         }
 
+        crosshairPoint = point
+
         guard let visibleIndex =
-                coordinateSystem.visibleIndex(atX: point.x)
+                coordinateSystem.visibleIndex(
+                    atX: point.x
+                )
         else {
 
             highlightedGlobalIndex = nil
@@ -168,19 +187,22 @@ final class CandlestickChartView: NSView {
             )
 
         needsDisplay = true
-    
     }
 
-    override func mouseExited(with event: NSEvent) {
-        
+    override func mouseExited(
+        with event: NSEvent
+    ) {
+
         highlightedGlobalIndex = nil
 
-        needsDisplay = true
+        crosshairPoint = nil
 
+        needsDisplay = true
     }
 
-   
-    override func mouseDown(with event: NSEvent) {
+    override func mouseDown(
+        with event: NSEvent
+    ) {
 
         let point =
             convert(
@@ -188,57 +210,88 @@ final class CandlestickChartView: NSView {
                 from: nil
             )
 
+        interaction.mouseDown(
+            at: point
+        )
+
         let chartRect =
             coordinateSystem.chartRect
 
-        guard chartRect.contains(point) else {
+        if chartRect.contains(point) {
 
-            highlightedGlobalIndex = nil
-            needsDisplay = true
+            crosshairPoint = point
 
-            return
-        }
+            if let visibleIndex =
+                coordinateSystem.visibleIndex(
+                    atX: point.x
+                ) {
 
-        interaction.mouseDown(at: point)
+                highlightedGlobalIndex =
+                    coordinateSystem.globalIndex(
+                        fromVisibleIndex: visibleIndex
+                    )
 
-        if let visibleIndex =
-            coordinateSystem.visibleIndex(atX: point.x)
-        {
+            } else {
 
-            highlightedGlobalIndex =
-                coordinateSystem.globalIndex(
-                    fromVisibleIndex: visibleIndex
-                )
+                highlightedGlobalIndex = nil
+            }
 
         } else {
+
+            crosshairPoint = nil
 
             highlightedGlobalIndex = nil
         }
 
         needsDisplay = true
     }
-    override func mouseDragged(with event: NSEvent) {
 
-        let point = convert(event.locationInWindow, from: nil)
+    override func mouseDragged(
+        with event: NSEvent
+    ) {
+
+        let point =
+            convert(
+                event.locationInWindow,
+                from: nil
+            )
+
+        crosshairPoint = point
+
+        if let visibleIndex =
+            coordinateSystem.visibleIndex(
+                atX: point.x
+            ) {
+
+            highlightedGlobalIndex =
+                coordinateSystem.globalIndex(
+                    fromVisibleIndex: visibleIndex
+                )
+        }
 
         interaction.mouseDragged(
+
             to: point,
-            chartWidth: coordinateSystem.chartRect.width
+
+            chartWidth:
+                coordinateSystem.chartRect.width
         )
-       
+
+        needsDisplay = true
     }
 
-    override func mouseUp(with event: NSEvent) {
+    override func mouseUp(
+        with event: NSEvent
+    ) {
 
         interaction.mouseUp()
-
-
-        
     }
 
     // MARK: - Keyboard
 
-    override func keyDown(with event: NSEvent) {
+    override func keyDown(
+        with event: NSEvent
+    ) {
 
         switch event.keyCode {
 
@@ -252,7 +305,9 @@ final class CandlestickChartView: NSView {
 
         default:
 
-            super.keyDown(with: event)
+            super.keyDown(
+                with: event
+            )
         }
     }
 
@@ -266,21 +321,41 @@ final class CandlestickChartView: NSView {
 
             y: bottomMargin,
 
-            width: bounds.width - leftMargin - rightMargin,
+            width:
+                max(
+                    0,
+                    bounds.width -
+                    leftMargin -
+                    rightMargin
+                ),
 
-            height: bounds.height - topMargin - bottomMargin
+            height:
+                max(
+                    0,
+                    bounds.height -
+                    topMargin -
+                    bottomMargin
+                )
         )
     }
-    
+
     // MARK: - Drawing
 
-    override func draw(_ dirtyRect: NSRect) {
+    override func draw(
+        _ dirtyRect: NSRect
+    ) {
 
-        guard let context = NSGraphicsContext.current?.cgContext else {
+        guard
+            let context =
+                NSGraphicsContext.current?.cgContext
+        else {
             return
         }
 
-        context.setFillColor(theme.backgroundColor.cgColor)
+        context.setFillColor(
+            theme.backgroundColor.cgColor
+        )
+
         context.fill(bounds)
 
         guard !candlesticks.isEmpty else {
@@ -290,86 +365,113 @@ final class CandlestickChartView: NSView {
             return
         }
 
-        //----------------------------------------------------
-        // Viewport
-        //----------------------------------------------------
+        // MARK: Viewport
 
-       // viewport.update(totalBars: candlesticks.count)
+        viewport.update(
+            totalBars: candlesticks.count
+        )
 
-        //----------------------------------------------------
-        // Coordinate System
-        //----------------------------------------------------
+        // MARK: Coordinate System
 
-        coordinateSystem.viewport = viewport
-        coordinateSystem.candles = candlesticks
-        coordinateSystem.chartRect = getChartRect()
+        coordinateSystem.viewport =
+            viewport
+
+        coordinateSystem.candles =
+            candlesticks
+
+        coordinateSystem.chartRect =
+            getChartRect()
 
         coordinateSystem.prepare()
 
-        guard !coordinateSystem.visibleCandles.isEmpty else {
+        guard
+            !coordinateSystem.visibleCandles.isEmpty
+        else {
             return
         }
 
-        //----------------------------------------------------
-        // GRID
-        //----------------------------------------------------
+        // MARK: Grid
 
-        gridRenderer.coordinateSystem = coordinateSystem
-        gridRenderer.theme = theme
+        gridRenderer.coordinateSystem =
+            coordinateSystem
+
+        gridRenderer.theme =
+            theme
+
         gridRenderer.draw()
 
-        //----------------------------------------------------
-        // CANDLES
-        //----------------------------------------------------
+        // MARK: Candles
 
-        candleRenderer.coordinateSystem = coordinateSystem
-        candleRenderer.theme = theme
+        candleRenderer.coordinateSystem =
+            coordinateSystem
+
+        candleRenderer.theme =
+            theme
+
         candleRenderer.draw()
 
-        //----------------------------------------------------
-        // SMA
-        //----------------------------------------------------
+        // MARK: SMA
 
-        smaRenderer.coordinateSystem = coordinateSystem
-        smaRenderer.theme = theme
-        smaRenderer.activeSMAs = activeSMAs
+        smaRenderer.coordinateSystem =
+            coordinateSystem
+
+        smaRenderer.theme =
+            theme
+
+        smaRenderer.activeSMAs =
+            activeSMAs
+
         smaRenderer.draw()
 
-        //----------------------------------------------------
-        // Selection
-        //----------------------------------------------------
+        // MARK: Selection
 
-        selectionRenderer.coordinateSystem = coordinateSystem
-        selectionRenderer.theme = theme
-        selectionRenderer.view = self
-        
-        if let globalIndex = highlightedGlobalIndex,
-        let visibleIndex =
-        coordinateSystem.visibleIndex(
-        fromGlobalIndex: globalIndex
-        )
-        {
-        selectionRenderer.highlightedIndex = visibleIndex
+        selectionRenderer.coordinateSystem =
+            coordinateSystem
+
+        selectionRenderer.theme =
+            theme
+
+        selectionRenderer.view =
+            self
+
+        selectionRenderer.crosshairPoint =
+            crosshairPoint
+
+        selectionRenderer.activeSMAs =
+            activeSMAs
+
+        if let globalIndex =
+            highlightedGlobalIndex,
+           let visibleIndex =
+            coordinateSystem.visibleIndex(
+                fromGlobalIndex: globalIndex
+            ) {
+
+            selectionRenderer.highlightedIndex =
+                visibleIndex
+
         } else {
-        selectionRenderer.highlightedIndex = nil
-        }
 
-        
+            selectionRenderer.highlightedIndex =
+                nil
+        }
 
         selectionRenderer.draw()
 
-        //----------------------------------------------------
-        // Axis
-        //----------------------------------------------------
+        // MARK: Axis
 
-        axisRenderer.coordinateSystem = coordinateSystem
-        axisRenderer.theme = theme
-        axisRenderer.view = self
+        axisRenderer.coordinateSystem =
+            coordinateSystem
+
+        axisRenderer.theme =
+            theme
+
+        axisRenderer.view =
+            self
+
         axisRenderer.draw()
 
-        //----------------------------------------------------
-        // Title
-        //----------------------------------------------------
+        // MARK: Title
 
         drawChartTitle()
     }
@@ -378,51 +480,78 @@ final class CandlestickChartView: NSView {
 
     private func drawEmptyState() {
 
-        let text = "Grafik verisi bulunamadı." as NSString
+        let text =
+            "Grafik verisi bulunamadı." as NSString
 
-        let attr: [NSAttributedString.Key: Any] = [
+        let attributes:
+            [NSAttributedString.Key: Any] = [
 
-            .font: NSFont.systemFont(ofSize: 18),
+                .font:
+                    NSFont.systemFont(
+                        ofSize: 18
+                    ),
 
-            .foregroundColor: NSColor.secondaryLabelColor
-        ]
+                .foregroundColor:
+                    NSColor.secondaryLabelColor
+            ]
 
-        let size = text.size(withAttributes: attr)
+        let size =
+            text.size(
+                withAttributes: attributes
+            )
 
         text.draw(
 
             at: CGPoint(
 
-                x: bounds.midX - size.width / 2,
+                x:
+                    bounds.midX -
+                    size.width / 2,
 
-                y: bounds.midY - size.height / 2
-
+                y:
+                    bounds.midY -
+                    size.height / 2
             ),
 
-            withAttributes: attr
+            withAttributes:
+                attributes
         )
     }
-    
+
     // MARK: - Title
 
     private func drawChartTitle() {
 
-        let title = "\(candlesticks.count) Bar" as NSString
+        let title =
+            "\(candlesticks.count) Bar" as NSString
 
-        let attr: [NSAttributedString.Key: Any] = [
-            .font: NSFont.boldSystemFont(ofSize: 14),
-            .foregroundColor: theme.axisTitleColor
-        ]
+        let attributes:
+            [NSAttributedString.Key: Any] = [
+
+                .font:
+                    NSFont.boldSystemFont(
+                        ofSize: 14
+                    ),
+
+                .foregroundColor:
+                    theme.axisTitleColor
+            ]
 
         title.draw(
+
             at: CGPoint(
+
                 x: 12,
-                y: bounds.height - 24
+
+                y:
+                    bounds.height - 24
             ),
-            withAttributes: attr
+
+            withAttributes:
+                attributes
         )
     }
-    
+
     // MARK: - Public
 
     func resetVisibleRange() {
@@ -434,16 +563,22 @@ final class CandlestickChartView: NSView {
 
     func reloadChart() {
 
-        viewport.update(totalBars: candlesticks.count)
+        viewport.update(
+            totalBars: candlesticks.count
+        )
 
         needsDisplay = true
     }
-    
+
     // MARK: - Resize
 
-    override func setFrameSize(_ newSize: NSSize) {
+    override func setFrameSize(
+        _ newSize: NSSize
+    ) {
 
-        super.setFrameSize(newSize)
+        super.setFrameSize(
+            newSize
+        )
 
         needsDisplay = true
     }
@@ -454,41 +589,27 @@ final class CandlestickChartView: NSView {
 
         needsDisplay = true
     }
-    
+
     // MARK: - Scroll Wheel
 
-    override func scrollWheel(with event: NSEvent) {
+    override func scrollWheel(
+        with event: NSEvent
+    ) {
 
-        if event.modifierFlags.contains(.option) {
-
-            //-----------------------------------
-            // OPTION + Wheel = Zoom
-            //-----------------------------------
-
-            interaction.zoom(
-                by: Int(event.scrollingDeltaY)
-            )
-
-        } else {
-
-            //-----------------------------------
-            // Wheel = Horizontal Scroll
-            //-----------------------------------
-
-            interaction.scrollWheel(
-                deltaX: event.scrollingDeltaX
-            )
-        }
+        interaction.zoomWithWheel(
+            delta: event.scrollingDeltaY
+        )
     }
-    
+
     // MARK: - Deinit
 
     deinit {
 
         if let trackingArea = trackingArea {
 
-            removeTrackingArea(trackingArea)
+            removeTrackingArea(
+                trackingArea
+            )
         }
     }
-    
 }

@@ -2,193 +2,267 @@ import Cocoa
 
 final class AxisRenderer {
 
-    weak var view: NSView?
 
-    var coordinateSystem: ChartCoordinateSystem!
+weak var view: NSView?
 
-    var theme: ChartTheme = .default
-    
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "tr_TR")
-        formatter.dateFormat = "dd MMM"
-        return formatter
-    }()
+var coordinateSystem: ChartCoordinateSystem!
 
-    func draw() {
+var theme: ChartTheme = .default
 
-        //guard let view else { return }
-        guard view != nil else { return }
-        guard let coordinateSystem = coordinateSystem else { return }
-        
-        let chartRect = coordinateSystem.chartRect
-        let candles = coordinateSystem.visibleCandles
+private let dateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.locale = Locale(identifier: "tr_TR")
+    formatter.dateFormat = "dd MMM"
+    return formatter
+}()
 
-        guard !candles.isEmpty else { return }
+func draw() {
 
-        //----------------------------------------------------
-        // Y AXIS
-        //----------------------------------------------------
+    guard view != nil else { return }
+    guard let coordinateSystem = coordinateSystem else { return }
 
-        let labelAttributes: [NSAttributedString.Key: Any] = [
+    let chartRect = coordinateSystem.chartRect
+    let candles = coordinateSystem.visibleCandles
 
-            .font: NSFont.systemFont(ofSize: 11),
+    guard !candles.isEmpty else { return }
 
-            .foregroundColor: theme.axisLabelColor
+    let labelAttributes: [NSAttributedString.Key: Any] = [
 
-        ]
+        .font: NSFont.systemFont(ofSize: 11),
 
-        let calculator = AdaptiveGridCalculator()
+        .foregroundColor: theme.axisLabelColor
+    ]
 
-        let targetLines =
-            calculator.horizontalGridCount(
-                visibleBars: candles.count
+    let calculator = AdaptiveGridCalculator()
+
+    let targetLines =
+        calculator.horizontalGridCount(
+            visibleBars: candles.count
+        )
+
+    let levels =
+        calculator.priceLevels(
+            minPrice: coordinateSystem.minPrice,
+            maxPrice: coordinateSystem.maxPrice,
+            targetLines: targetLines
+        )
+
+    for price in levels {
+
+        let y =
+            coordinateSystem.y(
+                forPrice: price
             )
 
-        let levels =
-            calculator.priceLevels(
-                minPrice: coordinateSystem.minPrice,
-                maxPrice: coordinateSystem.maxPrice,
-                targetLines: targetLines
-            )
+        guard
+            y >= chartRect.minY,
+            y <= chartRect.maxY
+        else {
+            continue
+        }
 
-        for price in levels {
+        let text =
+            NSString(format: "%.2f", price)
 
-            let y =
-                coordinateSystem.y(
-                    forPrice: price
-                )
-
-            guard
-                y >= chartRect.minY,
-                y <= chartRect.maxY
-            else {
-                continue
-            }
-
-            let text =
-                NSString(format: "%.2f", price)
-
-            let size =
-                text.size(withAttributes: labelAttributes)
-
-            text.draw(
-                at: NSPoint(
-                    x: chartRect.minX - 50,
-                    y: y - size.height / 2
-                ),
+        let size =
+            text.size(
                 withAttributes: labelAttributes
             )
-        }
 
-        //----------------------------------------------------
-        // X AXIS
-        //----------------------------------------------------
-
-      //  let formatter = DateFormatter()
-        //formatter.locale = Locale(identifier: "tr_TR")
-       // formatter.dateFormat = "dd MMM"
-
-        let first = candles.first!
-        let last = candles.last!
-
-        drawDate(
-            dateFormatter.string(from: first.date),
-            x: chartRect.minX,
-            chartRect: chartRect,
-            attributes: labelAttributes
-        )
-
-        drawDate(
-            dateFormatter.string(from: last.date),
-            x: chartRect.maxX,
-            chartRect: chartRect,
-            attributes: labelAttributes,
-            alignRight: true
-        )
-
-        let middle = candles.count / 2
-
-        if middle > 0 {
-
-            drawDate(
-                dateFormatter.string(from: candles[middle].date),
-                x: coordinateSystem.x(forVisibleIndex: middle),
-                chartRect: chartRect,
-                attributes: labelAttributes,
-                centered: true
-            )
-        }
-
-        //----------------------------------------------------
-        // Axis Titles
-        //----------------------------------------------------
-
-        let titleAttributes: [NSAttributedString.Key: Any] = [
-
-            .font: NSFont.systemFont(ofSize: 10),
-
-            .foregroundColor: theme.axisTitleColor
-
-        ]
-
-        ("Fiyat (₺)" as NSString).draw(
+        text.draw(
             at: NSPoint(
-                x: 8,
-                y: chartRect.maxY + 20
+                x: chartRect.maxX + 8,
+                y: y - size.height / 2
             ),
-            withAttributes: titleAttributes
-        )
-
-        let time = "Zaman" as NSString
-
-        let size = time.size(withAttributes: titleAttributes)
-
-        time.draw(
-            at: NSPoint(
-                x: chartRect.maxX - size.width - 10,
-                y: 8
-            ),
-            withAttributes: titleAttributes
+            withAttributes: labelAttributes
         )
     }
 
-    // MARK: -
+    drawXAxisDates(
+        candles: candles,
+        chartRect: chartRect,
+        attributes: labelAttributes
+    )
 
-    private func drawDate(
-        _ text: String,
-        x: CGFloat,
-        chartRect: CGRect,
-        attributes: [NSAttributedString.Key:Any],
-        alignRight: Bool = false,
-        centered: Bool = false
-    ) {
+    let titleAttributes:
+        [NSAttributedString.Key: Any] = [
 
-        let string = text as NSString
+            .font:
+                NSFont.systemFont(ofSize: 10),
 
-        let size =
-        string.size(withAttributes: attributes)
+            .foregroundColor:
+                theme.axisTitleColor
+        ]
 
-        var drawX = x
+    let priceTitle = "Fiyat (₺)" as NSString
 
-        if alignRight {
+    priceTitle.draw(
+        at: NSPoint(
+            x: chartRect.maxX + 8,
+            y: chartRect.maxY + 12
+        ),
+        withAttributes: titleAttributes
+    )
 
-            drawX -= size.width
+    let time = "Zaman" as NSString
 
-        }
+    let timeSize =
+        time.size(
+            withAttributes: titleAttributes
+        )
 
-        if centered {
+    time.draw(
+        at: NSPoint(
+            x: chartRect.maxX - timeSize.width,
+            y: 8
+        ),
+        withAttributes: titleAttributes
+    )
+}
 
-            drawX -= size.width / 2
+private func drawXAxisDates(
+    candles: [Candlestick],
+    chartRect: CGRect,
+    attributes: [NSAttributedString.Key: Any]
+) {
 
-        }
+    guard !candles.isEmpty else {
+        return
+    }
 
-        string.draw(
-            at: NSPoint(
-                x: drawX,
-                y: chartRect.maxY + 8
-            ),
-            withAttributes: attributes
+    let count = candles.count
+
+    let targetLabelCount: Int
+
+    switch count {
+
+    case 1...20:
+        targetLabelCount = 5
+
+    case 21...50:
+        targetLabelCount = 6
+
+    case 51...100:
+        targetLabelCount = 7
+
+    case 101...200:
+        targetLabelCount = 6
+
+    default:
+        targetLabelCount = 5
+    }
+
+    let step: Int
+
+    if count <= targetLabelCount {
+
+        step = 1
+
+    } else {
+
+        step =
+            max(
+                1,
+                Int(
+                    ceil(
+                        Double(count - 1) /
+                        Double(targetLabelCount - 1)
+                    )
+                )
+            )
+    }
+
+    var index = 0
+
+    while index < count {
+
+        let x =
+            coordinateSystem.x(
+                forVisibleIndex: index
+            )
+
+        let date =
+            dateFormatter.string(
+                from: candles[index].date
+            )
+
+        let isFirst = index == 0
+        let isLast = index == count - 1
+
+        drawDate(
+            date,
+            x: x,
+            chartRect: chartRect,
+            attributes: attributes,
+            alignRight: isLast,
+            centered: !isFirst && !isLast
+        )
+
+        index += step
+    }
+
+    if (count - 1) % step != 0,
+       count > 1 {
+
+        let lastIndex = count - 1
+
+        let x =
+            coordinateSystem.x(
+                forVisibleIndex: lastIndex
+            )
+
+        let date =
+            dateFormatter.string(
+                from: candles[lastIndex].date
+            )
+
+        drawDate(
+            date,
+            x: x,
+            chartRect: chartRect,
+            attributes: attributes,
+            alignRight: true
         )
     }
 }
+
+private func drawDate(
+    _ text: String,
+    x: CGFloat,
+    chartRect: CGRect,
+    attributes: [NSAttributedString.Key: Any],
+    alignRight: Bool = false,
+    centered: Bool = false
+) {
+
+    let string = text as NSString
+
+    let size =
+        string.size(
+            withAttributes: attributes
+        )
+
+    var drawX = x
+
+    if alignRight {
+
+        drawX -= size.width
+    }
+
+    if centered {
+
+        drawX -= size.width / 2
+    }
+
+    string.draw(
+        at: NSPoint(
+            x: drawX,
+            y: chartRect.minY - size.height - 8
+        ),
+        withAttributes: attributes
+    )
+}
+
+
+}
+
