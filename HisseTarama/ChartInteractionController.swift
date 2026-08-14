@@ -9,20 +9,30 @@ final class ChartInteractionController {
     /// Her viewport değiştiğinde grafik yeniden çizilsin
     var onViewportChanged: (() -> Void)?
 
-    // Sağ-sol okta kaç bar kayacak
+    /// Sağ-sol okta kaç bar kayacak
     var keyboardStep: Int = 20
 
-    // Mouse sürükleme başlangıcı
+    // MARK: - Zoom Limits
+
+    private let minimumVisibleBars = 20
+    private let maximumVisibleBars = 500
+
+    // MARK: - Mouse Drag
+
     private var dragStartPoint: CGPoint?
     private var dragStartFirstBar: Int = 0
 
-    // MARK: - Mouse
+    // MARK: - Mouse Down
 
     func mouseDown(at point: CGPoint) {
 
         dragStartPoint = point
-        dragStartFirstBar = viewport.firstVisibleBar
+
+        dragStartFirstBar =
+            viewport.firstVisibleBar
     }
+
+    // MARK: - Mouse Dragged
 
     func mouseDragged(
         to point: CGPoint,
@@ -36,7 +46,8 @@ final class ChartInteractionController {
             return
         }
 
-        let dx = point.x - start.x
+        let dx =
+            point.x - start.x
 
         let barsPerPixel =
             Double(viewport.visibleBarCount) /
@@ -51,13 +62,16 @@ final class ChartInteractionController {
             )
 
         viewport.setFirstVisibleBar(
-            dragStartFirstBar - deltaBars
+            dragStartFirstBar -
+            deltaBars
         )
 
         viewport.clamp()
 
         onViewportChanged?()
     }
+
+    // MARK: - Mouse Up
 
     func mouseUp() {
 
@@ -90,7 +104,10 @@ final class ChartInteractionController {
         delta: CGFloat
     ) {
 
-        guard delta != 0 else {
+        guard
+            delta != 0,
+            viewport.totalBarCount > 0
+        else {
             return
         }
 
@@ -102,51 +119,103 @@ final class ChartInteractionController {
                 )
             )
 
+        let totalBars =
+            viewport.totalBarCount
+
+        // -------------------------------------------------
+        // Wheel yukarı:
+        // YAKINLAŞ
+        //
+        // Wheel aşağı:
+        // UZAKLAŞ
+        // -------------------------------------------------
+
         if delta > 0 {
 
-            // Wheel yukarı:
-            // daha fazla bar göster → uzaklaş
+            // ---------------------------------------------
+            // YAKINLAŞ
+            // ---------------------------------------------
 
-            viewport.visibleBarCount +=
-                zoomAmount
+            let currentVisible =
+                min(
+                    viewport.visibleBarCount,
+                    totalBars
+                )
+
+            let newVisible =
+                max(
+                    minimumVisibleBars,
+                    currentVisible -
+                    zoomAmount
+                )
+
+            viewport.visibleBarCount =
+                newVisible
 
         } else {
 
-            // Wheel aşağı:
-            // daha az bar göster → yakınlaş
+            // ---------------------------------------------
+            // UZAKLAŞ
+            // ---------------------------------------------
 
-            viewport.visibleBarCount -=
-                zoomAmount
-        }
-
-        viewport.visibleBarCount =
-            max(
-                20,
+            let currentVisible =
                 min(
-                    500,
-                    viewport.visibleBarCount
+                    viewport.visibleBarCount,
+                    totalBars
                 )
-            )
+
+            let newVisible =
+                min(
+                    totalBars,
+                    min(
+                        maximumVisibleBars,
+                        currentVisible +
+                        zoomAmount
+                    )
+                )
+
+            viewport.visibleBarCount =
+                newVisible
+        }
 
         viewport.clamp()
 
         onViewportChanged?()
     }
 
-    // MARK: - Zoom
+    // MARK: - Programmatic Zoom
 
-    func zoom(by delta: Int) {
+    func zoom(
+        by delta: Int
+    ) {
 
-        viewport.visibleBarCount -= delta
+        guard
+            viewport.totalBarCount > 0
+        else {
+            return
+        }
 
-        viewport.visibleBarCount =
+        let totalBars =
+            viewport.totalBarCount
+
+        let currentVisible =
+            min(
+                viewport.visibleBarCount,
+                totalBars
+            )
+
+        let newVisible =
             max(
-                20,
+                minimumVisibleBars,
                 min(
-                    500,
-                    viewport.visibleBarCount
+                    maximumVisibleBars,
+                    currentVisible -
+                    delta
                 )
             )
+
+        viewport.visibleBarCount =
+            newVisible
 
         viewport.clamp()
 

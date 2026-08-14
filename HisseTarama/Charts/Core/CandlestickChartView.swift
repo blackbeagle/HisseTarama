@@ -142,9 +142,7 @@ final class CandlestickChartView: NSView {
 
     // MARK: - Mouse
 
-    override func mouseMoved(
-        with event: NSEvent
-    ) {
+    override func mouseMoved(with event: NSEvent) {
 
         let point =
             convert(
@@ -189,9 +187,7 @@ final class CandlestickChartView: NSView {
         needsDisplay = true
     }
 
-    override func mouseExited(
-        with event: NSEvent
-    ) {
+    override func mouseExited(with event: NSEvent) {
 
         highlightedGlobalIndex = nil
 
@@ -200,9 +196,7 @@ final class CandlestickChartView: NSView {
         needsDisplay = true
     }
 
-    override func mouseDown(
-        with event: NSEvent
-    ) {
+    override func mouseDown(with event: NSEvent) {
 
         let point =
             convert(
@@ -246,9 +240,7 @@ final class CandlestickChartView: NSView {
         needsDisplay = true
     }
 
-    override func mouseDragged(
-        with event: NSEvent
-    ) {
+    override func mouseDragged(with event: NSEvent) {
 
         let point =
             convert(
@@ -280,18 +272,14 @@ final class CandlestickChartView: NSView {
         needsDisplay = true
     }
 
-    override func mouseUp(
-        with event: NSEvent
-    ) {
+    override func mouseUp(with event: NSEvent) {
 
         interaction.mouseUp()
     }
 
     // MARK: - Keyboard
 
-    override func keyDown(
-        with event: NSEvent
-    ) {
+    override func keyDown(with event: NSEvent) {
 
         switch event.keyCode {
 
@@ -305,9 +293,7 @@ final class CandlestickChartView: NSView {
 
         default:
 
-            super.keyDown(
-                with: event
-            )
+            super.keyDown(with: event)
         }
     }
 
@@ -339,11 +325,34 @@ final class CandlestickChartView: NSView {
         )
     }
 
+    // MARK: - Public Viewport Control
+
+    /// Grafik üzerinde gösterilecek bar sayısını ayarlar.
+    /// Periyot değişimlerinde ChartDetailViewController
+    /// tarafından kullanılır.
+    func setVisibleBarCount(_ count: Int) {
+
+        viewport.visibleBarCount =
+            max(
+                20,
+                min(
+                    500,
+                    count
+                )
+            )
+
+        viewport.update(
+            totalBars: candlesticks.count
+        )
+
+        viewport.moveToLast()
+
+        needsDisplay = true
+    }
+
     // MARK: - Drawing
 
-    override func draw(
-        _ dirtyRect: NSRect
-    ) {
+    override func draw(_ dirtyRect: NSRect) {
 
         guard
             let context =
@@ -590,14 +599,15 @@ final class CandlestickChartView: NSView {
         needsDisplay = true
     }
 
-    // MARK: - Scroll Wheel
+    // MARK: - Scroll Wheel Zoom
 
     override func scrollWheel(
         with event: NSEvent
     ) {
 
         interaction.zoomWithWheel(
-            delta: event.scrollingDeltaY
+            delta:
+                event.scrollingDeltaY
         )
     }
 
