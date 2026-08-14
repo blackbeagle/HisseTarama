@@ -18,7 +18,6 @@
 		1C4ED3742FFAEB5500DC0AAC /* AxisRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED3732FFAEB5500DC0AAC /* AxisRenderer.swift */; };
 		1C4ED3762FFAEE0400DC0AAC /* ChartInteractionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED3752FFAEE0400DC0AAC /* ChartInteractionController.swift */; };
 		1C645C9A2F773189007E1F5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645C992F773189007E1F5C /* AppDelegate.swift */; };
-		1C645C9C2F773189007E1F5C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645C9B2F773189007E1F5C /* ViewController.swift */; };
 		1C645C9E2F77318B007E1F5C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1C645C9D2F77318B007E1F5C /* Assets.xcassets */; };
 		1C645CA12F77318B007E1F5C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1C645C9F2F77318B007E1F5C /* Main.storyboard */; };
 		1C645CA92F7735F0007E1F5C /* SidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CA82F7735F0007E1F5C /* SidebarViewController.swift */; };
@@ -51,7 +50,6 @@
 		1C4ED3752FFAEE0400DC0AAC /* ChartInteractionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartInteractionController.swift; sourceTree = "<group>"; };
 		1C645C962F773189007E1F5C /* HisseTarama.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HisseTarama.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C645C992F773189007E1F5C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		1C645C9B2F773189007E1F5C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		1C645C9D2F77318B007E1F5C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1C645CA02F77318B007E1F5C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		1C645CA22F77318B007E1F5C /* HisseTarama.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HisseTarama.entitlements; sourceTree = "<group>"; };
@@ -238,7 +236,6 @@
 				1C645C9D2F77318B007E1F5C /* Assets.xcassets */,
 				1C645CA22F77318B007E1F5C /* HisseTarama.entitlements */,
 				1C645C992F773189007E1F5C /* AppDelegate.swift */,
-				1C645C9B2F773189007E1F5C /* ViewController.swift */,
 				1C645CAE2F7736D3007E1F5C /* SidebarViewModel.swift */,
 				1C645CB02F773712007E1F5C /* Protocols.swift */,
 				1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */,
@@ -322,7 +319,6 @@
 				1C645CBB2F782132007E1F5C /* ChartDetailViewController.swift in Sources */,
 				1C4ED35F2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift in Sources */,
 				1C4ED3762FFAEE0400DC0AAC /* ChartInteractionController.swift in Sources */,
-				1C645C9C2F773189007E1F5C /* ViewController.swift in Sources */,
 				1C645CB52F7820D0007E1F5C /* Candlestick.swift in Sources */,
 				1C3246DC30027FEB00C2230B /* AdaptiveGridCalculator.swift in Sources */,
 				1C3246DE3002801700C2230B /* GridRenderer.swift in Sources */,

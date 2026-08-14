@@ -679,7 +679,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-475" y="-384"/>
+            <point key="canvasLocation" x="-483" y="-397"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -687,8 +687,7 @@
                 <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
                     <window key="window" title="Teknik &amp; Temel Analiz" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
-                        <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-                        <rect key="contentRect" x="196" y="240" width="480" height="270"/>
+                        <rect key="contentRect" x="583" y="409" width="480" height="270"/>
                         <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
                         <connections>
                             <outlet property="delegate" destination="B8D-0N-5wS" id="98r-iN-zZc"/>
@@ -700,7 +699,7 @@
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-455" y="-141"/>
+            <point key="canvasLocation" x="-455" y="-142"/>
         </scene>
         <!--Main Split View Controller-->
         <scene sceneID="pH0-Go-ICw">
@@ -725,24 +724,24 @@
                 </splitViewController>
                 <customObject id="UHZ-c3-5ei" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-190" y="320"/>
+            <point key="canvasLocation" x="-455" y="309"/>
         </scene>
         <!--Sidebar View Controller-->
         <scene sceneID="Rhq-8T-Jzd">
             <objects>
                 <viewController id="kRo-VM-Z2d" customClass="SidebarViewController" customModule="HisseTarama" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" id="PHN-9d-Xxi">
-                        <rect key="frame" x="0.0" y="0.0" width="421" height="300"/>
+                        <rect key="frame" x="0.0" y="0.0" width="421" height="334"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Yaw-mh-wrq">
-                                <rect key="frame" x="0.0" y="0.0" width="421" height="300"/>
+                                <rect key="frame" x="0.0" y="0.0" width="421" height="334"/>
                                 <clipView key="contentView" id="rrI-QC-ze8">
-                                    <rect key="frame" x="1" y="1" width="419" height="298"/>
+                                    <rect key="frame" x="1" y="1" width="419" height="332"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <outlineView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" rowSizeStyle="automatic" headerView="49B-ae-oeG" viewBased="YES" indentationPerLevel="13" outlineTableColumn="Wnc-Gx-WZG" id="IJJ-Yg-zR0">
-                                            <rect key="frame" x="0.0" y="0.0" width="419" height="270"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="419" height="304"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -817,7 +816,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="D4A-MU-CLK">
-                                    <rect key="frame" x="1" y="284" width="419" height="15"/>
+                                    <rect key="frame" x="1" y="318" width="419" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="dNO-Md-1xr">
@@ -843,7 +842,7 @@
                 </viewController>
                 <customObject id="a6b-Es-oNt" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-509" y="813"/>
+            <point key="canvasLocation" x="-692" y="781"/>
         </scene>
         <!--Chart Detail View Controller-->
         <scene sceneID="VcY-5M-9BF">
@@ -889,7 +888,7 @@
                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                 </textFieldCell>
             </objects>
-            <point key="canvasLocation" x="152" y="813"/>
+            <point key="canvasLocation" x="39" y="781"/>
         </scene>
     </scenes>
 </document>
