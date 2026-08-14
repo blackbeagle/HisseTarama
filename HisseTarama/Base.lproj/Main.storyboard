@@ -679,7 +679,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="0.0"/>
+            <point key="canvasLocation" x="-475" y="-384"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -700,7 +700,7 @@
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="250"/>
+            <point key="canvasLocation" x="-455" y="-141"/>
         </scene>
         <!--Main Split View Controller-->
         <scene sceneID="pH0-Go-ICw">
@@ -725,7 +725,7 @@
                 </splitViewController>
                 <customObject id="UHZ-c3-5ei" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="75" y="766"/>
+            <point key="canvasLocation" x="-190" y="320"/>
         </scene>
         <!--Sidebar View Controller-->
         <scene sceneID="Rhq-8T-Jzd">
@@ -761,7 +761,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView id="fyZ-hO-Dyr">
-                                                            <rect key="frame" x="18" y="0.0" width="114" height="24"/>
+                                                            <rect key="frame" x="8" y="0.0" width="114" height="24"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JYn-Ii-knP">
@@ -793,7 +793,7 @@
                                                     <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                                     <prototypeCellViews>
                                                         <tableCellView id="AZb-sg-bK3">
-                                                            <rect key="frame" x="149" y="0.0" width="271" height="24"/>
+                                                            <rect key="frame" x="139" y="0.0" width="271" height="24"/>
                                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                                             <subviews>
                                                                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" horizontalCompressionResistancePriority="250" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2Ov-Co-rbq">
@@ -817,7 +817,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="D4A-MU-CLK">
-                                    <rect key="frame" x="1" y="283" width="419" height="16"/>
+                                    <rect key="frame" x="1" y="284" width="419" height="15"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="dNO-Md-1xr">
@@ -843,7 +843,7 @@
                 </viewController>
                 <customObject id="a6b-Es-oNt" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-124" y="1258"/>
+            <point key="canvasLocation" x="-509" y="813"/>
         </scene>
         <!--Chart Detail View Controller-->
         <scene sceneID="VcY-5M-9BF">
@@ -889,7 +889,7 @@
                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                 </textFieldCell>
             </objects>
-            <point key="canvasLocation" x="316" y="1258"/>
+            <point key="canvasLocation" x="152" y="813"/>
         </scene>
     </scenes>
 </document>
