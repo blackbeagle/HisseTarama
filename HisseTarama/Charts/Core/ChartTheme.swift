@@ -1,7 +1,7 @@
 import Cocoa
 
 struct ChartTheme {
-    
+
     var showGrid = true
     var showCrosshair = true
     var showPriceLabel = true
@@ -40,59 +40,132 @@ struct ChartTheme {
     let priceLabelBackground: NSColor
     let priceLabelText: NSColor
 
-    // MARK: - SMA Colors
+    // MARK: - SMA
 
+    /// SMA periyodu -> renk
     let smaColors: [Int: NSColor]
+
+    /// SMA periyodu -> çizgi kalınlığı
+    /// Dictionary'de bulunmayan SMA'lar genel smaLineWidth değerini kullanır.
+    let smaLineWidths: [Int: CGFloat]
+
+    /// SMA'ların varsayılan çizgi kalınlığı
+    let smaLineWidth: CGFloat
 
     // MARK: - Dimensions
 
     let gridLineWidth: CGFloat
     let candleLineWidth: CGFloat
-    let smaLineWidth: CGFloat
     let crosshairWidth: CGFloat
 
     // MARK: - Singleton
 
     static let `default` = ChartTheme(
-        backgroundColor: .controlBackgroundColor,
 
-        bullColor: .systemGreen,
-        bearColor: .systemRed,
+        backgroundColor:
+            .controlBackgroundColor,
 
-        gridColor: .separatorColor.withAlphaComponent(0.28),
+        bullColor:
+            .systemGreen,
 
-        axisLabelColor: .secondaryLabelColor,
-        axisTitleColor: .tertiaryLabelColor,
+        bearColor:
+            .systemRed,
 
-        crosshairColor: .systemGray.withAlphaComponent(0.45),
+        gridColor:
+            .separatorColor.withAlphaComponent(0.28),
 
-        selectionFillColor: .systemYellow.withAlphaComponent(0.15),
-        selectionBorderColor: .systemYellow,
+        axisLabelColor:
+            .secondaryLabelColor,
 
-        priceLabelBackground: .windowBackgroundColor,
-        priceLabelText: .labelColor,
+        axisTitleColor:
+            .tertiaryLabelColor,
+
+        crosshairColor:
+            .systemGray.withAlphaComponent(0.45),
+
+        selectionFillColor:
+            .systemYellow.withAlphaComponent(0.15),
+
+        selectionBorderColor:
+            .systemYellow,
+
+        priceLabelBackground:
+            .windowBackgroundColor,
+
+        priceLabelText:
+            .labelColor,
+
+        // =================================================
+        // SMA RENKLERİ
+        //
+        // Buradaki renkleri daha sonra kendi tercihlerine
+        // göre değiştirebilirsin.
+        // =================================================
 
         smaColors: [
 
-            // Günlük varsayılanlar
-            8  : .systemGreen,
-            34 : .systemBlue,
+            // Günlük
+            5: .white,
+            8:
+                .systemGreen,
+
+            34:
+                .systemBlue,
 
             // Haftalık varsayılan
-            52 : .black,
+            52:
+                .systemOrange,
 
-            // İleride kullanılabilecekler
-            21 : .systemOrange,
-            89 : .systemPurple,
-            144: .systemBrown,
-            200: .systemPink
+            // Diğer kullanılabilecek SMA'lar
+            21:
+                .systemOrange,
 
+            89:
+                .systemPurple,
+
+            144:
+                .systemBrown,
+
+            200:
+                .systemRed,
+            260:
+                .systemRed
         ],
 
-        gridLineWidth: 0.5,
-        candleLineWidth: 1.0,
-        smaLineWidth: 1.0,
-        crosshairWidth: 0.8
+        // =================================================
+        // SMA ÇİZGİ KALINLIKLARI
+        //
+        // Dictionary'de olmayanlar smaLineWidth kullanır.
+        // =================================================
+
+        smaLineWidths: [
+
+            // Haftalık SMA 52
+            52:
+                2.5,
+           
+            5: 0.75,
+            // İstersen ileride:
+            
+             8: 1.25,
+             34: 1.75,
+            200: 2.5,
+            260: 2.5
+        ],
+
+        // Genel SMA kalınlığı
+        smaLineWidth:
+            1.0,
+
+        // MARK: - Dimensions
+
+        gridLineWidth:
+            0.5,
+
+        candleLineWidth:
+            1.0,
+
+        crosshairWidth:
+            0.8
     )
 }
-

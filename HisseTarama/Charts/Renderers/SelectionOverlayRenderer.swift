@@ -2,453 +2,596 @@ import Cocoa
 
 final class SelectionOverlayRenderer {
 
+    // MARK: - Properties
 
-weak var view: NSView?
+    weak var view: NSView?
 
-var coordinateSystem: ChartCoordinateSystem!
+    var coordinateSystem: ChartCoordinateSystem!
 
-var theme: ChartTheme = .default
+    var theme: ChartTheme = .default
 
-var highlightedIndex: Int?
+    /// Grafikte seçili olan görünür mum index'i
+    var highlightedIndex: Int?
 
-var crosshairPoint: CGPoint?
+    /// Mouse'un grafik üzerindeki konumu
+    var crosshairPoint: CGPoint?
 
-var activeSMAs: [Int: [Double?]] = [:]
+    /// period -> SMA değerleri
+    var activeSMAs: [Int: [Double?]] = [:]
 
-func draw() {
+    // MARK: - Draw
 
-    guard
-        let view = view,
-        let coordinateSystem = coordinateSystem,
-        let index = highlightedIndex,
-        let candle = coordinateSystem.candle(
-            atVisibleIndex: index
+    func draw() {
+
+        guard
+            let view = view,
+            let coordinateSystem = coordinateSystem,
+            let index = highlightedIndex,
+            let candle = coordinateSystem.candle(
+                atVisibleIndex: index
+            )
+        else {
+            return
+        }
+
+        let chartRect =
+            coordinateSystem.chartRect
+
+        let x =
+            coordinateSystem.x(
+                forVisibleIndex: index
+            )
+
+        guard
+            let mousePoint = crosshairPoint,
+            chartRect.contains(mousePoint)
+        else {
+            return
+        }
+
+        // -------------------------------------------------
+        // Mouse Y koordinatını fiyat değerine çevir
+        // -------------------------------------------------
+
+        let mouseY =
+            min(
+                max(
+                    mousePoint.y,
+                    chartRect.minY
+                ),
+                chartRect.maxY
+            )
+
+        let priceRatio =
+            Double(
+                mouseY - chartRect.minY
+            ) /
+            Double(
+                chartRect.height
+            )
+
+        let mousePrice =
+            coordinateSystem.minPrice +
+            (
+                coordinateSystem.maxPrice -
+                coordinateSystem.minPrice
+            ) * priceRatio
+
+        // -------------------------------------------------
+        // Crosshair
+        // -------------------------------------------------
+
+        let dash: [CGFloat] = [4, 4]
+
+        // Dikey çizgi
+        let vertical = NSBezierPath()
+
+        vertical.move(
+            to: NSPoint(
+                x: x,
+                y: chartRect.minY
+            )
         )
-    else {
-        return
+
+        vertical.line(
+            to: NSPoint(
+                x: x,
+                y: chartRect.maxY
+            )
+        )
+
+        vertical.lineWidth = 0.8
+
+        vertical.setLineDash(
+            dash,
+            count: dash.count,
+            phase: 0
+        )
+
+        theme.crosshairColor.setStroke()
+
+        vertical.stroke()
+
+        // Yatay çizgi
+        let horizontal = NSBezierPath()
+
+        horizontal.move(
+            to: NSPoint(
+                x: chartRect.minX,
+                y: mouseY
+            )
+        )
+
+        horizontal.line(
+            to: NSPoint(
+                x: chartRect.maxX,
+                y: mouseY
+            )
+        )
+
+        horizontal.lineWidth = 0.8
+
+        horizontal.setLineDash(
+            dash,
+            count: dash.count,
+            phase: 0
+        )
+
+        theme.crosshairColor.setStroke()
+
+        horizontal.stroke()
+
+        // -------------------------------------------------
+        // Labels
+        // -------------------------------------------------
+
+        if theme.showPriceLabel {
+
+            drawPriceLabel(
+                price: mousePrice,
+                y: mouseY
+            )
+        }
+
+        drawDateLabel(
+            date: candle.date,
+            x: x
+        )
+
+        // -------------------------------------------------
+        // Information Panel
+        // -------------------------------------------------
+
+        if theme.showTooltip {
+
+            drawInformationPanel(
+                candle: candle,
+                visibleIndex: index,
+                view: view
+            )
+        }
     }
 
-    let chartRect = coordinateSystem.chartRect
+    // MARK: - Price Label
 
-    let x = coordinateSystem.x(
-        forVisibleIndex: index
-    )
+    private func drawPriceLabel(
+        price: Double,
+        y: CGFloat
+    ) {
 
-    guard
-        let mousePoint = crosshairPoint,
-        chartRect.contains(mousePoint)
-    else {
-        return
+        let text =
+            String(
+                format: "%.2f",
+                price
+            ) as NSString
+
+        let attributes:
+            [NSAttributedString.Key: Any] = [
+
+                .font:
+                    NSFont.systemFont(
+                        ofSize: 11
+                    ),
+
+                .foregroundColor:
+                    theme.priceLabelText
+            ]
+
+        let size =
+            text.size(
+                withAttributes: attributes
+            )
+
+        let rect = CGRect(
+
+            x:
+                coordinateSystem.chartRect.maxX +
+                6,
+
+            y:
+                y -
+                size.height / 2 -
+                2,
+
+            width:
+                size.width +
+                8,
+
+            height:
+                size.height +
+                4
+        )
+
+        let background =
+            NSBezierPath(
+                roundedRect: rect,
+                xRadius: 4,
+                yRadius: 4
+            )
+
+        theme.priceLabelBackground.setFill()
+
+        background.fill()
+
+        text.draw(
+            at: CGPoint(
+                x: rect.minX + 4,
+                y: rect.minY + 2
+            ),
+            withAttributes: attributes
+        )
     }
 
-    let mouseY = min(
-        max(
-            mousePoint.y,
-            chartRect.minY
-        ),
-        chartRect.maxY
-    )
+    // MARK: - Date Label
 
-    let priceRatio =
-        Double(mouseY - chartRect.minY) /
-        Double(chartRect.height)
+    private func drawDateLabel(
+        date: Date,
+        x: CGFloat
+    ) {
 
-    let mousePrice =
-        coordinateSystem.minPrice +
-        (
-            coordinateSystem.maxPrice -
-            coordinateSystem.minPrice
-        ) * priceRatio
+        let formatter =
+            DateFormatter()
 
-    let dash: [CGFloat] = [4, 4]
+        formatter.locale =
+            Locale(
+                identifier: "tr_TR"
+            )
 
-    let vertical = NSBezierPath()
+        formatter.dateFormat =
+            "dd MMM yyyy"
 
-    vertical.move(
-        to: NSPoint(
-            x: x,
-            y: chartRect.minY
+        let text =
+            formatter.string(
+                from: date
+            ) as NSString
+
+        let attributes:
+            [NSAttributedString.Key: Any] = [
+
+                .font:
+                    NSFont.systemFont(
+                        ofSize: 11
+                    ),
+
+                .foregroundColor:
+                    NSColor.white
+            ]
+
+        let size =
+            text.size(
+                withAttributes: attributes
+            )
+
+        let rect = CGRect(
+
+            x:
+                x -
+                size.width / 2 -
+                4,
+
+            y:
+                4,
+
+            width:
+                size.width +
+                8,
+
+            height:
+                size.height +
+                4
         )
-    )
 
-    vertical.line(
-        to: NSPoint(
-            x: x,
-            y: chartRect.maxY
+        let background =
+            NSBezierPath(
+                roundedRect: rect,
+                xRadius: 4,
+                yRadius: 4
+            )
+
+        NSColor.systemBlue.setFill()
+
+        background.fill()
+
+        text.draw(
+            at: CGPoint(
+                x: rect.minX + 4,
+                y: rect.minY + 2
+            ),
+            withAttributes: attributes
         )
-    )
+    }
 
-    vertical.lineWidth = 0.8
+    // MARK: - Information Panel
 
-    vertical.setLineDash(
-        dash,
-        count: dash.count,
-        phase: 0
-    )
+    private func drawInformationPanel(
+        candle: Candlestick,
+        visibleIndex: Int,
+        view: NSView
+    ) {
 
-    NSColor.systemGray
-        .withAlphaComponent(0.55)
-        .setStroke()
+        let formatter =
+            DateFormatter()
 
-    vertical.stroke()
+        formatter.locale =
+            Locale(
+                identifier: "tr_TR"
+            )
 
-    let horizontal = NSBezierPath()
+        formatter.dateFormat =
+            "dd MMM yyyy"
 
-    horizontal.move(
-        to: NSPoint(
-            x: chartRect.minX,
-            y: mouseY
-        )
-    )
+        let dateText =
+            formatter.string(
+                from: candle.date
+            )
 
-    horizontal.line(
-        to: NSPoint(
-            x: chartRect.maxX,
-            y: mouseY
-        )
-    )
+        var lines: [String] = [
 
-    horizontal.lineWidth = 0.8
+            dateText,
 
-    horizontal.setLineDash(
-        dash,
-        count: dash.count,
-        phase: 0
-    )
+            String(
+                format: "Max     %.2f",
+                candle.max
+            ),
 
-    NSColor.systemGray
-        .withAlphaComponent(0.55)
-        .setStroke()
+            String(
+                format: "Min     %.2f",
+                candle.min
+            ),
 
-    horizontal.stroke()
+            String(
+                format: "AOF     %.2f",
+                candle.weightedAverage
+            )
+        ]
 
-    drawPriceLabel(
-        price: mousePrice,
-        y: mouseY
-    )
+        // -------------------------------------------------
+        // KRİTİK NOKTA
+        //
+        // visibleIndex sadece ekrandaki index'tir.
+        //
+        // SMA dizileri ise tüm veri setine göre tutuluyor.
+        // Bu nedenle gerçek/global index'i kullanmalıyız.
+        // -------------------------------------------------
 
-    drawDateLabel(
-        date: candle.date,
-        x: x
-    )
+        let globalIndex =
+            coordinateSystem.globalIndex(
+                fromVisibleIndex: visibleIndex
+            )
 
-    drawInformationPanel(
-        candle: candle,
-        visibleIndex: index,
-        view: view
-    )
-}
+        let sortedSMAs =
+            activeSMAs.keys.sorted()
 
-private func drawPriceLabel(
-    price: Double,
-    y: CGFloat
-) {
-
-    let text = String(
-        format: "%.2f",
-        price
-    ) as NSString
-
-    let attributes: [NSAttributedString.Key: Any] = [
-        .font: NSFont.systemFont(ofSize: 11),
-        .foregroundColor: NSColor.white
-    ]
-
-    let size = text.size(
-        withAttributes: attributes
-    )
-
-    let rect = CGRect(
-        x: coordinateSystem.chartRect.maxX + 6,
-        y: y - size.height / 2 - 2,
-        width: size.width + 8,
-        height: size.height + 4
-    )
-
-    let background = NSBezierPath(
-        roundedRect: rect,
-        xRadius: 4,
-        yRadius: 4
-    )
-
-    NSColor.systemBlue.setFill()
-
-    background.fill()
-
-    text.draw(
-        at: CGPoint(
-            x: rect.minX + 4,
-            y: rect.minY + 2
-        ),
-        withAttributes: attributes
-    )
-}
-
-private func drawDateLabel(
-    date: Date,
-    x: CGFloat
-) {
-
-    let formatter = DateFormatter()
-
-    formatter.locale = Locale(
-        identifier: "tr_TR"
-    )
-
-    formatter.dateFormat = "dd MMM yyyy"
-
-    let text = formatter.string(
-        from: date
-    ) as NSString
-
-    let attributes: [NSAttributedString.Key: Any] = [
-        .font: NSFont.systemFont(ofSize: 11),
-        .foregroundColor: NSColor.white
-    ]
-
-    let size = text.size(
-        withAttributes: attributes
-    )
-
-    let rect = CGRect(
-        x: x - size.width / 2 - 4,
-        y: 4,
-        width: size.width + 8,
-        height: size.height + 4
-    )
-
-    let background = NSBezierPath(
-        roundedRect: rect,
-        xRadius: 4,
-        yRadius: 4
-    )
-
-    NSColor.systemBlue.setFill()
-
-    background.fill()
-
-    text.draw(
-        at: CGPoint(
-            x: rect.minX + 4,
-            y: rect.minY + 2
-        ),
-        withAttributes: attributes
-    )
-}
-
-private func drawInformationPanel(
-    candle: Candlestick,
-    visibleIndex: Int,
-    view: NSView
-) {
-
-    let formatter = DateFormatter()
-
-    formatter.locale = Locale(
-        identifier: "tr_TR"
-    )
-
-    formatter.dateFormat = "dd MMM yyyy"
-
-    let dateText = formatter.string(
-        from: candle.date
-    )
-
-    let titleAttributes: [NSAttributedString.Key: Any] = [
-        .font: NSFont.boldSystemFont(ofSize: 12),
-        .foregroundColor: NSColor.labelColor
-    ]
-
-    let valueAttributes: [NSAttributedString.Key: Any] = [
-        .font: NSFont.monospacedDigitSystemFont(
-            ofSize: 11,
-            weight: .regular
-        ),
-        .foregroundColor: NSColor.secondaryLabelColor
-    ]
-
-    let lines: [String] = [
-        dateText,
-        String(
-            format: "Max     %.2f",
-            candle.max
-        ),
-        String(
-            format: "Min     %.2f",
-            candle.min
-        ),
-        String(
-            format: "AOF     %.2f",
-            candle.weightedAverage
-        )
-    ]
-
-    let sortedSMAs =
-        activeSMAs.keys.sorted()
-
-    let panelWidth: CGFloat = 145
-    let lineHeight: CGFloat = 18
-
-    let totalLineCount =
-        lines.count +
-        sortedSMAs.reduce(0) { count, period in
+        for period in sortedSMAs {
 
             guard
-                let values = activeSMAs[period],
-                let viewport = coordinateSystem.viewport
+                let smaValues =
+                    activeSMAs[period]
             else {
-                return count
+                continue
             }
-
-            let globalIndex =
-                viewport.firstVisibleBar +
-                visibleIndex
 
             guard
                 globalIndex >= 0,
-                globalIndex < values.count,
-                values[globalIndex] != nil
+                globalIndex < smaValues.count
             else {
-                return count
+                continue
             }
 
-            return count + 1
+            guard
+                let value =
+                    smaValues[globalIndex]
+            else {
+                continue
+            }
+
+            lines.append(
+                String(
+                    format: "SMA%-3d %.2f",
+                    period,
+                    value
+                )
+            )
         }
 
-    let panelHeight =
-        12 +
-        CGFloat(totalLineCount) *
-        lineHeight
+        // -------------------------------------------------
+        // Attributes
+        // -------------------------------------------------
 
-    let panelRect = CGRect(
-        x: 12,
-        y: view.bounds.height - panelHeight - 42,
-        width: panelWidth,
-        height: panelHeight
-    )
+        let titleAttributes:
+            [NSAttributedString.Key: Any] = [
 
-    let background = NSBezierPath(
-        roundedRect: panelRect,
-        xRadius: 6,
-        yRadius: 6
-    )
+                .font:
+                    NSFont.boldSystemFont(
+                        ofSize: 12
+                    ),
 
-    NSColor.windowBackgroundColor
-        .withAlphaComponent(0.92)
-        .setFill()
+                .foregroundColor:
+                    NSColor.labelColor
+            ]
 
-    background.fill()
+        let panelWidth: CGFloat = 145
 
-    NSColor.separatorColor
-        .withAlphaComponent(0.5)
-        .setStroke()
+        let lineHeight: CGFloat = 18
 
-    background.lineWidth = 0.5
+        let panelHeight =
+            12 +
+            CGFloat(lines.count) *
+            lineHeight
 
-    background.stroke()
+        let panelRect = CGRect(
 
-    var currentLine = 0
+            x:
+                12,
 
-    (dateText as NSString).draw(
-        at: CGPoint(
-            x: panelRect.minX + 8,
             y:
-                panelRect.maxY -
-                CGFloat(currentLine + 1) *
-                lineHeight -
-                2
-        ),
-        withAttributes: titleAttributes
-    )
+                view.bounds.height -
+                panelHeight -
+                42,
 
-    currentLine += 1
+            width:
+                panelWidth,
 
-    let baseLines = [
-        String(
-            format: "Max     %.2f",
-            candle.max
-        ),
-        String(
-            format: "Min     %.2f",
-            candle.min
-        ),
-        String(
-            format: "AOF     %.2f",
-            candle.weightedAverage
-        )
-    ]
-
-    for line in baseLines {
-
-        (line as NSString).draw(
-            at: CGPoint(
-                x: panelRect.minX + 8,
-                y:
-                    panelRect.maxY -
-                    CGFloat(currentLine + 1) *
-                    lineHeight
-            ),
-            withAttributes: valueAttributes
+            height:
+                panelHeight
         )
 
-        currentLine += 1
-    }
+        // -------------------------------------------------
+        // Background
+        // -------------------------------------------------
 
-    for period in sortedSMAs {
+        let background =
+            NSBezierPath(
+                roundedRect: panelRect,
+                xRadius: 6,
+                yRadius: 6
+            )
 
-        guard
-            let values = activeSMAs[period],
-            let viewport = coordinateSystem.viewport
-        else {
-            continue
+        NSColor.windowBackgroundColor
+            .withAlphaComponent(0.92)
+            .setFill()
+
+        background.fill()
+
+        NSColor.separatorColor
+            .withAlphaComponent(0.5)
+            .setStroke()
+
+        background.lineWidth = 0.5
+
+        background.stroke()
+
+        // -------------------------------------------------
+        // Date
+        // -------------------------------------------------
+
+        if let first = lines.first {
+
+            (first as NSString).draw(
+
+                at: CGPoint(
+
+                    x:
+                        panelRect.minX +
+                        8,
+
+                    y:
+                        panelRect.maxY -
+                        lineHeight -
+                        2
+                ),
+
+                withAttributes:
+                    titleAttributes
+            )
         }
 
-        let globalIndex =
-            viewport.firstVisibleBar +
-            visibleIndex
+        // -------------------------------------------------
+        // Values
+        // -------------------------------------------------
 
-        guard
-            globalIndex >= 0,
-            globalIndex < values.count,
-            let value = values[globalIndex]
-        else {
-            continue
+        if lines.count > 1 {
+
+            for index in 1..<lines.count {
+
+                let line =
+                    lines[index]
+
+                // -----------------------------------------
+                // SMA satırının period'unu bul
+                // -----------------------------------------
+
+                let foregroundColor =
+                    colorForInformationLine(
+                        line: line
+                    )
+
+                let valueAttributes:
+                    [NSAttributedString.Key: Any] = [
+
+                        .font:
+                            NSFont.monospacedDigitSystemFont(
+                                ofSize: 11,
+                                weight: .regular
+                            ),
+
+                        .foregroundColor:
+                            foregroundColor
+                    ]
+
+                (line as NSString).draw(
+
+                    at: CGPoint(
+
+                        x:
+                            panelRect.minX +
+                            8,
+
+                        y:
+                            panelRect.maxY -
+                            CGFloat(index + 1) *
+                            lineHeight
+                    ),
+
+                    withAttributes:
+                        valueAttributes
+                )
+            }
+        }
+    }
+
+    // MARK: - SMA Information Color
+
+    private func colorForInformationLine(
+        line: String
+    ) -> NSColor {
+
+        guard line.hasPrefix("SMA") else {
+            return NSColor.secondaryLabelColor
         }
 
-        let smaColor =
-            theme.smaColors[period]
-            ?? NSColor.systemGray
+        let components =
+            line.split(
+                whereSeparator: { $0.isWhitespace }
+            )
 
-        let smaAttributes: [NSAttributedString.Key: Any] = [
-            .font: NSFont.monospacedDigitSystemFont(
-                ofSize: 11,
-                weight: .regular
-            ),
-            .foregroundColor: smaColor
-        ]
+        guard
+            let firstComponent = components.first
+        else {
+            return NSColor.secondaryLabelColor
+        }
 
-        let line = String(
-            format: "SMA%-3d %.2f",
-            period,
-            value
-        ) as NSString
+        let periodText =
+            String(firstComponent.dropFirst(3))
 
-        line.draw(
-            at: CGPoint(
-                x: panelRect.minX + 8,
-                y:
-                    panelRect.maxY -
-                    CGFloat(currentLine + 1) *
-                    lineHeight
-            ),
-            withAttributes: smaAttributes
-        )
+        guard
+            let period = Int(periodText)
+        else {
+            return NSColor.secondaryLabelColor
+        }
 
-        currentLine += 1
+        return theme.smaColors[period]
+            ?? NSColor.secondaryLabelColor
     }
+    
 }
-
-
-
-}
-
