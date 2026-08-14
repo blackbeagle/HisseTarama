@@ -32,6 +32,8 @@
 		1C645CC12F787B91007E1F5C /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CC02F787B91007E1F5C /* Stock.swift */; };
 		1C645CC92F7884F2007E1F5C /* IsYatirimResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */; };
 		1C645CCB2F788528007E1F5C /* IsYatirimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CCA2F788528007E1F5C /* IsYatirimService.swift */; };
+		1C68CDE9302FD49400DD0670 /* AppMainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C68CDE7302FD49400DD0670 /* AppMainWindowController.swift */; };
+		1C68CDEA302FD49400DD0670 /* AppMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1C68CDE8302FD49400DD0670 /* AppMainWindowController.xib */; };
 		1C76A9DB2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */; };
 		1CFA03312F798352008D3A52 /* IndicatorCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */; };
 		1CFA03332F798392008D3A52 /* IndicatorPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */; };
@@ -65,6 +67,8 @@
 		1C645CC02F787B91007E1F5C /* Stock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
 		1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsYatirimResponse.swift; sourceTree = "<group>"; };
 		1C645CCA2F788528007E1F5C /* IsYatirimService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsYatirimService.swift; sourceTree = "<group>"; };
+		1C68CDE7302FD49400DD0670 /* AppMainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMainWindowController.swift; sourceTree = "<group>"; };
+		1C68CDE8302FD49400DD0670 /* AppMainWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AppMainWindowController.xib; sourceTree = "<group>"; };
 		1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyCandleStickBuilder.swift; sourceTree = "<group>"; };
 		1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorCalculator.swift; sourceTree = "<group>"; };
 		1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorPopupViewController.swift; sourceTree = "<group>"; };
@@ -145,6 +149,8 @@
 				1C645CB22F773766007E1F5C /* MainSplitViewController.swift */,
 				1C645CBA2F782132007E1F5C /* ChartDetailViewController.swift */,
 				1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */,
+				1C68CDE7302FD49400DD0670 /* AppMainWindowController.swift */,
+				1C68CDE8302FD49400DD0670 /* AppMainWindowController.xib */,
 			);
 			path = "View Controllers";
 			sourceTree = "<group>";
@@ -305,6 +311,7 @@
 			files = (
 				1C645C9E2F77318B007E1F5C /* Assets.xcassets in Resources */,
 				1C645CA12F77318B007E1F5C /* Main.storyboard in Resources */,
+				1C68CDEA302FD49400DD0670 /* AppMainWindowController.xib in Resources */,
 				1C645CBD2F7862EA007E1F5C /* Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -326,6 +333,7 @@
 				1C4ED36E2FFAE39E00DC0AAC /* CandleRenderer.swift in Sources */,
 				1CFA03332F798392008D3A52 /* IndicatorPopupViewController.swift in Sources */,
 				1C645CCB2F788528007E1F5C /* IsYatirimService.swift in Sources */,
+				1C68CDE9302FD49400DD0670 /* AppMainWindowController.swift in Sources */,
 				1C645CC12F787B91007E1F5C /* Stock.swift in Sources */,
 				1C645CA92F7735F0007E1F5C /* SidebarViewController.swift in Sources */,
 				1C4ED3722FFAEA3F00DC0AAC /* SMARenderer.swift in Sources */,

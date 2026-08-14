@@ -679,18 +679,18 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-483" y="-397"/>
+            <point key="canvasLocation" x="-777" y="-630"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
             <objects>
-                <windowController id="B8D-0N-5wS" sceneMemberID="viewController">
+                <windowController id="B8D-0N-5wS" customClass="AppMainWindowController" customModule="HisseTarama" customModuleProvider="target" sceneMemberID="viewController">
                     <window key="window" title="Teknik &amp; Temel Analiz" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" releasedWhenClosed="NO" animationBehavior="default" id="IQv-IB-iLA">
                         <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" fullSizeContentView="YES"/>
                         <rect key="contentRect" x="583" y="409" width="480" height="270"/>
-                        <rect key="screenRect" x="0.0" y="0.0" width="1680" height="1027"/>
+                        <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
                         <connections>
-                            <outlet property="delegate" destination="B8D-0N-5wS" id="98r-iN-zZc"/>
+                            <outlet property="delegate" destination="B8D-0N-5wS" id="qko-7U-iX9"/>
                         </connections>
                     </window>
                     <connections>
@@ -699,7 +699,7 @@
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-455" y="-142"/>
+            <point key="canvasLocation" x="-757" y="-363"/>
         </scene>
         <!--Main Split View Controller-->
         <scene sceneID="pH0-Go-ICw">
@@ -724,7 +724,7 @@
                 </splitViewController>
                 <customObject id="UHZ-c3-5ei" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-455" y="309"/>
+            <point key="canvasLocation" x="-757" y="85"/>
         </scene>
         <!--Sidebar View Controller-->
         <scene sceneID="Rhq-8T-Jzd">
@@ -842,7 +842,7 @@
                 </viewController>
                 <customObject id="a6b-Es-oNt" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-692" y="781"/>
+            <point key="canvasLocation" x="-943" y="775"/>
         </scene>
         <!--Chart Detail View Controller-->
         <scene sceneID="VcY-5M-9BF">
@@ -888,7 +888,7 @@
                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                 </textFieldCell>
             </objects>
-            <point key="canvasLocation" x="39" y="781"/>
+            <point key="canvasLocation" x="-338" y="783"/>
         </scene>
     </scenes>
 </document>
