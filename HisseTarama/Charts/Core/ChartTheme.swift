@@ -81,7 +81,7 @@ struct ChartTheme {
             .tertiaryLabelColor,
 
         crosshairColor:
-            .systemGray.withAlphaComponent(0.45),
+            .systemGray.withAlphaComponent(0.75),
 
         selectionFillColor:
             .systemYellow.withAlphaComponent(0.15),
@@ -166,6 +166,6 @@ struct ChartTheme {
             1.0,
 
         crosshairWidth:
-            0.8
+            1.0
     )
 }

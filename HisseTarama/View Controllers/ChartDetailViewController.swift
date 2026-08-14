@@ -675,38 +675,41 @@ extension ChartDetailViewController {
 
 extension ChartDetailViewController: IndicatorPopupDelegate {
     
-    func didSelectIndicators(
-        selectedSMAs: [Int]
-    ) {
-        
-        activeSMAs.removeAll()
-        
+    func didSelectIndicators(selectedSMAs: [Int]) {
+
+        guard !currentCandlesticks.isEmpty else {
+            return
+        }
+
         let prices =
             IndicatorCalculator
                 .getWeightedAveragePrices(
                     from: currentCandlesticks
                 )
-        
+
+        // Yeni seçilen SMA'ları mevcut SMA'ların
+        // üzerine ekle.
+        //
+        // activeSMAs bir Dictionary olduğu için
+        // aynı period zaten varsa tekrar oluşturulmaz;
+        // sadece değeri güncellenir.
         for period in selectedSMAs {
-            
+
             let smaValues =
                 IndicatorCalculator.calculateSMA(
                     prices: prices,
                     period: period
                 )
-            
-            activeSMAs[period] =
-                smaValues
+
+            activeSMAs[period] = smaValues
         }
-        
-        chartView?.activeSMAs =
-            activeSMAs
-        
-        chartView?.candlesticks =
-            currentCandlesticks
-        
+
+        // Grafiği yeniden çiz
+        chartView?.activeSMAs = activeSMAs
+        chartView?.candlesticks = currentCandlesticks
         chartView?.needsDisplay = true
-        
+
+        // SMA butonlarını güncelle
         updateSMAButtons()
     }
 }
