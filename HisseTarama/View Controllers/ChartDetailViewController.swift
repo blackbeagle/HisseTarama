@@ -5,6 +5,11 @@ enum ChartPeriod {
     case weekly
 }
 
+enum ChartCurrency {
+    case tryCurrency
+    case usd
+}
+
 class ChartDetailViewController: NSViewController {
     
     // MARK: - IBOutlets
@@ -28,6 +33,7 @@ class ChartDetailViewController: NSViewController {
     private var smaContainerView: NSView?
     
     private var chartPeriod: ChartPeriod = .daily
+    private var chartCurrency: ChartCurrency = .tryCurrency
     
     private var dailyCandlesticks: [Candlestick] = []
     
@@ -35,10 +41,29 @@ class ChartDetailViewController: NSViewController {
     private let dailyVisibleBarCount = 150
     private let weeklyVisibleBarCount = 80
     
+    // MARK: - Period Control
+    
     private let periodControl: NSSegmentedControl = {
         
         let control = NSSegmentedControl(
             labels: ["Günlük", "Haftalık"],
+            trackingMode: .selectOne,
+            target: nil,
+            action: nil
+        )
+        
+        control.selectedSegment = 0
+        control.translatesAutoresizingMaskIntoConstraints = false
+        
+        return control
+    }()
+    
+    // MARK: - Currency Control
+    
+    private let currencyControl: NSSegmentedControl = {
+        
+        let control = NSSegmentedControl(
+            labels: ["TRY", "USD"],
             trackingMode: .selectOne,
             target: nil,
             action: nil
@@ -85,7 +110,7 @@ class ChartDetailViewController: NSViewController {
         chartView?.needsDisplay = true
     }
     
-    // MARK: - Setup
+    // MARK: - Setup UI
     
     private func setupUI() {
         
@@ -102,7 +127,9 @@ class ChartDetailViewController: NSViewController {
         
         chartContainerView.translatesAutoresizingMaskIntoConstraints = false
         
+        // -------------------------------------------------
         // Indicator Button
+        // -------------------------------------------------
         
         let indicatorButton = NSButton()
         
@@ -116,14 +143,27 @@ class ChartDetailViewController: NSViewController {
         
         view.addSubview(indicatorButton)
         
+        // -------------------------------------------------
         // Period Control
+        // -------------------------------------------------
         
         view.addSubview(periodControl)
         
         periodControl.target = self
         periodControl.action = #selector(periodChanged)
         
+        // -------------------------------------------------
+        // Currency Control
+        // -------------------------------------------------
+        
+        view.addSubview(currencyControl)
+        
+        currencyControl.target = self
+        currencyControl.action = #selector(currencyChanged)
+        
+        // -------------------------------------------------
         // SMA Container
+        // -------------------------------------------------
         
         let smaContainerView = NSView()
         
@@ -136,6 +176,10 @@ class ChartDetailViewController: NSViewController {
         )
         
         NSLayoutConstraint.activate([
+            
+            // -------------------------------------------------
+            // Symbol
+            // -------------------------------------------------
             
             symbolTextField.topAnchor.constraint(
                 equalTo: view.topAnchor,
@@ -151,6 +195,10 @@ class ChartDetailViewController: NSViewController {
                 equalToConstant: 150
             ),
             
+            // -------------------------------------------------
+            // Fetch Button
+            // -------------------------------------------------
+            
             fetchButton.leadingAnchor.constraint(
                 equalTo: symbolTextField.trailingAnchor,
                 constant: 8
@@ -159,6 +207,10 @@ class ChartDetailViewController: NSViewController {
             fetchButton.centerYAnchor.constraint(
                 equalTo: symbolTextField.centerYAnchor
             ),
+            
+            // -------------------------------------------------
+            // Chart
+            // -------------------------------------------------
             
             chartContainerView.topAnchor.constraint(
                 equalTo: symbolTextField.bottomAnchor,
@@ -180,6 +232,10 @@ class ChartDetailViewController: NSViewController {
                 constant: -20
             ),
             
+            // -------------------------------------------------
+            // Indicator Button
+            // -------------------------------------------------
+            
             indicatorButton.leadingAnchor.constraint(
                 equalTo: fetchButton.trailingAnchor,
                 constant: 8
@@ -188,6 +244,10 @@ class ChartDetailViewController: NSViewController {
             indicatorButton.centerYAnchor.constraint(
                 equalTo: symbolTextField.centerYAnchor
             ),
+            
+            // -------------------------------------------------
+            // Period Control
+            // -------------------------------------------------
             
             periodControl.leadingAnchor.constraint(
                 equalTo: indicatorButton.trailingAnchor,
@@ -202,6 +262,28 @@ class ChartDetailViewController: NSViewController {
                 equalToConstant: 150
             ),
             
+            // -------------------------------------------------
+            // Currency Control - SAĞ ÜST
+            // -------------------------------------------------
+            
+            currencyControl.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -20
+            ),
+            
+            currencyControl.topAnchor.constraint(
+                equalTo: view.topAnchor,
+                constant: 40
+            ),
+            
+            currencyControl.widthAnchor.constraint(
+                equalToConstant: 100
+            ),
+            
+            // -------------------------------------------------
+            // SMA Container
+            // -------------------------------------------------
+            
             smaContainerView.topAnchor.constraint(
                 equalTo: view.topAnchor,
                 constant: 40
@@ -213,8 +295,8 @@ class ChartDetailViewController: NSViewController {
             ),
             
             smaContainerView.trailingAnchor.constraint(
-                equalTo: view.trailingAnchor,
-                constant: 0
+                equalTo: currencyControl.leadingAnchor,
+                constant: -10
             ),
             
             smaContainerView.heightAnchor.constraint(
@@ -225,6 +307,8 @@ class ChartDetailViewController: NSViewController {
         self.smaContainerView =
             smaContainerView
     }
+    
+    // MARK: - Chart View
     
     private func setupChartView() {
         
@@ -327,21 +411,7 @@ class ChartDetailViewController: NSViewController {
                         self?.dailyCandlesticks =
                             candlesticks
                         
-                        if self?.chartPeriod == .weekly {
-                            
-                            self?.currentCandlesticks =
-                                WeeklyCandlestickBuilder.build(
-                                    from: candlesticks
-                                )
-                            
-                        } else {
-                            
-                            self?.currentCandlesticks =
-                                candlesticks
-                        }
-                        
-                        self?.chartView?.candlesticks =
-                            self?.currentCandlesticks ?? []
+                        self?.rebuildCurrentCandlesticks()
                         
                         self?.applyDefaultSMAsForCurrentPeriod()
                         
@@ -378,25 +448,16 @@ class ChartDetailViewController: NSViewController {
             
             chartPeriod = .daily
             
-            currentCandlesticks =
-                dailyCandlesticks
-            
         case 1:
             
             chartPeriod = .weekly
-            
-            currentCandlesticks =
-                WeeklyCandlestickBuilder.build(
-                    from: dailyCandlesticks
-                )
             
         default:
             
             return
         }
         
-        chartView?.candlesticks =
-            currentCandlesticks
+        rebuildCurrentCandlesticks()
         
         applyDefaultSMAsForCurrentPeriod()
         
@@ -405,6 +466,154 @@ class ChartDetailViewController: NSViewController {
         chartView?.needsDisplay = true
         
         updateWindowTitle()
+    }
+    
+    // MARK: - Currency
+    
+    @objc
+    private func currencyChanged(
+        _ sender: NSSegmentedControl
+    ) {
+        
+        switch sender.selectedSegment {
+            
+        case 0:
+            
+            chartCurrency = .tryCurrency
+            
+        case 1:
+            
+            chartCurrency = .usd
+            
+        default:
+            
+            return
+        }
+        
+        // Veri henüz yüklenmediyse sadece seçimi sakla.
+        guard !dailyCandlesticks.isEmpty else {
+            return
+        }
+        
+        // USD verisi gerçekten mevcut mu?
+        if chartCurrency == .usd {
+            
+            let hasUSDData =
+                dailyCandlesticks.contains {
+                    $0.usdMax != nil ||
+                    $0.usdMin != nil ||
+                    $0.usdWeightedAverage != nil
+                }
+            
+            guard hasUSDData else {
+                
+                // USD verisi yoksa TRY'ye geri dön.
+                chartCurrency = .tryCurrency
+                currencyControl.selectedSegment = 0
+                
+                showAlert(
+                    message:
+                        "Bu hisse için USD bazlı fiyat verisi bulunamadı."
+                )
+                
+                return
+            }
+        }
+        
+        rebuildCurrentCandlesticks()
+        
+        applyDefaultSMAsForCurrentPeriod()
+        
+        resetViewportForCurrentPeriod()
+        
+        chartView?.needsDisplay = true
+        
+        updateWindowTitle()
+    }
+    
+    // MARK: - Rebuild Current Candlesticks
+    
+    private func rebuildCurrentCandlesticks() {
+        
+        guard !dailyCandlesticks.isEmpty else {
+            
+            currentCandlesticks = []
+            
+            chartView?.candlesticks = []
+            
+            return
+        }
+        
+        let currencyCandlesticks =
+            candlesticksForSelectedCurrency(
+                from: dailyCandlesticks
+            )
+        
+        guard !currencyCandlesticks.isEmpty else {
+            
+            currentCandlesticks = []
+            
+            chartView?.candlesticks = []
+            
+            return
+        }
+        
+        switch chartPeriod {
+            
+        case .daily:
+            
+            currentCandlesticks =
+                currencyCandlesticks
+            
+        case .weekly:
+            
+            currentCandlesticks =
+                WeeklyCandlestickBuilder.build(
+                    from: currencyCandlesticks
+                )
+        }
+        
+        chartView?.candlesticks =
+            currentCandlesticks
+        
+        chartView?.needsDisplay = true
+    }
+    
+    // MARK: - Currency Conversion
+    
+    private func candlesticksForSelectedCurrency(
+        from candles: [Candlestick]
+    ) -> [Candlestick] {
+        
+        switch chartCurrency {
+            
+        case .tryCurrency:
+            
+            return candles
+            
+        case .usd:
+            
+            return candles.compactMap { candle in
+                
+                guard
+                    let usdMax = candle.usdMax,
+                    let usdMin = candle.usdMin,
+                    let usdAOF = candle.usdWeightedAverage
+                else {
+                    return nil
+                }
+                
+                return Candlestick(
+                    max: usdMax,
+                    min: usdMin,
+                    weightedAverage: usdAOF,
+                    date: candle.date,
+                    usdMax: usdMax,
+                    usdMin: usdMin,
+                    usdWeightedAverage: usdAOF
+                )
+            }
+        }
     }
     
     // MARK: - Viewport
@@ -436,13 +645,19 @@ class ChartDetailViewController: NSViewController {
     
     // MARK: - Alert
     
-    private func showAlert(message: String) {
+    private func showAlert(
+        message: String
+    ) {
         
         let alert = NSAlert()
         
         alert.messageText = "Uyarı"
-        alert.informativeText = message
-        alert.alertStyle = .warning
+        
+        alert.informativeText =
+            message
+        
+        alert.alertStyle =
+            .warning
         
         alert.addButton(
             withTitle: "Tamam"
@@ -450,6 +665,8 @@ class ChartDetailViewController: NSViewController {
         
         alert.runModal()
     }
+    
+    // MARK: - Window Title
     
     private func updateWindowTitle() {
         
@@ -467,8 +684,19 @@ class ChartDetailViewController: NSViewController {
             periodText = "Haftalık"
         }
         
+        let currencyText: String
+        
+        switch chartCurrency {
+            
+        case .tryCurrency:
+            currencyText = "TRY"
+            
+        case .usd:
+            currencyText = "USD"
+        }
+        
         view.window?.title =
-            "\(symbol) - \(periodText) (\(currentCandlesticks.count) Bar)"
+            "\(symbol) - \(periodText) - \(currencyText) (\(currentCandlesticks.count) Bar)"
     }
     
     // MARK: - Indicators
@@ -478,7 +706,8 @@ class ChartDetailViewController: NSViewController {
         let popupVC =
             IndicatorPopupViewController()
         
-        popupVC.delegate = self
+        popupVC.delegate =
+            self
         
         presentAsSheet(
             popupVC
@@ -539,9 +768,13 @@ class ChartDetailViewController: NSViewController {
         updateSMAButtons()
     }
     
+    // MARK: - SMA Buttons
+    
     private func updateSMAButtons() {
         
-        guard let container = smaContainerView else {
+        guard let container =
+                smaContainerView
+        else {
             return
         }
         
@@ -560,33 +793,47 @@ class ChartDetailViewController: NSViewController {
             button.title =
                 "SMA \(period)"
             
-            button.bezelStyle = .rounded
+            button.bezelStyle =
+                .rounded
             
             button.font =
                 NSFont.systemFont(
                     ofSize: 11
                 )
             
-            button.target = self
-            button.action = #selector(toggleSMA(_:))
-            button.tag = period
-            button.translatesAutoresizingMaskIntoConstraints = false
+            button.target =
+                self
             
-            container.addSubview(button)
+            button.action =
+                #selector(toggleSMA(_:))
+            
+            button.tag =
+                period
+            
+            button.translatesAutoresizingMaskIntoConstraints =
+                false
+            
+            container.addSubview(
+                button
+            )
             
             NSLayoutConstraint.activate([
                 
                 button.leadingAnchor.constraint(
-                    equalTo: container.leadingAnchor,
-                    constant: xOffset
+                    equalTo:
+                        container.leadingAnchor,
+                    constant:
+                        xOffset
                 ),
                 
                 button.centerYAnchor.constraint(
-                    equalTo: container.centerYAnchor
+                    equalTo:
+                        container.centerYAnchor
                 ),
                 
                 button.widthAnchor.constraint(
-                    equalToConstant: 60
+                    equalToConstant:
+                        60
                 )
             ])
             
@@ -601,7 +848,8 @@ class ChartDetailViewController: NSViewController {
         _ sender: NSButton
     ) {
         
-        let period = sender.tag
+        let period =
+            sender.tag
         
         if activeSMAs[period] != nil {
             
@@ -619,8 +867,10 @@ class ChartDetailViewController: NSViewController {
             
             let smaValues =
                 IndicatorCalculator.calculateSMA(
-                    prices: prices,
-                    period: period
+                    prices:
+                        prices,
+                    period:
+                        period
                 )
             
             activeSMAs[period] =
@@ -633,7 +883,8 @@ class ChartDetailViewController: NSViewController {
         chartView?.candlesticks =
             currentCandlesticks
         
-        chartView?.needsDisplay = true
+        chartView?.needsDisplay =
+            true
         
         updateSMAButtons()
     }
@@ -641,7 +892,8 @@ class ChartDetailViewController: NSViewController {
 
 // MARK: - SidebarSelectionDelegate
 
-extension ChartDetailViewController: SidebarSelectionDelegate {
+extension ChartDetailViewController:
+    SidebarSelectionDelegate {
     
     func didSelectSidebarItem(
         _ item: SidebarItem
@@ -663,9 +915,11 @@ extension ChartDetailViewController {
     
     func refreshChart() {
         
-        chartView?.needsDisplay = true
+        chartView?.needsDisplay =
+            true
         
-        chartContainerView.needsLayout = true
+        chartContainerView.needsLayout =
+            true
         
         chartContainerView.layoutSubtreeIfNeeded()
     }
@@ -673,50 +927,59 @@ extension ChartDetailViewController {
 
 // MARK: - IndicatorPopupDelegate
 
-extension ChartDetailViewController: IndicatorPopupDelegate {
+extension ChartDetailViewController:
+    IndicatorPopupDelegate {
     
-    func didSelectIndicators(selectedSMAs: [Int]) {
-
+    func didSelectIndicators(
+        selectedSMAs: [Int]
+    ) {
+        
         guard !currentCandlesticks.isEmpty else {
             return
         }
-
+        
         let prices =
             IndicatorCalculator
                 .getWeightedAveragePrices(
                     from: currentCandlesticks
                 )
-
-        // Yeni seçilen SMA'ları mevcut SMA'ların
-        // üzerine ekle.
+        
+        // Yeni seçilen SMA'ları mevcut
+        // SMA'ların üzerine ekle.
         //
-        // activeSMAs bir Dictionary olduğu için
-        // aynı period zaten varsa tekrar oluşturulmaz;
-        // sadece değeri güncellenir.
+        // Aynı period zaten varsa mevcut
+        // değer güncellenir.
         for period in selectedSMAs {
-
+            
             let smaValues =
                 IndicatorCalculator.calculateSMA(
-                    prices: prices,
-                    period: period
+                    prices:
+                        prices,
+                    period:
+                        period
                 )
-
-            activeSMAs[period] = smaValues
+            
+            activeSMAs[period] =
+                smaValues
         }
-
-        // Grafiği yeniden çiz
-        chartView?.activeSMAs = activeSMAs
-        chartView?.candlesticks = currentCandlesticks
-        chartView?.needsDisplay = true
-
-        // SMA butonlarını güncelle
+        
+        chartView?.activeSMAs =
+            activeSMAs
+        
+        chartView?.candlesticks =
+            currentCandlesticks
+        
+        chartView?.needsDisplay =
+            true
+        
         updateSMAButtons()
     }
 }
 
 // MARK: - NSTextFieldDelegate
 
-extension ChartDetailViewController: NSTextFieldDelegate {
+extension ChartDetailViewController:
+    NSTextFieldDelegate {
     
     func control(
         _ control: NSControl,
