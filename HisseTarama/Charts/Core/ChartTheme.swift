@@ -103,33 +103,16 @@ struct ChartTheme {
         // =================================================
 
         smaColors: [
-
+       //private let quickSMAPeriods = [5, 8, 13, 21, 34,52,200,260]
             // Günlük
-            5: .white,
-            8:
-                .systemGreen,
-
-            34:
-                .systemBlue,
-
-            // Haftalık varsayılan
-            52:
-                .systemOrange,
-
-            // Diğer kullanılabilecek SMA'lar
-            21:
-                .systemOrange,
-
-            89:
-                .systemPurple,
-
-            144:
-                .systemBrown,
-
-            200:
-                .systemRed,
-            260:
-                .systemRed
+            5:.white,
+            8:.systemGreen,
+            13:.systemMint,
+            21:.systemMint,
+            34:.systemBlue,
+            52:.systemOrange,
+            200:.systemRed,
+            260:.systemRed
         ],
 
         // =================================================
@@ -139,18 +122,14 @@ struct ChartTheme {
         // =================================================
 
         smaLineWidths: [
-
-            // Haftalık SMA 52
-            52:
-                2.5,
-           
             5: 0.75,
-            // İstersen ileride:
-            
-             8: 1.25,
-             34: 1.75,
-            200: 2.5,
-            260: 2.5
+            8: 1.25,
+            13:1.5,
+            21:1.75,
+            34: 2.0,
+            52:2.50,
+            200: 3.0,
+            260: 3.0
         ],
 
         // Genel SMA kalınlığı

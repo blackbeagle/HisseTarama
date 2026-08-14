@@ -11,7 +11,8 @@ class IndicatorPopupViewController: NSViewController {
     weak var delegate: IndicatorPopupDelegate?
     
     // Hızlı seçim için SMA periyotları
-    private let quickSMAPeriods = [5, 8, 13, 21, 34,225]
+    //private let quickSMAPeriods = [5, 8, 13, 21, 34,225]
+    private let quickSMAPeriods = [5, 8, 13, 21, 34,52,200,260]
     private var selectedSMAs: Set<Int> = []
     
     // MARK: - UI Elements
