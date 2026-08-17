@@ -1,23 +1,28 @@
 // MainSplitViewController.swift
+
 import Cocoa
 
 class MainSplitViewController: NSSplitViewController {
-    
+
+    // MARK: - Properties
+
+    private var sidebarWasCollapsed = false
+
+    // MARK: - View Lifecycle
 
     override func viewDidLoad() {
-        
+
         super.viewDidLoad()
-        
+
         // Split view ayarları
         setupSplitView()
-        
+
         view.window?.toolbar?.isVisible = true
-        
-        
+
         // View'in tüm alanı kaplamasını sağla
         view.autoresizingMask = [.width, .height]
         view.wantsLayer = true
-        
+
         // Pencere boyut değişikliklerini dinle
         NotificationCenter.default.addObserver(
             self,
@@ -25,7 +30,7 @@ class MainSplitViewController: NSSplitViewController {
             name: NSWindow.didResizeNotification,
             object: view.window
         )
-        
+
         // Full screen değişikliklerini dinle
         NotificationCenter.default.addObserver(
             self,
@@ -33,126 +38,238 @@ class MainSplitViewController: NSSplitViewController {
             name: NSWindow.didEnterFullScreenNotification,
             object: view.window
         )
-        
+
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(windowDidExitFullScreen),
             name: NSWindow.didExitFullScreenNotification,
             object: view.window
         )
-        
     }
-    
+
+    // MARK: - Split View Setup
+
     private func setupSplitView() {
-        
-        // Split view'in tüm alanı kaplamasını sağla
+
         splitView.autoresizingMask = [.width, .height]
         splitView.dividerStyle = .paneSplitter
-    
-        // Sidebar item'ı ayarla
+
+        // Sidebar
         if let sidebarItem = splitViewItems.first {
+
             sidebarItem.minimumThickness = 150
             sidebarItem.maximumThickness = 400
             sidebarItem.canCollapse = true
         }
-        
-        // İkinci item'ın tüm alanı kaplamasını sağla
+
+        // Detail
         if let detailItem = splitViewItems.last {
+
             detailItem.minimumThickness = 400
             detailItem.canCollapse = false
         }
     }
 
-    func adjustSidebarWidthManually() {
-            adjustSidebarWidth()
-            // Grafikleri yenile
-            if let detailVC = children.last as? ChartDetailViewController {
-                detailVC.refreshChart()
-            }
-        }
-    
-    override func viewDidAppear() {
-        super.viewDidAppear()
-        
-  
-            if let window = view.window {
-                print("Toolbar visible: \(window.toolbar?.isVisible ?? false)")
-                print("Toolbar items: \(window.toolbar?.items ?? [])")
-            }
-        
-        // Pencere açıldığında sidebar genişliğini ayarla
-        DispatchQueue.main.async { [weak self] in
-            self?.adjustSidebarWidth()
-            
-            
-        }
-    }
-    
-    override func viewDidLayout() {
-        super.viewDidLayout()
-        adjustSidebarWidth()
-    }
-    
-    private func adjustSidebarWidth() {
-        
-        guard let sidebarItem = splitViewItems.first,
-              let window = view.window else { return }
-        
-        let windowWidth = window.frame.width
-        let sidebarWidth = max(150, min(400, windowWidth / 5))
-        
-        if sidebarItem.minimumThickness != sidebarWidth {
-            
-            sidebarItem.minimumThickness = sidebarWidth
-            splitView.setPosition(sidebarWidth, ofDividerAt: 0)
-        }
-    }
-    
-  
-     
+    // MARK: - Sidebar
 
-  
-    
-    // MARK: - Window Notifications
-    @objc private func windowDidResize(_ notification: Notification) {
-        // Pencere yeniden boyutlandırıldığında sidebar genişliğini güncelle
+    func toggleSidebar() {
+
+        guard let sidebarItem = splitViewItems.first else {
+            return
+        }
+
+        if sidebarItem.isCollapsed {
+
+            // Sidebar'ı göster
+            sidebarItem.isCollapsed = false
+            sidebarWasCollapsed = false
+
+            DispatchQueue.main.async { [weak self] in
+
+                guard let self = self else {
+                    return
+                }
+
+                self.adjustSidebarWidth()
+                self.view.layoutSubtreeIfNeeded()
+            }
+
+        } else {
+
+            // Sidebar'ı gizle
+            sidebarWasCollapsed = true
+            sidebarItem.isCollapsed = true
+
+            view.layoutSubtreeIfNeeded()
+        }
+    }
+
+    // MARK: - Sidebar Width
+
+    func adjustSidebarWidthManually() {
+
+        guard let sidebarItem = splitViewItems.first,
+              !sidebarItem.isCollapsed else {
+            return
+        }
+
         adjustSidebarWidth()
-        
-        // Grafikleri yeniden çiz
-        if let detailVC = children.last as? ChartDetailViewController {
+
+        // Grafikleri yenile
+        if let detailVC =
+            children.last as? ChartDetailViewController {
+
             detailVC.refreshChart()
         }
     }
-    
-    @objc private func windowDidEnterFullScreen(_ notification: Notification) {
-        // Full screen'e girildiğinde
+
+    private func adjustSidebarWidth() {
+
+        guard let sidebarItem = splitViewItems.first,
+              let window = view.window,
+              !sidebarItem.isCollapsed else {
+            return
+        }
+
+        let windowWidth = window.frame.width
+
+        let sidebarWidth =
+            max(
+                150,
+                min(
+                    400,
+                    windowWidth / 5
+                )
+            )
+
+        if sidebarItem.minimumThickness != sidebarWidth {
+
+            sidebarItem.minimumThickness = sidebarWidth
+
+            splitView.setPosition(
+                sidebarWidth,
+                ofDividerAt: 0
+            )
+        }
+    }
+
+    // MARK: - View Appearance
+
+    override func viewDidAppear() {
+
+        super.viewDidAppear()
+
+        if let window = view.window {
+
+            print(
+                "Toolbar visible: \(window.toolbar?.isVisible ?? false)"
+            )
+
+            print(
+                "Toolbar items: \(window.toolbar?.items ?? [])"
+            )
+        }
+
+        // Pencere açıldığında sidebar genişliğini ayarla
         DispatchQueue.main.async { [weak self] in
+
             self?.adjustSidebarWidth()
-            self?.view.layoutSubtreeIfNeeded()
-            
+        }
+    }
+
+    override func viewDidLayout() {
+
+        super.viewDidLayout()
+
+        guard let sidebarItem = splitViewItems.first else {
+            return
+        }
+
+        // Sidebar kapalıyken genişlik ayarı yapma.
+        if !sidebarItem.isCollapsed {
+            adjustSidebarWidth()
+        }
+    }
+
+    // MARK: - Window Notifications
+
+    @objc private func windowDidResize(
+        _ notification: Notification
+    ) {
+
+        // Sidebar kapalıysa genişlik hesaplama
+        if let sidebarItem = splitViewItems.first,
+           !sidebarItem.isCollapsed {
+
+            adjustSidebarWidth()
+        }
+
+        // Grafikleri yeniden çiz
+        if let detailVC =
+            children.last as? ChartDetailViewController {
+
+            detailVC.refreshChart()
+        }
+    }
+
+    @objc private func windowDidEnterFullScreen(
+        _ notification: Notification
+    ) {
+
+        DispatchQueue.main.async { [weak self] in
+
+            guard let self = self else {
+                return
+            }
+
+            if let sidebarItem = self.splitViewItems.first,
+               !sidebarItem.isCollapsed {
+
+                self.adjustSidebarWidth()
+            }
+
+            self.view.layoutSubtreeIfNeeded()
+
             // Grafikleri yenile
-            if let detailVC = self?.children.last as? ChartDetailViewController {
+            if let detailVC =
+                self.children.last as? ChartDetailViewController {
+
                 detailVC.refreshChart()
             }
         }
     }
-    
-    @objc private func windowDidExitFullScreen(_ notification: Notification) {
-        // Full screen'den çıkıldığında
+
+    @objc private func windowDidExitFullScreen(
+        _ notification: Notification
+    ) {
+
         DispatchQueue.main.async { [weak self] in
-            self?.adjustSidebarWidth()
-            self?.view.layoutSubtreeIfNeeded()
-            
+
+            guard let self = self else {
+                return
+            }
+
+            if let sidebarItem = self.splitViewItems.first,
+               !sidebarItem.isCollapsed {
+
+                self.adjustSidebarWidth()
+            }
+
+            self.view.layoutSubtreeIfNeeded()
+
             // Grafikleri yenile
-            if let detailVC = self?.children.last as? ChartDetailViewController {
+            if let detailVC =
+                self.children.last as? ChartDetailViewController {
+
                 detailVC.refreshChart()
             }
         }
     }
-    
+
+    // MARK: - Deinit
+
     deinit {
-        // Notification observer'ları temizle
+
         NotificationCenter.default.removeObserver(self)
     }
 }
-
