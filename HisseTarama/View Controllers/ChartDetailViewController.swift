@@ -351,6 +351,25 @@ class ChartDetailViewController: NSViewController {
         )
     }
     
+    // MARK: - External Stock Selection
+
+    func selectStock(symbol: String) {
+
+        let normalizedSymbol = symbol
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+            .uppercased()
+
+        guard !normalizedSymbol.isEmpty else {
+            return
+        }
+
+        symbolTextField.stringValue = normalizedSymbol
+
+        fetchButtonClicked()
+    }
+    
     // MARK: - Actions
     
     @objc private func fetchButtonClicked() {

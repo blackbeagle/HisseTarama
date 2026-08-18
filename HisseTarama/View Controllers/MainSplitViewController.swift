@@ -45,24 +45,7 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
             object: view.window
         )
     }
-   /*
-    override func viewDidAppear() {
-
-        super.viewDidAppear()
-
-        if let sidebarVC =
-            splitViewItems.first?.viewController
-                as? SidebarViewController {
-
-            sidebarVC.selectionDelegate = self
-        }
-
-        DispatchQueue.main.async { [weak self] in
-
-            self?.adjustSidebarWidth()
-        }
-    }
-*/
+   
     // MARK: - Split View Setup
 
     private func setupSplitView() {
@@ -172,23 +155,27 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
     // MARK: - View Appearance
 
     override func viewDidAppear() {
-
         super.viewDidAppear()
 
         if let window = view.window {
-
             print(
                 "Toolbar visible: \(window.toolbar?.isVisible ?? false)"
             )
-
             print(
                 "Toolbar items: \(window.toolbar?.items ?? [])"
             )
         }
 
+        // Sidebar seçim delegate bağlantısı
+        if let sidebarVC =
+            splitViewItems.first?.viewController
+                as? SidebarViewController {
+
+            sidebarVC.selectionDelegate = self
+        }
+
         // Pencere açıldığında sidebar genişliğini ayarla
         DispatchQueue.main.async { [weak self] in
-
             self?.adjustSidebarWidth()
         }
     }
@@ -318,6 +305,19 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
         print(
             "AppState seçili hisse: " +
             "\(AppStockState.shared.selectedStock?.symbol ?? "-")"
+        )
+
+        guard let detailVC =
+            children.last as? ChartDetailViewController
+        else {
+            print(
+                "HATA: ChartDetailViewController bulunamadı."
+            )
+            return
+        }
+
+        detailVC.selectStock(
+            symbol: stock.symbol
         )
     }
 
