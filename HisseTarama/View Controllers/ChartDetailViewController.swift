@@ -890,24 +890,22 @@ class ChartDetailViewController: NSViewController {
     }
 }
 
-// MARK: - SidebarSelectionDelegate
+// MARK: - SidebarSelection Delegate
+extension ChartDetailViewController: SidebarSelectionDelegate {
 
-extension ChartDetailViewController:
-    SidebarSelectionDelegate {
-    
-    func didSelectSidebarItem(
-        _ item: SidebarItem
+    func sidebar(
+        _ sidebar: SidebarViewController,
+        didSelect selection: SidebarSelection
     ) {
-        
-        if item.children == nil {
-            
-            symbolTextField.stringValue =
-                item.name
-            
+        switch selection {
+
+        case .stock(let symbol):
+            symbolTextField.stringValue = symbol
             fetchButtonClicked()
         }
     }
 }
+
 
 // MARK: - Refresh
 

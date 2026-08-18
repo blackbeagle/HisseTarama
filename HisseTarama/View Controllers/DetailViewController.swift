@@ -1,6 +1,6 @@
 import Cocoa
 
-class DetailViewController: NSViewController, SidebarSelectionDelegate {
+class DetailViewController: NSViewController {
 
     @IBOutlet weak var titleLabel: NSTextField!
     @IBOutlet weak var contentTextField: NSTextField!
@@ -12,13 +12,22 @@ class DetailViewController: NSViewController, SidebarSelectionDelegate {
     }
     
     func didSelectSidebarItem(_ item: SidebarItem) {
-        titleLabel.stringValue = item.name
-        
-        // Eğer bir hisse ise (children yoksa), gelecekte burada detayları yükleriz
+
+        titleLabel.stringValue = item.title
+
+        // Eğer bir hisse ise (children yoksa),
+        // gelecekte burada detayları yükleriz
         if item.children == nil {
-            contentTextField.stringValue = "Details for \(item.name) will be shown here.\nPrice, charts, technicals..."
+
+            contentTextField.stringValue =
+                "Details for \(item.title) will be shown here.\n" +
+                "Price, charts, technicals..."
+
         } else {
-            contentTextField.stringValue = "Group: \(item.name)\nSelect a stock to see details."
+
+            contentTextField.stringValue =
+                "Group: \(item.title)\n" +
+                "Select a stock to see details."
         }
     }
 }

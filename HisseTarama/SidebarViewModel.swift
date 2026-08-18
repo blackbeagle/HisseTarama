@@ -1,23 +1,26 @@
-// SidebarViewModel.swift
 import Foundation
 
-struct SidebarItem {
-    let name: String
-    let children: [SidebarItem]?
-}
+final class SidebarViewModel {
 
-class SidebarViewModel {
-    
-    let items: [SidebarItem] = [
-        SidebarItem(name: "Teknik", children: [
-            SidebarItem(name: "Teknik Analiz", children: nil),
-            SidebarItem(name: "Teknik Tarama", children: nil)
-            //SidebarItem(name: "GOOGL", children: nil)
-        ]),
-        SidebarItem(name: "Temel", children: [
-            SidebarItem(name: "Temel Analiz", children: nil),
-            SidebarItem(name: "Temel Tarama", children: nil)
-        ])
-        
-    ]
+    // MARK: - App State
+
+    private let appState = AppStockState.shared
+
+    // MARK: - Watchlists
+
+    var watchlists: [Watchlist] {
+        appState.watchlists
+    }
+
+    // MARK: - Scans
+
+    var scans: [Scan] {
+        appState.scans
+    }
+
+    // MARK: - Scan Results
+
+    var scanResults: [ScanResult] {
+        appState.scanResults
+    }
 }

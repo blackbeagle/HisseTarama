@@ -1,8 +1,7 @@
 // MainSplitViewController.swift
 
 import Cocoa
-
-class MainSplitViewController: NSSplitViewController {
+class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
 
     // MARK: - Properties
 
@@ -46,7 +45,24 @@ class MainSplitViewController: NSSplitViewController {
             object: view.window
         )
     }
+   /*
+    override func viewDidAppear() {
 
+        super.viewDidAppear()
+
+        if let sidebarVC =
+            splitViewItems.first?.viewController
+                as? SidebarViewController {
+
+            sidebarVC.selectionDelegate = self
+        }
+
+        DispatchQueue.main.async { [weak self] in
+
+            self?.adjustSidebarWidth()
+        }
+    }
+*/
     // MARK: - Split View Setup
 
     private func setupSplitView() {
@@ -264,6 +280,45 @@ class MainSplitViewController: NSSplitViewController {
                 detailVC.refreshChart()
             }
         }
+    }
+    
+    // MARK: - Sidebar Selection
+
+    func sidebar(
+        _ sidebar: SidebarViewController,
+        didSelect selection: SidebarSelection
+    ) {
+
+        switch selection {
+
+        case .stock(let symbol):
+
+            let stock = Stock(
+                symbol: symbol
+            )
+
+            AppStockState.shared.selectStock(
+                stock
+            )
+
+            showSelectedStock(
+                stock
+            )
+        }
+    }
+    
+    private func showSelectedStock(
+        _ stock: Stock
+    ) {
+
+        print(
+            "Seçilen hisse: \(stock.symbol)"
+        )
+
+        print(
+            "AppState seçili hisse: " +
+            "\(AppStockState.shared.selectedStock?.symbol ?? "-")"
+        )
     }
 
     // MARK: - Deinit
