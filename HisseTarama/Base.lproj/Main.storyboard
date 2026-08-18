@@ -719,7 +719,7 @@
                     <connections>
                         <outlet property="splitView" destination="X7R-Np-8Ly" id="91h-ah-4qy"/>
                         <segue destination="kRo-VM-Z2d" kind="relationship" relationship="splitItems" id="A0K-6y-hRp"/>
-                        <segue destination="wix-IW-6pb" kind="relationship" relationship="splitItems" id="nXA-OJ-c8c"/>
+                        <segue destination="3AQ-Vc-02V" kind="relationship" relationship="splitItems" id="nXA-OJ-c8c"/>
                     </connections>
                 </splitViewController>
                 <customObject id="UHZ-c3-5ei" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
@@ -853,10 +853,29 @@
                         <tabViewItem label="Temel" identifier="" id="its-OY-3Jm"/>
                         <tabViewItem label="Dashboard" id="a1g-r3-CPu"/>
                     </tabViewItems>
-                    <tabView key="tabView" type="noTabsNoBorder" id="noB-6z-yiw">
+                    <tabView key="tabView" initialItem="kUZ-gq-WjX" id="noB-6z-yiw">
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <font key="font" metaFont="message"/>
+                        <tabViewItems>
+                            <tabViewItem label="Item 0" identifier="" id="hVd-cm-qbC">
+                                <view key="view" id="m0p-F9-IsS">
+                                    <rect key="frame" x="10" y="33" width="430" height="254"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </view>
+                            </tabViewItem>
+                            <tabViewItem label="Item 1" identifier="" id="kUZ-gq-WjX">
+                                <view key="view" id="eqp-7r-eLU">
+                                    <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </view>
+                            </tabViewItem>
+                            <tabViewItem label="Item 2" identifier="" id="kaa-g0-nTt">
+                                <view key="view" id="m8a-nY-E7B">
+                                    <autoresizingMask key="autoresizingMask"/>
+                                </view>
+                            </tabViewItem>
+                        </tabViewItems>
                         <connections>
                             <outlet property="delegate" destination="3AQ-Vc-02V" id="PBb-CT-A5p"/>
                         </connections>
@@ -870,7 +889,7 @@
                 </tabViewController>
                 <customObject id="tIB-ld-6n0" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1752" y="694"/>
+            <point key="canvasLocation" x="-1101" y="134"/>
         </scene>
         <!--Chart Detail View Controller-->
         <scene sceneID="Pma-Dx-3ZX">
@@ -911,7 +930,7 @@
                 </viewController>
                 <customObject id="gXg-2R-hwb" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1150" y="694"/>
+            <point key="canvasLocation" x="-557" y="758"/>
         </scene>
         <!--Fundamentals View Controller-->
         <scene sceneID="vpZ-ZO-yLy">
@@ -924,25 +943,7 @@
                 </viewController>
                 <customObject id="Nd6-xQ-2db" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1456" y="1253"/>
-        </scene>
-        <!--Detail Tab View Controller-->
-        <scene sceneID="VcY-5M-9BF">
-            <objects>
-                <viewController storyboardIdentifier="ChartDetailViewController" id="wix-IW-6pb" customClass="DetailTabViewController" customModule="HisseTarama" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" id="MBL-hD-IdB">
-                        <rect key="frame" x="0.0" y="0.0" width="385" height="312"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </view>
-                </viewController>
-                <customObject id="414-hz-Tj1" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-                <textFieldCell scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="jei-vm-ois">
-                    <font key="font" usesAppearanceFont="YES"/>
-                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                </textFieldCell>
-            </objects>
-            <point key="canvasLocation" x="-980" y="129"/>
+            <point key="canvasLocation" x="-1085" y="808"/>
         </scene>
         <!--Dashboard View Controller-->
         <scene sceneID="fdE-JB-Kqh">
@@ -955,20 +956,7 @@
                 </viewController>
                 <customObject id="hB9-we-RP7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2023" y="1236"/>
-        </scene>
-        <!--View Controller-->
-        <scene sceneID="lSy-EC-skD">
-            <objects>
-                <viewController id="gun-Wq-9TL" sceneMemberID="viewController">
-                    <view key="view" id="BHi-dU-7Ji">
-                        <rect key="frame" x="0.0" y="0.0" width="270" height="300"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                    </view>
-                </viewController>
-                <customObject id="Rnu-ya-vAH" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="-2250" y="-472"/>
+            <point key="canvasLocation" x="-1665" y="797"/>
         </scene>
     </scenes>
 </document>
