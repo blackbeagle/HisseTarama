@@ -115,10 +115,10 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
         adjustSidebarWidth()
 
         // Grafikleri yenile
-        if let detailVC =
-            children.last as? ChartDetailViewController {
+        if let detailTabVC =
+            children.last as? DetailTabViewController {
 
-            detailVC.refreshChart()
+            detailTabVC.refreshChart()
         }
     }
 
@@ -307,16 +307,18 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
             "\(AppStockState.shared.selectedStock?.symbol ?? "-")"
         )
 
-        guard let detailVC =
-            children.last as? ChartDetailViewController
+        guard let detailTabVC =
+            children.last as? DetailTabViewController
         else {
+
             print(
-                "HATA: ChartDetailViewController bulunamadı."
+                "HATA: DetailTabViewController bulunamadı."
             )
+
             return
         }
 
-        detailVC.selectStock(
+        detailTabVC.selectStock(
             symbol: stock.symbol
         )
     }
