@@ -1,7 +1,9 @@
 // MainSplitViewController.swift
 
 import Cocoa
-class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
+
+class MainSplitViewController: NSSplitViewController,
+                               SidebarSelectionDelegate {
 
     // MARK: - Properties
 
@@ -45,7 +47,7 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
             object: view.window
         )
     }
-   
+
     // MARK: - Split View Setup
 
     private func setupSplitView() {
@@ -114,7 +116,7 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
 
         adjustSidebarWidth()
 
-        // Grafikleri yenile
+        // Grafik alanını yenile
         if let detailTabVC =
             children.last as? DetailTabViewController {
 
@@ -155,12 +157,15 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
     // MARK: - View Appearance
 
     override func viewDidAppear() {
+
         super.viewDidAppear()
 
         if let window = view.window {
+
             print(
                 "Toolbar visible: \(window.toolbar?.isVisible ?? false)"
             )
+
             print(
                 "Toolbar items: \(window.toolbar?.items ?? [])"
             )
@@ -176,8 +181,12 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
 
         // Pencere açıldığında sidebar genişliğini ayarla
         DispatchQueue.main.async { [weak self] in
+
             self?.adjustSidebarWidth()
         }
+        
+        // GEÇİCİ TEST
+            FinancialDataService.shared.testFetch()
     }
 
     override func viewDidLayout() {
@@ -190,6 +199,7 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
 
         // Sidebar kapalıyken genişlik ayarı yapma.
         if !sidebarItem.isCollapsed {
+
             adjustSidebarWidth()
         }
     }
@@ -207,11 +217,11 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
             adjustSidebarWidth()
         }
 
-        // Grafikleri yeniden çiz
-        if let detailVC =
-            children.last as? ChartDetailViewController {
+        // Detail tab içerisindeki teknik grafiği yenile
+        if let detailTabVC =
+            children.last as? DetailTabViewController {
 
-            detailVC.refreshChart()
+            detailTabVC.refreshChart()
         }
     }
 
@@ -233,11 +243,11 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
 
             self.view.layoutSubtreeIfNeeded()
 
-            // Grafikleri yenile
-            if let detailVC =
-                self.children.last as? ChartDetailViewController {
+            // Detail tab içerisindeki teknik grafiği yenile
+            if let detailTabVC =
+                self.children.last as? DetailTabViewController {
 
-                detailVC.refreshChart()
+                detailTabVC.refreshChart()
             }
         }
     }
@@ -260,15 +270,15 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
 
             self.view.layoutSubtreeIfNeeded()
 
-            // Grafikleri yenile
-            if let detailVC =
-                self.children.last as? ChartDetailViewController {
+            // Detail tab içerisindeki teknik grafiği yenile
+            if let detailTabVC =
+                self.children.last as? DetailTabViewController {
 
-                detailVC.refreshChart()
+                detailTabVC.refreshChart()
             }
         }
     }
-    
+
     // MARK: - Sidebar Selection
 
     func sidebar(
@@ -293,7 +303,7 @@ class MainSplitViewController: NSSplitViewController, SidebarSelectionDelegate{
             )
         }
     }
-    
+
     private func showSelectedStock(
         _ stock: Stock
     ) {

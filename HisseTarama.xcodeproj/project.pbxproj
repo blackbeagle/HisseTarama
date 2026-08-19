@@ -40,6 +40,12 @@
 		1C645CC12F787B91007E1F5C /* StockData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CC02F787B91007E1F5C /* StockData.swift */; };
 		1C645CC92F7884F2007E1F5C /* IsYatirimResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */; };
 		1C645CCB2F788528007E1F5C /* IsYatirimService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C645CCA2F788528007E1F5C /* IsYatirimService.swift */; };
+		1C64D7A13036450E00D69EFB /* FinancialPeriod.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C64D7A03036450E00D69EFB /* FinancialPeriod.swift */; };
+		1C64D7A33036453D00D69EFB /* FinancialStatements.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C64D7A23036453D00D69EFB /* FinancialStatements.swift */; };
+		1C64D7A53036456B00D69EFB /* StockSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C64D7A43036456B00D69EFB /* StockSnapshot.swift */; };
+		1C64D7A7303648FE00D69EFB /* FinancialDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C64D7A6303648FE00D69EFB /* FinancialDataService.swift */; };
+		1C64D7A93036504300D69EFB /* StockCurrency.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C64D7A83036504300D69EFB /* StockCurrency.swift */; };
+		1C64D7AB3036505C00D69EFB /* StockDataQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C64D7AA3036505C00D69EFB /* StockDataQuery.swift */; };
 		1C68CDE9302FD49400DD0670 /* AppMainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C68CDE7302FD49400DD0670 /* AppMainWindowController.swift */; };
 		1C68CDEA302FD49400DD0670 /* AppMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1C68CDE8302FD49400DD0670 /* AppMainWindowController.xib */; };
 		1C76A9DB2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */; };
@@ -86,6 +92,12 @@
 		1C645CC02F787B91007E1F5C /* StockData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockData.swift; sourceTree = "<group>"; };
 		1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsYatirimResponse.swift; sourceTree = "<group>"; };
 		1C645CCA2F788528007E1F5C /* IsYatirimService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IsYatirimService.swift; sourceTree = "<group>"; };
+		1C64D7A03036450E00D69EFB /* FinancialPeriod.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialPeriod.swift; sourceTree = "<group>"; };
+		1C64D7A23036453D00D69EFB /* FinancialStatements.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialStatements.swift; sourceTree = "<group>"; };
+		1C64D7A43036456B00D69EFB /* StockSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockSnapshot.swift; sourceTree = "<group>"; };
+		1C64D7A6303648FE00D69EFB /* FinancialDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialDataService.swift; sourceTree = "<group>"; };
+		1C64D7A83036504300D69EFB /* StockCurrency.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockCurrency.swift; sourceTree = "<group>"; };
+		1C64D7AA3036505C00D69EFB /* StockDataQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockDataQuery.swift; sourceTree = "<group>"; };
 		1C68CDE7302FD49400DD0670 /* AppMainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMainWindowController.swift; sourceTree = "<group>"; };
 		1C68CDE8302FD49400DD0670 /* AppMainWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AppMainWindowController.xib; sourceTree = "<group>"; };
 		1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyCandleStickBuilder.swift; sourceTree = "<group>"; };
@@ -110,15 +122,20 @@
 		1C4ED3592FFA8E0C00DC0AAC /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				1C645CB42F7820CF007E1F5C /* Candlestick.swift */,
-				1C645CC02F787B91007E1F5C /* StockData.swift */,
 				1C17340330338BC900EEF972 /* Stock.swift */,
+				1C645CB42F7820CF007E1F5C /* Candlestick.swift */,
+				1C64D7A03036450E00D69EFB /* FinancialPeriod.swift */,
+				1C64D7A23036453D00D69EFB /* FinancialStatements.swift */,
+				1C64D7A43036456B00D69EFB /* StockSnapshot.swift */,
+				1C645CC02F787B91007E1F5C /* StockData.swift */,
 				1C17340530338BEE00EEF972 /* Watchlist.swift */,
 				1C17340730338C3100EEF972 /* ScanCriterion.swift */,
 				1C17340930338C5700EEF972 /* Scan.swift */,
 				1C17340B30338C8700EEF972 /* ScanResult.swift */,
 				1C17340D30338CAF00EEF972 /* AppStockState.swift */,
 				1C17340F30338E3C00EEF972 /* SideBarItem.swift */,
+				1C64D7A83036504300D69EFB /* StockCurrency.swift */,
+				1C64D7AA3036505C00D69EFB /* StockDataQuery.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -157,6 +174,7 @@
 			children = (
 				1C645CC82F7884F2007E1F5C /* IsYatirimResponse.swift */,
 				1C645CCA2F788528007E1F5C /* IsYatirimService.swift */,
+				1C64D7A6303648FE00D69EFB /* FinancialDataService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -358,7 +376,9 @@
 			files = (
 				1C645CBB2F782132007E1F5C /* ChartDetailViewController.swift in Sources */,
 				1C4ED35F2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift in Sources */,
+				1C64D7A53036456B00D69EFB /* StockSnapshot.swift in Sources */,
 				1C4ED3762FFAEE0400DC0AAC /* ChartInteractionController.swift in Sources */,
+				1C64D7A7303648FE00D69EFB /* FinancialDataService.swift in Sources */,
 				1C1734123033903B00EEF972 /* SidebarSelection.swift in Sources */,
 				1C645CB52F7820D0007E1F5C /* Candlestick.swift in Sources */,
 				1C9726F93034EA8D0078AC24 /* DetailTabViewController.swift in Sources */,
@@ -371,9 +391,12 @@
 				1C645CCB2F788528007E1F5C /* IsYatirimService.swift in Sources */,
 				1C68CDE9302FD49400DD0670 /* AppMainWindowController.swift in Sources */,
 				1C645CC12F787B91007E1F5C /* StockData.swift in Sources */,
+				1C64D7AB3036505C00D69EFB /* StockDataQuery.swift in Sources */,
 				1C17340630338BEE00EEF972 /* Watchlist.swift in Sources */,
 				1C17340C30338C8700EEF972 /* ScanResult.swift in Sources */,
 				1C645CA92F7735F0007E1F5C /* SidebarViewController.swift in Sources */,
+				1C64D7A33036453D00D69EFB /* FinancialStatements.swift in Sources */,
+				1C64D7A93036504300D69EFB /* StockCurrency.swift in Sources */,
 				1C4ED3722FFAEA3F00DC0AAC /* SMARenderer.swift in Sources */,
 				1C645CC92F7884F2007E1F5C /* IsYatirimResponse.swift in Sources */,
 				1C4ED3742FFAEB5500DC0AAC /* AxisRenderer.swift in Sources */,
@@ -382,6 +405,7 @@
 				1C645CB32F773766007E1F5C /* MainSplitViewController.swift in Sources */,
 				1C76A9DB2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift in Sources */,
 				1C17340830338C3100EEF972 /* ScanCriterion.swift in Sources */,
+				1C64D7A13036450E00D69EFB /* FinancialPeriod.swift in Sources */,
 				1C645CB12F773712007E1F5C /* SidebarSelectionDelegate.swift in Sources */,
 				1C17341030338E3C00EEF972 /* SideBarItem.swift in Sources */,
 				1C4ED35D2FFA8E7A00DC0AAC /* ChartViewport.swift in Sources */,
