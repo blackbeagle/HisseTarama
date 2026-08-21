@@ -13,11 +13,13 @@ final class FinancialDataService {
     private let baseURL =
         "https://www.isyatirim.com.tr/_layouts/15/IsYatirim.Website/Common/Data.aspx/MaliTablo"
 
-    // MARK: - Configuration
-
     private let defaultQuarterCount = 10
 
     private let financialGroup = "XI_29"
+
+    // İş Yatırım MaliTablo endpoint'i bir sorguda
+    // 4 periyot kullanacak şekilde çalışıyor.
+    private let maximumPeriodsPerRequest = 4
 
     // MARK: - Public Fetch
 
@@ -34,86 +36,242 @@ final class FinancialDataService {
                 .trimmingCharacters(
                     in: .whitespacesAndNewlines
                 )
-                .lowercased()
+                .uppercased()
 
         guard !normalizedCompanyCode.isEmpty else {
             completion(
                 .failure(
                     makeError(
                         code: -1,
-                        message:
-                            "Şirket kodu boş olamaz."
+                        message: "Şirket kodu boş olamaz."
                     )
                 )
             )
             return
         }
 
-        // -------------------------------------------------
-        // Dönem sayısı
-        // -------------------------------------------------
-
-        let requestedQuarterCount =
+        let quarterCount =
             max(
                 1,
                 query.financialQuarterCount
                     ?? defaultQuarterCount
             )
 
-        // -------------------------------------------------
-        // Kullanıcının belirlediği son dönemden geriye doğru
-        // finansal dönemleri oluştur.
-        // -------------------------------------------------
+        /*
+         -----------------------------------------------------
+         Son bilanço dönemi
+         -----------------------------------------------------
 
-        let periods =
-            makeQuarterPeriods(
-                lastPeriod:
-                    query.lastFinancialPeriod,
-                count:
-                    requestedQuarterCount
+         Kullanıcı bir dönem verdiyse onu kullanıyoruz.
+
+         nil ise API üzerinden otomatik keşif yapıyoruz.
+         -----------------------------------------------------
+         */
+
+        if let lastPeriod = query.lastFinancialPeriod {
+
+            print(
+                "Finansal veri sorgusu kullanıcı tarafından belirlenen dönemden başlıyor: \(lastPeriod.title)"
             )
 
-        guard !periods.isEmpty else {
-            completion(
-                .failure(
-                    makeError(
-                        code: -2,
-                        message:
-                            "Finansal dönem oluşturulamadı."
+            fetchPeriods(
+                companyCode: normalizedCompanyCode,
+                lastPeriod: lastPeriod,
+                quarterCount: quarterCount,
+                currency: query.currency,
+                completion: completion
+            )
+
+        } else {
+
+            print("Finansal dönem keşfi başladı.")
+
+            discoverLastPublishedPeriod(
+                companyCode: normalizedCompanyCode,
+                currency: query.currency
+            ) { [weak self] result in
+
+                guard let self = self else {
+                    return
+                }
+
+                switch result {
+
+                case .success(let lastPeriod):
+
+                    print(
+                        "Yayınlanmış son bilanço: \(lastPeriod.title)"
                     )
-                )
+
+                    self.fetchPeriods(
+                        companyCode:
+                            normalizedCompanyCode,
+                        lastPeriod:
+                            lastPeriod,
+                        quarterCount:
+                            quarterCount,
+                        currency:
+                            query.currency,
+                        completion:
+                            completion
+                    )
+
+                case .failure(let error):
+
+                    completion(
+                        .failure(error)
+                    )
+                }
+            }
+        }
+    }
+
+    // MARK: - Discover Last Published Period
+
+    private func discoverLastPublishedPeriod(
+        companyCode: String,
+        currency: StockCurrency,
+        completion: @escaping (
+            Result<FinancialPeriod, Error>
+        ) -> Void
+    ) {
+
+        let firstCandidate =
+            makeInitialCandidatePeriod()
+
+        print(
+            "İlk aday dönem: \(firstCandidate.title)"
+        )
+
+        checkCandidatePeriod(
+            companyCode: companyCode,
+            period: firstCandidate,
+            currency: currency,
+            completion: completion
+        )
+    }
+
+    // MARK: - Initial Candidate
+
+    private func makeInitialCandidatePeriod()
+        -> FinancialPeriod
+    {
+        let calendar =
+            Calendar.current
+
+        let now =
+            Date()
+
+        let year =
+            calendar.component(
+                .year,
+                from: now
             )
-            return
+
+        let month =
+            calendar.component(
+                .month,
+                from: now
+            )
+
+        /*
+         -----------------------------------------------------
+         Tamamlanmış son çeyrek
+         -----------------------------------------------------
+
+         Ocak - Mart     -> önceki yıl Q4
+         Nisan - Haziran -> Q1
+         Temmuz - Eylül  -> Q2
+         Ekim - Aralık   -> Q3
+
+         Örneğin:
+         Ağustos 2026 -> 2026 Q2
+         -----------------------------------------------------
+         */
+
+        let currentQuarter =
+            ((month - 1) / 3) + 1
+
+        var completedQuarter =
+            currentQuarter - 1
+
+        var completedYear =
+            year
+
+        if completedQuarter == 0 {
+            completedQuarter = 4
+            completedYear -= 1
         }
 
-        // -------------------------------------------------
-        // URL
-        // -------------------------------------------------
+        return FinancialPeriod(
+            year: completedYear,
+            quarter: completedQuarter
+        )
+    }
+
+    // MARK: - Check Candidate
+
+    private func checkCandidatePeriod(
+        companyCode: String,
+        period: FinancialPeriod,
+        currency: StockCurrency,
+        completion: @escaping (
+            Result<FinancialPeriod, Error>
+        ) -> Void
+    ) {
+
+        print(
+            "Finansal dönem kontrol ediliyor: \(period.title)"
+        )
+
+        /*
+         -----------------------------------------------------
+         ÖNEMLİ
+
+         API'nin çalışan formatına göre aynı dönem
+         dört kez gönderiliyor.
+
+         Örneğin:
+
+         year1=2026&period1=6
+         year2=2026&period2=6
+         year3=2026&period3=6
+         year4=2026&period4=6
+
+         -----------------------------------------------------
+         */
+
+        let periods = Array(
+            repeating: period,
+            count: maximumPeriodsPerRequest
+        )
 
         guard let url =
                 makeURL(
                     companyCode:
-                        normalizedCompanyCode,
+                        companyCode,
                     periods:
                         periods,
                     currency:
-                        query.currency
+                        currency
                 )
         else {
+
             completion(
                 .failure(
                     makeError(
-                        code: -3,
+                        code: -10,
                         message:
-                            "Geçersiz finansal veri URL'si oluşturuldu."
+                            "Finansal dönem kontrol URL'si oluşturulamadı."
                     )
                 )
             )
+
             return
         }
 
         print(
-            "Finansal veri URL: \(url.absoluteString)"
+            "Dönem kontrol URL: \(url.absoluteString)"
         )
 
         var request =
@@ -125,48 +283,48 @@ final class FinancialDataService {
 
         request.setValue(
             "application/json",
-            forHTTPHeaderField:
-                "Accept"
+            forHTTPHeaderField: "Accept"
         )
-
-        // -------------------------------------------------
-        // Request
-        // -------------------------------------------------
 
         let task =
             URLSession.shared.dataTask(
                 with: request
             ) { [weak self] data, response, error in
 
-                if let error = error {
-                    completion(
-                        .failure(error)
-                    )
+                guard let self = self else {
                     return
                 }
 
-                guard let self = self else {
+                if let error = error {
+
+                    completion(
+                        .failure(error)
+                    )
+
                     return
                 }
 
                 guard let httpResponse =
                         response as? HTTPURLResponse
                 else {
+
                     completion(
                         .failure(
                             self.makeError(
-                                code: -4,
+                                code: -11,
                                 message:
-                                    "Sunucu yanıtı alınamadı."
+                                    "Finansal dönem kontrolünde sunucu yanıtı alınamadı."
                             )
                         )
                     )
+
                     return
                 }
 
                 guard
                     200...299 ~= httpResponse.statusCode
                 else {
+
                     completion(
                         .failure(
                             self.makeError(
@@ -177,41 +335,354 @@ final class FinancialDataService {
                             )
                         )
                     )
+
                     return
                 }
 
                 guard let data = data else {
+
                     completion(
                         .failure(
                             self.makeError(
-                                code: -5,
+                                code: -12,
                                 message:
-                                    "Sunucudan finansal veri alınamadı."
+                                    "Finansal dönem kontrolünde veri alınamadı."
                             )
                         )
                     )
+
                     return
                 }
 
                 do {
 
-                    let statements =
-                        try self.parseFinancialStatements(
-                            data: data,
-                            periods: periods
+                    let hasData =
+                        try self.responseContainsFinancialData(
+                            data: data
                         )
 
-                    completion(
-                        .success(
-                            statements
+                    if hasData {
+
+                        print(
+                            "\(period.title) için veri bulundu."
                         )
-                    )
+
+                        print(
+                            "Yayınlanmış son bilanço bulundu: \(period.title)"
+                        )
+
+                        completion(
+                            .success(period)
+                        )
+
+                    } else {
+
+                        print(
+                            "\(period.title) için veri yok."
+                        )
+
+                        let previousPeriod =
+                            self.previousPeriod(
+                                from: period
+                            )
+
+                        print(
+                            "Bir önceki dönem deneniyor: \(previousPeriod.title)"
+                        )
+
+                        self.checkCandidatePeriod(
+                            companyCode:
+                                companyCode,
+                            period:
+                                previousPeriod,
+                            currency:
+                                currency,
+                            completion:
+                                completion
+                        )
+                    }
 
                 } catch {
 
-                    print(
-                        "FinancialDataService parse hatası: \(error)"
+                    completion(
+                        .failure(error)
                     )
+                }
+            }
+
+        task.resume()
+    }
+
+    // MARK: - Fetch Periods
+
+    private func fetchPeriods(
+        companyCode: String,
+        lastPeriod: FinancialPeriod,
+        quarterCount: Int,
+        currency: StockCurrency,
+        completion: @escaping (
+            Result<FinancialStatements, Error>
+        ) -> Void
+    ) {
+
+        let periods =
+            makeQuarterPeriods(
+                endingAt:
+                    lastPeriod,
+                count:
+                    quarterCount
+            )
+
+        guard !periods.isEmpty else {
+
+            completion(
+                .failure(
+                    makeError(
+                        code: -20,
+                        message:
+                            "Finansal dönem listesi oluşturulamadı."
+                    )
+                )
+            )
+
+            return
+        }
+
+        /*
+         ---------------------------------------------------------
+         API 4 dönemlik bloklar halinde çağrılıyor.
+
+         Örneğin 10 dönem:
+
+         4 dönem
+         4 dönem
+         2 dönem
+         ---------------------------------------------------------
+         */
+
+        var chunks: [[FinancialPeriod]] = []
+
+        var startIndex = 0
+
+        while startIndex < periods.count {
+
+            let endIndex =
+                min(
+                    startIndex + maximumPeriodsPerRequest,
+                    periods.count
+                )
+
+            let chunk =
+                Array(
+                    periods[startIndex..<endIndex]
+                )
+
+            chunks.append(chunk)
+
+            startIndex = endIndex
+        }
+
+        fetchPeriodChunks(
+            companyCode:
+                companyCode,
+            chunks:
+                chunks,
+            chunkIndex:
+                0,
+            currency:
+                currency,
+            allPeriods:
+                periods,
+            completion:
+                completion
+        )
+    }
+    // MARK: - Fetch Chunks
+
+    private func fetchPeriodChunks(
+        companyCode: String,
+        chunks: [[FinancialPeriod]],
+        chunkIndex: Int,
+        currency: StockCurrency,
+        allPeriods: [FinancialPeriod],
+        completion: @escaping (
+            Result<FinancialStatements, Error>
+        ) -> Void
+    ) {
+
+        if chunkIndex >= chunks.count {
+
+            /*
+             -------------------------------------------------
+             Şimdilik gerçek finansal kalem parser'ı
+             mevcut FinancialStatements yapısına
+             ayrı aşamada bağlanacak.
+
+             -------------------------------------------------
+             */
+
+            completion(
+                .success(
+                    FinancialStatements(
+                        periods:
+                            allPeriods,
+                        items:
+                            [:]
+                    )
+                )
+            )
+
+            return
+        }
+
+        let chunk =
+            chunks[chunkIndex]
+
+        guard let url =
+                makeURL(
+                    companyCode:
+                        companyCode,
+                    periods:
+                        chunk,
+                    currency:
+                        currency
+                )
+        else {
+
+            completion(
+                .failure(
+                    makeError(
+                        code: -21,
+                        message:
+                            "Finansal veri URL'si oluşturulamadı."
+                    )
+                )
+            )
+
+            return
+        }
+
+        print(
+            "Finansal veri URL: \(url.absoluteString)"
+        )
+
+        var request =
+            URLRequest(
+                url:
+                    url
+            )
+
+        request.httpMethod =
+            "GET"
+
+        request.setValue(
+            "application/json",
+            forHTTPHeaderField:
+                "Accept"
+        )
+
+        let task =
+            URLSession.shared.dataTask(
+                with:
+                    request
+            ) { [weak self] data, response, error in
+
+                guard let self = self else {
+                    return
+                }
+
+                if let error = error {
+
+                    completion(
+                        .failure(error)
+                    )
+
+                    return
+                }
+
+                guard let httpResponse =
+                        response as? HTTPURLResponse
+                else {
+
+                    completion(
+                        .failure(
+                            self.makeError(
+                                code: -22,
+                                message:
+                                    "Finansal veri sunucu yanıtı alınamadı."
+                            )
+                        )
+                    )
+
+                    return
+                }
+
+                guard
+                    200...299 ~= httpResponse.statusCode
+                else {
+
+                    completion(
+                        .failure(
+                            self.makeError(
+                                code:
+                                    httpResponse.statusCode,
+                                message:
+                                    "İş Yatırım sunucusu HTTP \(httpResponse.statusCode) döndürdü."
+                            )
+                        )
+                    )
+
+                    return
+                }
+
+                guard let data = data else {
+
+                    completion(
+                        .failure(
+                            self.makeError(
+                                code: -23,
+                                message:
+                                    "Finansal veri alınamadı."
+                            )
+                        )
+                    )
+
+                    return
+                }
+
+                do {
+
+                    /*
+                     -------------------------------------------------
+                     JSON'u şimdilik doğruluyoruz.
+
+                     Gerçek FinancialStatements parser'ı
+                     daha sonra burada geliştirilecek.
+                     -------------------------------------------------
+                     */
+
+                    _ =
+                        try self.responseContainsFinancialData(
+                            data:
+                                data
+                        )
+
+                    self.fetchPeriodChunks(
+                        companyCode:
+                            companyCode,
+                        chunks:
+                            chunks,
+                        chunkIndex:
+                            chunkIndex + 1,
+                        currency:
+                            currency,
+                        allPeriods:
+                            allPeriods,
+                        completion:
+                            completion
+                    )
+
+                } catch {
 
                     completion(
                         .failure(error)
@@ -225,9 +696,18 @@ final class FinancialDataService {
     // MARK: - Quarter Periods
 
     private func makeQuarterPeriods(
-        lastPeriod: FinancialPeriod,
+        endingAt lastPeriod: FinancialPeriod,
         count: Int
     ) -> [FinancialPeriod] {
+
+        let requestedCount =
+            max(
+                1,
+                count
+            )
+
+        var periods:
+            [FinancialPeriod] = []
 
         var year =
             lastPeriod.year
@@ -235,27 +715,78 @@ final class FinancialDataService {
         var quarter =
             lastPeriod.quarter
 
-        var periods:
-            [FinancialPeriod] = []
-
-        for _ in 0..<count {
+        for _ in 0..<requestedCount {
 
             periods.append(
                 FinancialPeriod(
-                    year: year,
-                    quarter: quarter
+                    year:
+                        year,
+                    quarter:
+                        quarter
                 )
             )
 
             quarter -= 1
 
             if quarter == 0 {
+
                 quarter = 4
                 year -= 1
             }
         }
 
         return periods
+    }
+
+    // MARK: - Previous Period
+
+    private func previousPeriod(
+        from period: FinancialPeriod
+    ) -> FinancialPeriod {
+
+        if period.quarter > 1 {
+
+            return FinancialPeriod(
+                year:
+                    period.year,
+                quarter:
+                    period.quarter - 1
+            )
+
+        } else {
+
+            return FinancialPeriod(
+                year:
+                    period.year - 1,
+                quarter:
+                    4
+            )
+        }
+    }
+
+    // MARK: - API Period Value
+
+    private func apiPeriodValue(
+        for quarter: Int
+    ) -> Int {
+
+        switch quarter {
+
+        case 1:
+            return 3
+
+        case 2:
+            return 6
+
+        case 3:
+            return 9
+
+        case 4:
+            return 12
+
+        default:
+            return 0
+        }
     }
 
     // MARK: - URL
@@ -266,42 +797,66 @@ final class FinancialDataService {
         currency: StockCurrency
     ) -> URL? {
 
+        guard !periods.isEmpty else {
+            return nil
+        }
+
         var components =
             URLComponents(
-                string: baseURL
+                string:
+                    baseURL
             )
 
         var queryItems:
             [URLQueryItem] = [
 
                 URLQueryItem(
-                    name: "companyCode",
-                    value: companyCode
+                    name:
+                        "companyCode",
+                    value:
+                        companyCode
                 ),
 
                 URLQueryItem(
-                    name: "exchange",
-                    value: currency.rawValue
+                    name:
+                        "exchange",
+                    value:
+                        currency.apiValue
                 ),
 
                 URLQueryItem(
-                    name: "financialGroup",
-                    value: financialGroup
+                    name:
+                        "financialGroup",
+                    value:
+                        financialGroup
                 )
             ]
 
         for (index, period)
-            in periods.enumerated() {
+            in periods.enumerated()
+        {
 
             let number =
                 index + 1
+
+            let apiPeriod =
+                apiPeriodValue(
+                    for:
+                        period.quarter
+                )
+
+            guard apiPeriod > 0 else {
+                continue
+            }
 
             queryItems.append(
                 URLQueryItem(
                     name:
                         "year\(number)",
                     value:
-                        String(period.year)
+                        String(
+                            period.year
+                        )
                 )
             )
 
@@ -310,9 +865,72 @@ final class FinancialDataService {
                     name:
                         "period\(number)",
                     value:
-                        String(period.quarter)
+                        String(
+                            apiPeriod
+                        )
                 )
             )
+        }
+
+        /*
+         -----------------------------------------------------
+         Eğer 4'ten az dönem gönderiyorsak,
+         API'nin çalışan yapısını korumak için
+         son dönemi 4'e tamamlıyoruz.
+
+         Örneğin tek dönem:
+
+         year1=2026&period1=6
+         year2=2026&period2=6
+         year3=2026&period3=6
+         year4=2026&period4=6
+
+         -----------------------------------------------------
+         */
+
+        if periods.count < maximumPeriodsPerRequest {
+
+            let fillPeriod =
+                periods.last!
+
+            let fillAPIValue =
+                apiPeriodValue(
+                    for:
+                        fillPeriod.quarter
+                )
+
+            if fillAPIValue > 0 {
+
+                for index
+                    in periods.count..<maximumPeriodsPerRequest
+                {
+
+                    let number =
+                        index + 1
+
+                    queryItems.append(
+                        URLQueryItem(
+                            name:
+                                "year\(number)",
+                            value:
+                                String(
+                                    fillPeriod.year
+                                )
+                        )
+                    )
+
+                    queryItems.append(
+                        URLQueryItem(
+                            name:
+                                "period\(number)",
+                            value:
+                                String(
+                                    fillAPIValue
+                                )
+                        )
+                    )
+                }
+            }
         }
 
         components?.queryItems =
@@ -321,43 +939,34 @@ final class FinancialDataService {
         return components?.url
     }
 
-    // MARK: - Parse
+    // MARK: - Response Validation
 
-    private func parseFinancialStatements(
-        data: Data,
-        periods: [FinancialPeriod]
-    ) throws -> FinancialStatements {
-
-        print("MaliTablo JSON:")
-
-        print(
-            String(
-                data: data,
-                encoding: .utf8
-            ) ?? "JSON okunamadı"
-        )
+    private func responseContainsFinancialData(
+        data: Data
+    ) throws -> Bool {
 
         guard
             let jsonObject =
                 try JSONSerialization.jsonObject(
-                    with: data,
-                    options: []
+                    with:
+                        data,
+                    options:
+                        []
                 ) as? [String: Any]
         else {
+
             throw makeError(
-                code: -6,
+                code:
+                    -30,
                 message:
                     "Finansal veri JSON formatında okunamadı."
             )
         }
 
-        // -------------------------------------------------
-        // API başarı kontrolü
-        // -------------------------------------------------
-
         if let ok =
             jsonObject["ok"] as? Bool,
-            !ok {
+            !ok
+        {
 
             let message =
                 jsonObject[
@@ -367,19 +976,28 @@ final class FinancialDataService {
                 "İş Yatırım finansal veri servisi hata döndürdü."
 
             throw makeError(
-                code: -7,
-                message: message
+                code:
+                    -31,
+                message:
+                    message
             )
         }
 
-        // -------------------------------------------------
-        // Şimdilik JSON doğrulaması
-        // -------------------------------------------------
+        guard let value =
+                jsonObject["value"]
+        else {
 
-        return FinancialStatements(
-            periods: periods,
-            items: [:]
-        )
+            return false
+        }
+
+        if let array =
+            value as? [Any]
+        {
+
+            return !array.isEmpty
+        }
+
+        return false
     }
 
     // MARK: - Error
@@ -394,10 +1012,11 @@ final class FinancialDataService {
                 "FinancialDataService",
             code:
                 code,
-            userInfo: [
-                NSLocalizedDescriptionKey:
-                    message
-            ]
+            userInfo:
+                [
+                    NSLocalizedDescriptionKey:
+                        message
+                ]
         )
     }
 
@@ -408,10 +1027,7 @@ final class FinancialDataService {
         let query =
             StockDataQuery(
                 lastFinancialPeriod:
-                    FinancialPeriod(
-                        year: 2026,
-                        quarter: 2
-                    ),
+                    nil,
                 financialQuarterCount:
                     10,
                 currency:
@@ -419,23 +1035,35 @@ final class FinancialDataService {
             )
 
         fetchFinancialStatements(
-            companyCode: "SISE",
-            query: query
+            companyCode:
+                "SISE",
+            query:
+                query
         ) { result in
 
             switch result {
 
             case .success(let statements):
 
-                print("================================")
-                print("FINANSAL VERİ TESTİ BAŞARILI")
-                print("================================")
+                print(
+                    "================================"
+                )
+
+                print(
+                    "FİNANSAL VERİ TESTİ BAŞARILI"
+                )
+
+                print(
+                    "================================"
+                )
 
                 print(
                     "Dönem sayısı: \(statements.periods.count)"
                 )
 
-                for period in statements.periods {
+                for period
+                    in statements.periods
+                {
 
                     print(
                         "Dönem: \(period.title)"
@@ -444,9 +1072,17 @@ final class FinancialDataService {
 
             case .failure(let error):
 
-                print("================================")
-                print("FINANSAL VERİ TESTİ HATALI")
-                print("================================")
+                print(
+                    "================================"
+                )
+
+                print(
+                    "FİNANSAL VERİ TESTİ HATALI"
+                )
+
+                print(
+                    "================================"
+                )
 
                 print(
                     "Hata: \(error.localizedDescription)"

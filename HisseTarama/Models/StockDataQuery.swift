@@ -1,28 +1,27 @@
 import Foundation
 
 struct StockDataQuery {
-    
+
     // MARK: - Financial Period
-    
-    /// Kullanıcının belirlediği son raporlanan finansal dönem.
-    let lastFinancialPeriod: FinancialPeriod
-    
+
+    /// Kullanıcı bir dönem verirse doğrudan kullanılır.
+    /// nil ise servis yayınlanmış son bilanço dönemini otomatik keşfeder.
+    let lastFinancialPeriod: FinancialPeriod?
+
     /// Geriye doğru alınacak çeyrek sayısı.
-    /// nil ise servis kendi varsayılan değerini kullanabilir.
+    /// nil ise varsayılan değer kullanılır.
     let financialQuarterCount: Int?
-    
+
     // MARK: - Currency
-    
-    /// Fiyat ve finansal veriler için kullanılacak para birimi.
+
     let currency: StockCurrency
-    
+
     // MARK: - Init
-    
+
     init(
-        lastFinancialPeriod: FinancialPeriod,
+        lastFinancialPeriod: FinancialPeriod? = nil,
         financialQuarterCount: Int? = 10,
-        //currency: StockCurrency = .tryCurrency
-        currency: StockCurrency = .usd
+        currency: StockCurrency = .tryCurrency
     ) {
         self.lastFinancialPeriod = lastFinancialPeriod
         self.financialQuarterCount = financialQuarterCount
