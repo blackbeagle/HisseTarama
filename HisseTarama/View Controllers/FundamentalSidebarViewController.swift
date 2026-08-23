@@ -49,11 +49,8 @@ final class FundamentalSidebarNode {
     ) {
 
         self.title = title
-
         self.selection = selection
-
         self.children = children
-
         self.isGroup = isGroup
     }
 }
@@ -87,9 +84,7 @@ final class FundamentalSidebarViewController:
                 false
 
             scrollView.hasVerticalScroller = true
-
             scrollView.hasHorizontalScroller = false
-
             scrollView.autohidesScrollers = true
 
             return scrollView
@@ -123,12 +118,6 @@ final class FundamentalSidebarViewController:
         super.viewDidLoad()
 
         setupOutlineView()
-
-        buildSidebarData()
-
-        outlineView.reloadData()
-
-        expandMainSections()
     }
 
     // MARK: - Setup
@@ -143,7 +132,8 @@ final class FundamentalSidebarViewController:
                     )
             )
 
-        column.title = "Finansal Kalemler"
+        column.title =
+            "Finansal Kalemler"
 
         outlineView.addTableColumn(
             column
@@ -152,11 +142,14 @@ final class FundamentalSidebarViewController:
         outlineView.outlineTableColumn =
             column
 
-        outlineView.headerView = nil
+        outlineView.headerView =
+            nil
 
-        outlineView.delegate = self
+        outlineView.delegate =
+            self
 
-        outlineView.dataSource = self
+        outlineView.dataSource =
+            self
 
         outlineView.selectionHighlightStyle =
             .sourceList
@@ -201,101 +194,81 @@ final class FundamentalSidebarViewController:
         ])
     }
 
-    // MARK: - Data
+    // MARK: - Financial Items
 
-    private func buildSidebarData() {
+    func updateFinancialItems(
+        items: [FinancialStatementItem]
+    ) {
 
-        nodes = [
+        nodes.removeAll()
 
-            FundamentalSidebarNode(
-                title: "Bilanço",
-                children: [
+        /*
+         ---------------------------------------------------------
+         API'dan gelen bütün finansal kalemler sidebar'a ekleniyor.
 
-                    FundamentalSidebarNode(
-                        title:
-                            "Nakit ve Nakit Benzerleri",
-                        selection:
-                            .single(
-                                itemCode: "1AA"
-                            )
-                    ),
+         Başlık:
+             titleTR
 
-                    FundamentalSidebarNode(
-                        title: "Stoklar",
-                        selection:
-                            .single(
-                                itemCode: "1AF"
-                            )
-                    ),
+         Seçim:
+             itemCode
 
-                    FundamentalSidebarNode(
-                        title: "Toplam Varlıklar",
-                        selection:
-                            .single(
-                                itemCode: "1BL"
-                            )
-                    )
-                ],
-                isGroup: true
-            ),
+         Şimdilik API'dan gelen level bilgisi korunuyor ancak
+         kalemlerin tamamı doğrudan listeleniyor.
+         ---------------------------------------------------------
+         */
 
-            FundamentalSidebarNode(
-                title: "Gelir Tablosu",
-                children: [
+        let sortedItems =
+            items.sorted {
+                lhs, rhs in
 
-                    FundamentalSidebarNode(
-                        title: "Satışlar",
-                        selection:
-                            .group(
-                                itemCodes: [
-                                    "3C",
-                                    "3CA"
-                                ]
-                            )
-                    ),
+                lhs.itemCode.localizedStandardCompare(
+                    rhs.itemCode
+                ) == .orderedAscending
+            }
 
-                    FundamentalSidebarNode(
-                        title:
-                            "Satış Gelirleri",
-                        selection:
-                            .single(
-                                itemCode: "3C"
-                            )
-                    ),
+        for item in sortedItems {
 
-                    FundamentalSidebarNode(
-                        title:
-                            "Satışların Maliyeti",
-                        selection:
-                            .single(
-                                itemCode: "3CA"
-                            )
-                    ),
+            let title =
+                item.titleTR.isEmpty
+                ? item.itemCode
+                : item.titleTR
 
-                    FundamentalSidebarNode(
-                        title:
-                            "Brüt Kâr (Zarar)",
-                        selection:
-                            .single(
-                                itemCode: "3D"
-                            )
-                    )
-                ],
-                isGroup: true
-            )
-        ]
-    }
+            let node =
+                FundamentalSidebarNode(
+                    title:
+                        title,
 
-    // MARK: - Expand
+                    selection:
+                        .single(
+                            itemCode:
+                                item.itemCode
+                        ),
 
-    private func expandMainSections() {
+                    isGroup:
+                        false
+                )
 
-        for node in nodes {
-
-            outlineView.expandItem(
+            nodes.append(
                 node
             )
         }
+
+        outlineView.reloadData()
+
+        print(
+            "Fundamental sidebar güncellendi. Kalem sayısı: \(nodes.count)"
+        )
+    }
+
+    func clearFinancialItems() {
+
+        nodes.removeAll()
+
+        outlineView.deselectAll(
+            nil
+        )
+
+        outlineView.reloadData()
     }
 
     // MARK: - Stock
@@ -304,7 +277,8 @@ final class FundamentalSidebarViewController:
         symbol: String
     ) {
 
-        currentStockSymbol = symbol
+        currentStockSymbol =
+            symbol
 
         print(
             "Temel sidebar hisse güncellendi: \(symbol)"
@@ -383,13 +357,15 @@ extension FundamentalSidebarViewController:
                 "FundamentalSidebarCell"
             )
 
-        let cell: NSTableCellView
+        let cell:
+            NSTableCellView
 
         if let existing =
             outlineView.makeView(
                 withIdentifier:
                     identifier,
-                owner: self
+                owner:
+                    self
             ) as? NSTableCellView {
 
             cell = existing
@@ -404,7 +380,8 @@ extension FundamentalSidebarViewController:
 
             let textField =
                 NSTextField(
-                    labelWithString: ""
+                    labelWithString:
+                        ""
                 )
 
             textField.translatesAutoresizingMaskIntoConstraints =
@@ -422,13 +399,15 @@ extension FundamentalSidebarViewController:
                 textField.leadingAnchor.constraint(
                     equalTo:
                         cell.leadingAnchor,
-                    constant: 4
+                    constant:
+                        4
                 ),
 
                 textField.trailingAnchor.constraint(
                     equalTo:
                         cell.trailingAnchor,
-                    constant: -4
+                    constant:
+                        -4
                 ),
 
                 textField.centerYAnchor.constraint(
@@ -441,22 +420,11 @@ extension FundamentalSidebarViewController:
         cell.textField?.stringValue =
             node.title
 
-        if node.isGroup {
-
-            cell.textField?.font =
-                NSFont.boldSystemFont(
-                    ofSize:
-                        NSFont.systemFontSize
-                )
-
-        } else {
-
-            cell.textField?.font =
-                NSFont.systemFont(
-                    ofSize:
-                        NSFont.systemFontSize
-                )
-        }
+        cell.textField?.font =
+            NSFont.systemFont(
+                ofSize:
+                    NSFont.systemFontSize
+            )
 
         return cell
     }
@@ -474,7 +442,8 @@ extension FundamentalSidebarViewController:
 
         let item =
             outlineView.item(
-                atRow: row
+                atRow:
+                    row
             )
 
         guard let node =
@@ -491,7 +460,8 @@ extension FundamentalSidebarViewController:
 
         delegate?.fundamentalSidebar(
             self,
-            didSelect: selection
+            didSelect:
+                selection
         )
     }
 }

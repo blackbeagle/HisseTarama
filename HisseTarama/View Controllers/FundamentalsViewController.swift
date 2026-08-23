@@ -46,7 +46,7 @@ final class FundamentalsViewController: NSViewController {
         super.viewDidLoad()
 
         //test amaçlı bu satır. kaldırıalcak.
-        FinancialDataService.shared.testFetch()
+        //FinancialDataService.shared.testFetch()
         
         setupView()
 
@@ -157,7 +157,6 @@ final class FundamentalsViewController: NSViewController {
     }
 
     // MARK: - Stock Selection
-
     func selectStock(
         symbol: String
     ) {
@@ -176,29 +175,98 @@ final class FundamentalsViewController: NSViewController {
         currentStockSymbol =
             normalizedSymbol
 
-        sidebarViewController.updateStock(
-            symbol: normalizedSymbol
-        )
-
         print(
             "Temel sekmesi hisse güncellendi: \(normalizedSymbol)"
         )
 
-        /*
-         Finansal veriler henüz bu controller'a
-         bağlanmadığı için burada mevcut grafik
-         verisini temizliyoruz.
-
-         Bir sonraki adımda StockSnapshot'tan gelen
-         FinancialStatementItem + FinancialPeriod
-         burada beslenecek.
-         */
-
+        // Önce eski finansal verileri temizle.
         financialItems.removeAll()
         financialPeriods.removeAll()
 
+        // Eski grafiği temizle.
         chartViewController.clearChart()
+
+        // Sidebar'daki hisseyi güncelle.
+        sidebarViewController.updateStock(
+            symbol: normalizedSymbol
+        )
+
+        // YENİ:
+        // Seçilen hisse için finansal verileri çek.
+        fetchFinancialData(
+            for: normalizedSymbol
+        )
     }
+
+    
+
+    // MARK: - Financial Data
+
+    // MARK: - Financial Data
+
+    private func fetchFinancialData(
+        for symbol: String
+    ) {
+
+        print("================================")
+        print("TEMEL VERİ ÇEKİMİ BAŞLADI")
+        print("Hisse: \(symbol)")
+        print("================================")
+
+        let query = StockDataQuery(
+            lastFinancialPeriod: nil,
+            financialQuarterCount: 10,
+            currency: .tryCurrency
+        )
+
+        FinancialDataService.shared.fetchFinancialStatements(
+            companyCode: symbol,
+            query: query
+        ) { [weak self] result in
+
+            DispatchQueue.main.async {
+
+                guard let self = self else {
+                    return
+                }
+
+                switch result {
+
+                case .success(let statements):
+
+                    print("================================")
+                    print("TEMEL VERİ ALINDI")
+                    print("================================")
+
+                    print(
+                        "Dönem sayısı: \(statements.periods.count)"
+                    )
+
+                    print(
+                        "Finansal kalem sayısı: \(statements.items.count)"
+                    )
+
+                    self.updateFinancialData(
+                        items: statements.allItems,
+                        periods: statements.periods
+                    )
+
+                case .failure(let error):
+
+                    print("================================")
+                    print("TEMEL VERİ HATASI")
+                    print("================================")
+
+                    print(
+                        "Hata: \(error.localizedDescription)"
+                    )
+                }
+            }
+        }
+    }
+    
+    // MARK: - Financial Data
+    // MARK: - Financial Data
 
     // MARK: - Financial Data
 
@@ -206,26 +274,75 @@ final class FundamentalsViewController: NSViewController {
         items: [FinancialStatementItem],
         periods: [FinancialPeriod]
     ) {
+        print(">>> updateFinancialData ÇAĞRILDI <<<")
 
-        financialItems =
-            items
+        // ---------------------------------------------------------
+        // Finansal verileri controller içinde sakla
+        // ---------------------------------------------------------
 
-        financialPeriods =
-            periods
+        financialItems = items
+        financialPeriods = periods
 
         print(
-            "Temel sekmesine finansal veri aktarıldı."
+            "Gelen finansal kalem sayısı: \(items.count)"
         )
 
         print(
-            "Finansal kalem sayısı: \(items.count)"
+            "Gelen finansal dönem sayısı: \(periods.count)"
         )
 
         print(
-            "Finansal dönem sayısı: \(periods.count)"
+            "financialItems artık: \(financialItems.count)"
         )
+
+        print(
+            "financialPeriods artık: \(financialPeriods.count)"
+        )
+
+        // ---------------------------------------------------------
+        // Finansal kalemleri sol sidebar'a gönder
+        // ---------------------------------------------------------
+
+        sidebarViewController.updateFinancialItems(
+            items: financialItems
+        )
+
+        print(
+            ">>> Fundamental sidebar finansal verilerle güncellendi <<<"
+        )
+
+        // ---------------------------------------------------------
+        // Mevcut grafiği temizle
+        // ---------------------------------------------------------
 
         chartViewController.clearChart()
+
+        // ---------------------------------------------------------
+        // Test amacıyla ilk finansal kalemi grafiğe gönder
+        // ---------------------------------------------------------
+
+        if !financialItems.isEmpty &&
+            !financialPeriods.isEmpty {
+
+            let firstItem = financialItems[0]
+
+            print(
+                "Test grafik kalemi: \(firstItem.itemCode) - \(firstItem.titleTR)"
+            )
+
+            chartViewController.show(
+                items: [firstItem],
+                periods: financialPeriods
+            )
+
+            print(
+                ">>> chartViewController.show() ÇAĞRILDI <<<"
+            )
+        }
+
+        print(
+            "Temel grafik verisi güncellendi."
+        )
     }
 
     // MARK: - Selection
@@ -320,3 +437,4 @@ extension FundamentalsViewController:
         )
     }
 }
+
