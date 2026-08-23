@@ -2,19 +2,23 @@ import Foundation
 
 struct StockSnapshot {
 
-    let stock: Stock
+    // MARK: - Financial Data
 
-    let priceHistory: [Candlestick]
+    let periods: [FinancialPeriod]
 
-    let financials: FinancialStatements
+    let currency: StockCurrency
+
+    let items: [String: FinancialStatementItem]
+
+    // MARK: - Init
 
     init(
-        stock: Stock,
-        priceHistory: [Candlestick] = [],
-        financials: FinancialStatements = FinancialStatements()
+        periods: [FinancialPeriod] = [],
+        currency: StockCurrency = .tryCurrency,
+        items: [String: FinancialStatementItem] = [:]
     ) {
-        self.stock = stock
-        self.priceHistory = priceHistory
-        self.financials = financials
+        self.periods = periods
+        self.currency = currency
+        self.items = items
     }
 }

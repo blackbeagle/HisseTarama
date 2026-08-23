@@ -4,12 +4,10 @@ struct StockDataQuery {
 
     // MARK: - Financial Period
 
-    /// Kullanıcı bir dönem verirse doğrudan kullanılır.
-    /// nil ise servis yayınlanmış son bilanço dönemini otomatik keşfeder.
+    /// nil ise yayınlanmış son bilanço otomatik keşfedilir.
     let lastFinancialPeriod: FinancialPeriod?
 
-    /// Geriye doğru alınacak çeyrek sayısı.
-    /// nil ise varsayılan değer kullanılır.
+    /// nil ise tüm uygun dönemler yerine varsayılan 10 çeyrek alınır.
     let financialQuarterCount: Int?
 
     // MARK: - Currency
@@ -23,8 +21,13 @@ struct StockDataQuery {
         financialQuarterCount: Int? = 10,
         currency: StockCurrency = .tryCurrency
     ) {
-        self.lastFinancialPeriod = lastFinancialPeriod
-        self.financialQuarterCount = financialQuarterCount
-        self.currency = currency
+        self.lastFinancialPeriod =
+            lastFinancialPeriod
+
+        self.financialQuarterCount =
+            financialQuarterCount
+
+        self.currency =
+            currency
     }
 }

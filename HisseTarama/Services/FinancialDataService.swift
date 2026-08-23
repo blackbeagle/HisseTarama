@@ -47,6 +47,7 @@ final class FinancialDataService {
                     )
                 )
             )
+
             return
         }
 
@@ -63,7 +64,6 @@ final class FinancialDataService {
          -----------------------------------------------------
 
          Kullanıcı bir dönem verdiyse onu kullanıyoruz.
-
          nil ise API üzerinden otomatik keşif yapıyoruz.
          -----------------------------------------------------
          */
@@ -75,20 +75,29 @@ final class FinancialDataService {
             )
 
             fetchPeriods(
-                companyCode: normalizedCompanyCode,
-                lastPeriod: lastPeriod,
-                quarterCount: quarterCount,
-                currency: query.currency,
-                completion: completion
+                companyCode:
+                    normalizedCompanyCode,
+                lastPeriod:
+                    lastPeriod,
+                quarterCount:
+                    quarterCount,
+                currency:
+                    query.currency,
+                completion:
+                    completion
             )
 
         } else {
 
-            print("Finansal dönem keşfi başladı.")
+            print(
+                "Finansal dönem keşfi başladı."
+            )
 
             discoverLastPublishedPeriod(
-                companyCode: normalizedCompanyCode,
-                currency: query.currency
+                companyCode:
+                    normalizedCompanyCode,
+                currency:
+                    query.currency
             ) { [weak self] result in
 
                 guard let self = self else {
@@ -144,10 +153,14 @@ final class FinancialDataService {
         )
 
         checkCandidatePeriod(
-            companyCode: companyCode,
-            period: firstCandidate,
-            currency: currency,
-            completion: completion
+            companyCode:
+                companyCode,
+            period:
+                firstCandidate,
+            currency:
+                currency,
+            completion:
+                completion
         )
     }
 
@@ -156,6 +169,7 @@ final class FinancialDataService {
     private func makeInitialCandidatePeriod()
         -> FinancialPeriod
     {
+
         let calendar =
             Calendar.current
 
@@ -165,13 +179,15 @@ final class FinancialDataService {
         let year =
             calendar.component(
                 .year,
-                from: now
+                from:
+                    now
             )
 
         let month =
             calendar.component(
                 .month,
-                from: now
+                from:
+                    now
             )
 
         /*
@@ -199,13 +215,16 @@ final class FinancialDataService {
             year
 
         if completedQuarter == 0 {
+
             completedQuarter = 4
             completedYear -= 1
         }
 
         return FinancialPeriod(
-            year: completedYear,
-            quarter: completedQuarter
+            year:
+                completedYear,
+            quarter:
+                completedQuarter
         )
     }
 
@@ -226,8 +245,6 @@ final class FinancialDataService {
 
         /*
          -----------------------------------------------------
-         ÖNEMLİ
-
          API'nin çalışan formatına göre aynı dönem
          dört kez gönderiliyor.
 
@@ -242,8 +259,10 @@ final class FinancialDataService {
          */
 
         let periods = Array(
-            repeating: period,
-            count: maximumPeriodsPerRequest
+            repeating:
+                period,
+            count:
+                maximumPeriodsPerRequest
         )
 
         guard let url =
@@ -260,7 +279,8 @@ final class FinancialDataService {
             completion(
                 .failure(
                     makeError(
-                        code: -10,
+                        code:
+                            -10,
                         message:
                             "Finansal dönem kontrol URL'si oluşturulamadı."
                     )
@@ -276,19 +296,23 @@ final class FinancialDataService {
 
         var request =
             URLRequest(
-                url: url
+                url:
+                    url
             )
 
-        request.httpMethod = "GET"
+        request.httpMethod =
+            "GET"
 
         request.setValue(
             "application/json",
-            forHTTPHeaderField: "Accept"
+            forHTTPHeaderField:
+                "Accept"
         )
 
         let task =
             URLSession.shared.dataTask(
-                with: request
+                with:
+                    request
             ) { [weak self] data, response, error in
 
                 guard let self = self else {
@@ -311,7 +335,8 @@ final class FinancialDataService {
                     completion(
                         .failure(
                             self.makeError(
-                                code: -11,
+                                code:
+                                    -11,
                                 message:
                                     "Finansal dönem kontrolünde sunucu yanıtı alınamadı."
                             )
@@ -344,7 +369,8 @@ final class FinancialDataService {
                     completion(
                         .failure(
                             self.makeError(
-                                code: -12,
+                                code:
+                                    -12,
                                 message:
                                     "Finansal dönem kontrolünde veri alınamadı."
                             )
@@ -358,7 +384,8 @@ final class FinancialDataService {
 
                     let hasData =
                         try self.responseContainsFinancialData(
-                            data: data
+                            data:
+                                data
                         )
 
                     if hasData {
@@ -383,7 +410,8 @@ final class FinancialDataService {
 
                         let previousPeriod =
                             self.previousPeriod(
-                                from: period
+                                from:
+                                    period
                             )
 
                         print(
@@ -438,7 +466,8 @@ final class FinancialDataService {
             completion(
                 .failure(
                     makeError(
-                        code: -20,
+                        code:
+                            -20,
                         message:
                             "Finansal dönem listesi oluşturulamadı."
                     )
@@ -460,26 +489,34 @@ final class FinancialDataService {
          ---------------------------------------------------------
          */
 
-        var chunks: [[FinancialPeriod]] = []
+        var chunks:
+            [[FinancialPeriod]] = []
 
-        var startIndex = 0
+        var startIndex =
+            0
 
         while startIndex < periods.count {
 
             let endIndex =
                 min(
-                    startIndex + maximumPeriodsPerRequest,
+                    startIndex +
+                        maximumPeriodsPerRequest,
                     periods.count
                 )
 
             let chunk =
                 Array(
-                    periods[startIndex..<endIndex]
+                    periods[
+                        startIndex..<endIndex
+                    ]
                 )
 
-            chunks.append(chunk)
+            chunks.append(
+                chunk
+            )
 
-            startIndex = endIndex
+            startIndex =
+                endIndex
         }
 
         fetchPeriodChunks(
@@ -493,10 +530,13 @@ final class FinancialDataService {
                 currency,
             allPeriods:
                 periods,
+            collectedItems:
+                [:],
             completion:
                 completion
         )
     }
+
     // MARK: - Fetch Chunks
 
     private func fetchPeriodChunks(
@@ -505,29 +545,33 @@ final class FinancialDataService {
         chunkIndex: Int,
         currency: StockCurrency,
         allPeriods: [FinancialPeriod],
+        collectedItems: [String: FinancialStatementItem],
         completion: @escaping (
             Result<FinancialStatements, Error>
         ) -> Void
     ) {
 
+        /*
+         -----------------------------------------------------
+         Tüm chunk'lar tamamlandı.
+         -----------------------------------------------------
+         */
+
         if chunkIndex >= chunks.count {
 
-            /*
-             -------------------------------------------------
-             Şimdilik gerçek finansal kalem parser'ı
-             mevcut FinancialStatements yapısına
-             ayrı aşamada bağlanacak.
-
-             -------------------------------------------------
-             */
+            print(
+                "Toplam finansal kalem sayısı: \(collectedItems.count)"
+            )
 
             completion(
                 .success(
                     FinancialStatements(
                         periods:
                             allPeriods,
+                        currency:
+                            currency,
                         items:
-                            [:]
+                            collectedItems
                     )
                 )
             )
@@ -552,7 +596,8 @@ final class FinancialDataService {
             completion(
                 .failure(
                     makeError(
-                        code: -21,
+                        code:
+                            -21,
                         message:
                             "Finansal veri URL'si oluşturulamadı."
                     )
@@ -607,7 +652,8 @@ final class FinancialDataService {
                     completion(
                         .failure(
                             self.makeError(
-                                code: -22,
+                                code:
+                                    -22,
                                 message:
                                     "Finansal veri sunucu yanıtı alınamadı."
                             )
@@ -640,7 +686,8 @@ final class FinancialDataService {
                     completion(
                         .failure(
                             self.makeError(
-                                code: -23,
+                                code:
+                                    -23,
                                 message:
                                     "Finansal veri alınamadı."
                             )
@@ -654,18 +701,72 @@ final class FinancialDataService {
 
                     /*
                      -------------------------------------------------
-                     JSON'u şimdilik doğruluyoruz.
-
-                     Gerçek FinancialStatements parser'ı
-                     daha sonra burada geliştirilecek.
+                     API yanıtındaki finansal kalemleri parse ediyoruz.
                      -------------------------------------------------
                      */
 
-                    _ =
-                        try self.responseContainsFinancialData(
+                    let chunkItems =
+                        try self.parseFinancialItems(
                             data:
-                                data
+                                data,
+                            periods:
+                                chunk
                         )
+
+                    var mergedItems =
+                        collectedItems
+
+                    /*
+                     -------------------------------------------------
+                     Aynı itemCode birden fazla chunk'ta bulunabilir.
+
+                     Bu durumda mevcut değerleri koruyup
+                     yeni dönem değerlerini üzerine ekliyoruz.
+                     -------------------------------------------------
+                     */
+
+                    for (itemCode, item)
+                        in chunkItems
+                    {
+
+                        if let existingItem =
+                            mergedItems[itemCode]
+                        {
+
+                            var mergedValues =
+                                existingItem.values
+
+                            for (period, value)
+                                in item.values
+                            {
+                                mergedValues[period] =
+                                    value
+                            }
+
+                            mergedItems[itemCode] =
+                                FinancialStatementItem(
+                                    itemCode:
+                                        existingItem.itemCode,
+                                    titleTR:
+                                        existingItem.titleTR,
+                                    titleEN:
+                                        existingItem.titleEN,
+                                    level:
+                                        existingItem.level,
+                                    values:
+                                        mergedValues
+                                )
+
+                        } else {
+
+                            mergedItems[itemCode] =
+                                item
+                        }
+                    }
+
+                    print(
+                        "Chunk \(chunkIndex + 1)/\(chunks.count) tamamlandı. Kalem sayısı: \(mergedItems.count)"
+                    )
 
                     self.fetchPeriodChunks(
                         companyCode:
@@ -678,6 +779,8 @@ final class FinancialDataService {
                             currency,
                         allPeriods:
                             allPeriods,
+                        collectedItems:
+                            mergedItems,
                         completion:
                             completion
                     )
@@ -691,6 +794,273 @@ final class FinancialDataService {
             }
 
         task.resume()
+    }
+
+    // MARK: - Parse Financial Items
+
+    private func parseFinancialItems(
+        data: Data,
+        periods: [FinancialPeriod]
+    ) throws -> [String: FinancialStatementItem] {
+
+        guard
+            let jsonObject =
+                try JSONSerialization.jsonObject(
+                    with:
+                        data,
+                    options:
+                        []
+                ) as? [String: Any]
+        else {
+
+            throw makeError(
+                code:
+                    -32,
+                message:
+                    "Finansal veri JSON formatında okunamadı."
+            )
+        }
+
+        if let ok =
+            jsonObject["ok"] as? Bool,
+            !ok
+        {
+
+            let message =
+                jsonObject[
+                    "errorDescription"
+                ] as? String
+                ??
+                "İş Yatırım finansal veri servisi hata döndürdü."
+
+            throw makeError(
+                code:
+                    -33,
+                message:
+                    message
+            )
+        }
+
+        guard let valueArray =
+                jsonObject["value"]
+                as? [[String: Any]]
+        else {
+
+            throw makeError(
+                code:
+                    -34,
+                message:
+                    "Finansal veri 'value' alanında bulunamadı."
+            )
+        }
+
+        var result:
+            [String: FinancialStatementItem] = [:]
+
+        for item in valueArray {
+
+            let itemCode =
+                stringValue(
+                    item["itemCode"]
+                )
+
+            guard !itemCode.isEmpty else {
+                continue
+            }
+
+            let titleTR =
+                stringValue(
+                    item["itemDescTr"]
+                )
+
+            let titleEN =
+                stringValue(
+                    item["itemDescEng"]
+                )
+
+            let level =
+                intValue(
+                    item["level"]
+                )
+
+            var values:
+                [FinancialPeriod: Double?] = [:]
+
+            for (index, period)
+                in periods.enumerated()
+            {
+
+                let key =
+                    "value\(index + 1)"
+
+                let value =
+                    parseFinancialValue(
+                        item[key]
+                    )
+
+                values[period] =
+                    value
+            }
+
+            let financialItem =
+                FinancialStatementItem(
+                    itemCode:
+                        itemCode,
+                    titleTR:
+                        titleTR,
+                    titleEN:
+                        titleEN,
+                    level:
+                        level,
+                    values:
+                        values
+                )
+
+            result[itemCode] =
+                financialItem
+        }
+
+        return result
+    }
+
+    // MARK: - String Value
+
+    private func stringValue(
+        _ value: Any?
+    ) -> String {
+
+        guard let value = value else {
+            return ""
+        }
+
+        if let string =
+            value as? String
+        {
+            return string.trimmingCharacters(
+                in:
+                    .whitespacesAndNewlines
+            )
+        }
+
+        if let number =
+            value as? NSNumber
+        {
+            return number.stringValue
+        }
+
+        return String(
+            describing:
+                value
+        )
+        .trimmingCharacters(
+            in:
+                .whitespacesAndNewlines
+        )
+    }
+
+    // MARK: - Int Value
+
+    private func intValue(
+        _ value: Any?
+    ) -> Int {
+
+        guard let value = value else {
+            return 0
+        }
+
+        if let number =
+            value as? NSNumber
+        {
+            return number.intValue
+        }
+
+        if let string =
+            value as? String
+        {
+            return Int(
+                string.trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+            ) ?? 0
+        }
+
+        return 0
+    }
+
+    // MARK: - Double Value
+
+    private func parseFinancialValue(
+        _ value: Any?
+    ) -> Double? {
+
+        guard let value = value else {
+            return nil
+        }
+
+        if let number =
+            value as? NSNumber
+        {
+            return number.doubleValue
+        }
+
+        if let string =
+            value as? String
+        {
+
+            let trimmed =
+                string.trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+
+            if trimmed.isEmpty {
+                return nil
+            }
+
+            /*
+             -----------------------------------------------------
+             Önce doğrudan Double dönüşümü.
+             -----------------------------------------------------
+             */
+
+            if let direct =
+                Double(trimmed)
+            {
+                return direct
+            }
+
+            /*
+             -----------------------------------------------------
+             Türkçe sayı formatı ihtimali:
+
+             1.234,56
+             ->
+             1234.56
+             -----------------------------------------------------
+             */
+
+            let normalized =
+                trimmed
+                    .replacingOccurrences(
+                        of:
+                            ".",
+                        with:
+                            ""
+                    )
+                    .replacingOccurrences(
+                        of:
+                            ",",
+                        with:
+                            "."
+                    )
+
+            return Double(
+                normalized
+            )
+        }
+
+        return nil
     }
 
     // MARK: - Quarter Periods
@@ -877,14 +1247,6 @@ final class FinancialDataService {
          Eğer 4'ten az dönem gönderiyorsak,
          API'nin çalışan yapısını korumak için
          son dönemi 4'e tamamlıyoruz.
-
-         Örneğin tek dönem:
-
-         year1=2026&period1=6
-         year2=2026&period2=6
-         year3=2026&period3=6
-         year4=2026&period4=6
-
          -----------------------------------------------------
          */
 
@@ -1061,12 +1423,64 @@ final class FinancialDataService {
                     "Dönem sayısı: \(statements.periods.count)"
                 )
 
+                print(
+                    "Para birimi: \(statements.currency.apiValue)"
+                )
+
+                print(
+                    "Finansal kalem sayısı: \(statements.items.count)"
+                )
+
                 for period
                     in statements.periods
                 {
 
                     print(
                         "Dönem: \(period.title)"
+                    )
+                }
+
+                print(
+                    "--------------------------------"
+                )
+
+                for item
+                    in statements.allItems
+                {
+
+                    print(
+                        "Kod: \(item.itemCode)"
+                    )
+
+                    print(
+                        "Başlık TR: \(item.titleTR)"
+                    )
+
+                    print(
+                        "Başlık EN: \(item.titleEN)"
+                    )
+
+                    print(
+                        "Seviye: \(item.level)"
+                    )
+
+                    for period
+                        in statements.periods
+                    {
+
+                        let value =
+                            item.value(
+                                for:
+                                    period
+                            )
+
+                        print(
+                            "  \(period.title): \(String(describing: value ?? nil))"
+                        )
+                    }
+
+                    print(
+                        "--------------------------------"
                     )
                 }
 

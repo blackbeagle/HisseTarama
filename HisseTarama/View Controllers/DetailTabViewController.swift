@@ -44,14 +44,17 @@ final class DetailTabViewController: NSTabViewController {
         // Temel
         // -------------------------------------------------
 
-        if let fundamentalsVC =
-            children.compactMap({
-                $0 as? FundamentalsViewController
-            }).first {
+        for child in children {
 
-            fundamentalsVC.selectStock(
-                symbol: normalizedSymbol
-            )
+            if let fundamentalsVC =
+                child as? FundamentalsViewController {
+
+                fundamentalsVC.selectStock(
+                    symbol: normalizedSymbol
+                )
+
+                break
+            }
         }
 
         // -------------------------------------------------

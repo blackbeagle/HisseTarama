@@ -2,72 +2,55 @@ import Foundation
 
 struct FinancialStatements {
 
-    // MARK: - Constants
+    // MARK: - Periods
 
-    static let defaultQuarterCount = 10
-
-    // MARK: - Properties
-
-    /// Kullanılacak finansal dönemler.
-    /// En yeni dönemden eskiye doğru sıralanır.
+    /// Sorgulanan finansal dönemler.
+    ///
+    /// Her zaman en yeni dönemden eski döneme doğru tutulur.
     let periods: [FinancialPeriod]
 
-    /// Finansal kalemler.
-    ///
-    /// Örnek:
-    /// "Hasılat" -> dönem bazında değerler
-    /// "Net Dönem Karı" -> dönem bazında değerler
-    let items: [String: [FinancialPeriod: Double?]]
+    // MARK: - Currency
 
-    // MARK: - Initialization
+    let currency: StockCurrency
+
+    // MARK: - Items
+
+    /// Finansal tablo kalemleri.
+    ///
+    /// Key = itemCode
+    let items: [String: FinancialStatementItem]
+
+    // MARK: - Init
 
     init(
-        periods: [FinancialPeriod] = [],
-        items: [String: [FinancialPeriod: Double?]] = [:]
+        periods: [FinancialPeriod],
+        currency: StockCurrency,
+        items: [String: FinancialStatementItem]
     ) {
         self.periods = periods
+        self.currency = currency
         self.items = items
     }
 
     // MARK: - Item Access
 
-    /// Belirli bir finansal kalemin tüm dönemlerdeki değerlerini döndürür.
-    ///
-    /// Dönem sırası `periods` ile aynıdır.
-    func values(
-        for item: String
-    ) -> [Double?] {
+    func item(
+        code: String
+    ) -> FinancialStatementItem? {
 
-        guard let itemValues = items[item] else {
-            return Array(
-                repeating: nil,
-                count: periods.count
-            )
-        }
-
-        return periods.map { period in
-            itemValues[period] ?? nil
-        }
+        items[code]
     }
 
-    /// Belirli bir finansal kalemin belirli bir dönemdeki değerini döndürür.
-    func value(
-        for item: String,
-        period: FinancialPeriod
-    ) -> Double? {
+    // MARK: - All Items
 
-        guard let itemValues = items[item] else {
-            return nil
+    var allItems: [FinancialStatementItem] {
+
+        items.values.sorted {
+            if $0.level != $1.level {
+                return $0.level < $1.level
+            }
+
+            return $0.itemCode < $1.itemCode
         }
-
-        return itemValues[period] ?? nil
-    }
-
-    /// Finansal kalemin mevcut olup olmadığını kontrol eder.
-    func contains(
-        item: String
-    ) -> Bool {
-
-        items[item] != nil
     }
 }
