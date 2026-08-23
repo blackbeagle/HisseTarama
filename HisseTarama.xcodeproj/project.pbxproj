@@ -20,7 +20,7 @@
 		1C42C459303A45720069583B /* FinancialStatementItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C42C458303A45720069583B /* FinancialStatementItem.swift */; };
 		1C42C45B303A52130069583B /* FundamentalSidebarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C42C45A303A52130069583B /* FundamentalSidebarViewController.swift */; };
 		1C42C45D303A55710069583B /* FundamentalChartViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C42C45C303A55710069583B /* FundamentalChartViewController.swift */; };
-		1C42C461303B849E0069583B /* FundamentalBarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C42C460303B849E0069583B /* FundamentalBarChartView.swift */; };
+		1C42C465303B8AFD0069583B /* FundamentalBarChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C42C464303B8AFD0069583B /* FundamentalBarChartView.swift */; };
 		1C4ED35D2FFA8E7A00DC0AAC /* ChartViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED35C2FFA8E7A00DC0AAC /* ChartViewport.swift */; };
 		1C4ED35F2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED35E2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift */; };
 		1C4ED36C2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C4ED36B2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift */; };
@@ -74,7 +74,7 @@
 		1C42C458303A45720069583B /* FinancialStatementItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialStatementItem.swift; sourceTree = "<group>"; };
 		1C42C45A303A52130069583B /* FundamentalSidebarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundamentalSidebarViewController.swift; sourceTree = "<group>"; };
 		1C42C45C303A55710069583B /* FundamentalChartViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundamentalChartViewController.swift; sourceTree = "<group>"; };
-		1C42C460303B849E0069583B /* FundamentalBarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = FundamentalBarChartView.swift; path = ../../../../FundamentalBarChartView.swift; sourceTree = "<group>"; };
+		1C42C464303B8AFD0069583B /* FundamentalBarChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundamentalBarChartView.swift; sourceTree = "<group>"; };
 		1C4ED35C2FFA8E7A00DC0AAC /* ChartViewport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartViewport.swift; sourceTree = "<group>"; };
 		1C4ED35E2FFA8FB400DC0AAC /* ChartCoordinateSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartCoordinateSystem.swift; sourceTree = "<group>"; };
 		1C4ED36B2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionOverlayRenderer.swift; sourceTree = "<group>"; };
@@ -216,14 +216,6 @@
 			path = "View Controllers";
 			sourceTree = "<group>";
 		};
-		1C4ED3642FFA90BE00DC0AAC /* Views */ = {
-			isa = PBXGroup;
-			children = (
-				1C42C460303B849E0069583B /* FundamentalBarChartView.swift */,
-			);
-			path = Views;
-			sourceTree = "<group>";
-		};
 		1C4ED3652FFA90CE00DC0AAC /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
@@ -292,7 +284,6 @@
 			isa = PBXGroup;
 			children = (
 				1C4ED3652FFA90CE00DC0AAC /* Utilities */,
-				1C4ED3642FFA90BE00DC0AAC /* Views */,
 				1C4ED3632FFA90A500DC0AAC /* View Controllers */,
 				1C4ED3622FFA908200DC0AAC /* Scanner */,
 				1C4ED3612FFA906700DC0AAC /* Services */,
@@ -310,6 +301,7 @@
 				1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */,
 				1C4ED3752FFAEE0400DC0AAC /* ChartInteractionController.swift */,
 				1C1734113033903B00EEF972 /* SidebarSelection.swift */,
+				1C42C464303B8AFD0069583B /* FundamentalBarChartView.swift */,
 			);
 			path = HisseTarama;
 			sourceTree = "<group>";
@@ -395,6 +387,7 @@
 				1C1734123033903B00EEF972 /* SidebarSelection.swift in Sources */,
 				1C645CB52F7820D0007E1F5C /* Candlestick.swift in Sources */,
 				1C9726F93034EA8D0078AC24 /* DetailTabViewController.swift in Sources */,
+				1C42C465303B8AFD0069583B /* FundamentalBarChartView.swift in Sources */,
 				1C3246DC30027FEB00C2230B /* AdaptiveGridCalculator.swift in Sources */,
 				1C3246DE3002801700C2230B /* GridRenderer.swift in Sources */,
 				1C645CAF2F7736D3007E1F5C /* SidebarViewModel.swift in Sources */,
@@ -429,7 +422,6 @@
 				1C4ED36C2FFA9C1800DC0AAC /* SelectionOverlayRenderer.swift in Sources */,
 				1C9726FB3034EAFA0078AC24 /* DashboardViewController.swift in Sources */,
 				1C17340A30338C5700EEF972 /* Scan.swift in Sources */,
-				1C42C461303B849E0069583B /* FundamentalBarChartView.swift in Sources */,
 				1C645C9A2F773189007E1F5C /* AppDelegate.swift in Sources */,
 				1C645CAC2F77360F007E1F5C /* DetailViewController.swift in Sources */,
 				1C645CB92F78210E007E1F5C /* CandlestickChartView.swift in Sources */,
