@@ -343,7 +343,7 @@ class ChartDetailViewController: NSViewController {
 
         chartView?.needsDisplay = true
 
-        updateWindowTitle()
+       
     }
     
     @objc private func globalSymbolChanged(
@@ -407,7 +407,7 @@ class ChartDetailViewController: NSViewController {
                         self?.rebuildCurrentCandlesticks()
                         self?.applyDefaultSMAsForCurrentPeriod()
                         self?.resetViewportForCurrentPeriod()
-                        self?.updateWindowTitle()
+                       
                     }
 
                 case .failure(let error):
@@ -453,7 +453,7 @@ class ChartDetailViewController: NSViewController {
         
         chartView?.needsDisplay = true
         
-        updateWindowTitle()
+        
     }
     
     
@@ -592,37 +592,7 @@ class ChartDetailViewController: NSViewController {
         alert.runModal()
     }
     
-    // MARK: - Window Title
     
-    private func updateWindowTitle() {
-        
-        let symbol = AppSelectionState.shared.selectedSymbol
-        
-        let periodText: String
-        
-        switch chartPeriod {
-            
-        case .daily:
-            periodText = "Günlük"
-            
-        case .weekly:
-            periodText = "Haftalık"
-        }
-        
-        let currencyText: String
-        
-        switch chartCurrency {
-            
-        case .tryCurrency:
-            currencyText = "TRY"
-            
-        case .usd:
-            currencyText = "USD"
-        }
-        
-        view.window?.title =
-            "\(symbol) - \(periodText) - \(currencyText) (\(currentCandlesticks.count) Bar)"
-    }
     
     // MARK: - Indicators
     

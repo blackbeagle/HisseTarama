@@ -24,6 +24,13 @@ class MainSplitViewController: NSSplitViewController,
         view.autoresizingMask = [.width, .height]
         view.wantsLayer = true
 
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(globalSymbolChanged(_:)),
+            name: AppSelectionState.symbolDidChange,
+            object: nil
+        )
+        
         // Pencere boyut değişikliklerini dinle
         NotificationCenter.default.addObserver(
             self,
@@ -159,6 +166,8 @@ class MainSplitViewController: NSSplitViewController,
     override func viewDidAppear() {
 
         super.viewDidAppear()
+        
+        //print("ANA PENCERE BAŞLIĞI: \(view.window?.title ?? "nil")")
 
         if let window = view.window {
 
@@ -205,6 +214,20 @@ class MainSplitViewController: NSSplitViewController,
     }
 
     // MARK: - Window Notifications
+    
+    @objc private func globalSymbolChanged(
+        _ notification: Notification
+    ) {
+        let symbol = AppSelectionState.shared.selectedSymbol
+
+        guard !symbol.isEmpty else {
+            return
+        }
+
+        view.window?.title = "\(symbol) - Teknik & Temel Analiz"
+
+       // print("ANA PENCERE BAŞLIĞI GÜNCELLENDİ: \(symbol)")
+    }
 
     @objc private func windowDidResize(
         _ notification: Notification
@@ -303,11 +326,9 @@ class MainSplitViewController: NSSplitViewController,
             )
         }
     }
-
     private func showSelectedStock(
         _ stock: Stock
     ) {
-
         print(
             "Seçilen hisse: \(stock.symbol)"
         )
@@ -317,14 +338,16 @@ class MainSplitViewController: NSSplitViewController,
             "\(AppStockState.shared.selectedStock?.symbol ?? "-")"
         )
 
+        // Ana pencere başlığını güncelle
+        view.window?.title =
+            "\(stock.symbol) - Teknik & Temel Analiz"
+
         guard let detailTabVC =
             children.last as? DetailTabViewController
         else {
-
             print(
                 "HATA: DetailTabViewController bulunamadı."
             )
-
             return
         }
 

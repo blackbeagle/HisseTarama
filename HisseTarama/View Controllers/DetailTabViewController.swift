@@ -26,47 +26,15 @@ final class DetailTabViewController: NSTabViewController {
             return
         }
 
-        // -------------------------------------------------
-        // Global State
-        // -------------------------------------------------
-
+        // Tek gerçek kaynak:
+        // AppSelectionState
         AppSelectionState.shared.setSymbol(
             normalizedSymbol
         )
-
-        // -------------------------------------------------
-        // Temel
-        // -------------------------------------------------
-
-        for child in children {
-
-            if let fundamentalsVC =
-                child as? FundamentalsViewController {
-
-                fundamentalsVC.selectStock(
-                    symbol: normalizedSymbol
-                )
-
-                break
-            }
-        }
-
-        // -------------------------------------------------
-        // Dashboard
-        // -------------------------------------------------
-
-        if let dashboardVC =
-            children.compactMap({
-                $0 as? DashboardViewController
-            }).first {
-
-            dashboardVC.selectStock(
-                symbol: normalizedSymbol
-            )
-        }
     }
-    
-    
+
+    // MARK: - Chart
+
     func refreshChart() {
 
         if let chartVC =

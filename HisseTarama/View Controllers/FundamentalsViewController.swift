@@ -42,17 +42,85 @@ final class FundamentalsViewController: NSViewController {
     }
 
     override func viewDidLoad() {
-
         super.viewDidLoad()
 
-        //test amaçlı bu satır. kaldırıalcak.
-        //FinancialDataService.shared.testFetch()
-        
+        // FinancialDataService.shared.testFetch()
+
         setupView()
-
         setupSidebar()
-
         setupChart()
+        setupGlobalSelectionObservers()
+
+        // Uygulama açılırken global state'te bir hisse varsa yükle.
+        let symbol = AppSelectionState.shared.selectedSymbol
+
+        if !symbol.isEmpty {
+            selectStock(symbol: symbol)
+        }
+    }
+    
+    // MARK: - Global Selection
+
+    private func setupGlobalSelectionObservers() {
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(globalSymbolChanged(_:)),
+            name: AppSelectionState.symbolDidChange,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(globalCurrencyChanged(_:)),
+            name: AppSelectionState.currencyDidChange,
+            object: nil
+        )
+    }
+
+    @objc private func globalSymbolChanged(
+        _ notification: Notification
+    ) {
+        let symbol =
+            AppSelectionState.shared.selectedSymbol
+
+        guard !symbol.isEmpty else {
+            return
+        }
+
+        selectStock(symbol: symbol)
+    }
+
+    @objc private func globalCurrencyChanged(
+        _ notification: Notification
+    ) {
+        
+        print(
+               "TEMEL GLOBAL PARA BİRİMİ:",
+               AppSelectionState.shared.selectedCurrency.title
+           )
+        
+        guard
+            let symbol = currentStockSymbol,
+            !symbol.isEmpty
+        else {
+            return
+        }
+
+        // Para birimi değiştiğinde finansal verileri
+        // yeni para birimiyle tekrar çek.
+        financialItems.removeAll()
+        financialPeriods.removeAll()
+
+        chartViewController.clearChart()
+
+        fetchFinancialData(
+            for: symbol
+        )
+    }
+
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 
     // MARK: - Setup
@@ -213,12 +281,18 @@ final class FundamentalsViewController: NSViewController {
         print("Hisse: \(symbol)")
         print("================================")
 
+        
+        print(
+            "TEMEL SORGU PARA BİRİMİ:",
+            AppSelectionState.shared.selectedCurrency.stockCurrency.apiValue
+        )
+        
         let query = StockDataQuery(
             lastFinancialPeriod: nil,
             financialQuarterCount: 10,
-            currency: .tryCurrency
+            currency: AppSelectionState.shared.selectedCurrency.stockCurrency
         )
-
+        
         FinancialDataService.shared.fetchFinancialStatements(
             companyCode: symbol,
             query: query
