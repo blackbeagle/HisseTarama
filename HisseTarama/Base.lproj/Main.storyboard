@@ -899,23 +899,6 @@
                         <rect key="frame" x="0.0" y="0.0" width="450" height="300"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
-                            <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="x6X-JQ-wkc" userLabel="Symbol Text Field">
-                                <rect key="frame" x="20" y="251" width="150" height="21"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" drawsBackground="YES" id="fOe-f0-k4S">
-                                    <font key="font" usesAppearanceFont="YES"/>
-                                    <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                    <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                </textFieldCell>
-                            </textField>
-                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="JoS-r3-6oj" userLabel="Fetch Button">
-                                <rect key="frame" x="257" y="236" width="114" height="32"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="FFr-Xt-3TK">
-                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                    <font key="font" metaFont="system"/>
-                                </buttonCell>
-                            </button>
                             <view id="gPv-B3-NmA" userLabel="Chart Container View">
                                 <rect key="frame" x="-14" y="20" width="309" height="214"/>
                                 <autoresizingMask key="autoresizingMask"/>
@@ -924,8 +907,6 @@
                     </view>
                     <connections>
                         <outlet property="chartContainerView" destination="gPv-B3-NmA" id="m2R-LH-uJf"/>
-                        <outlet property="fetchButton" destination="JoS-r3-6oj" id="6ip-zS-lSw"/>
-                        <outlet property="symbolTextField" destination="x6X-JQ-wkc" id="YgN-UA-lvs"/>
                     </connections>
                 </viewController>
                 <customObject id="gXg-2R-hwb" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>

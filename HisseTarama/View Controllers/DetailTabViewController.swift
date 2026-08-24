@@ -27,18 +27,12 @@ final class DetailTabViewController: NSTabViewController {
         }
 
         // -------------------------------------------------
-        // Teknik
+        // Global State
         // -------------------------------------------------
 
-        if let chartVC =
-            children.compactMap({
-                $0 as? ChartDetailViewController
-            }).first {
-
-            chartVC.selectStock(
-                symbol: normalizedSymbol
-            )
-        }
+        AppSelectionState.shared.setSymbol(
+            normalizedSymbol
+        )
 
         // -------------------------------------------------
         // Temel

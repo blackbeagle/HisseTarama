@@ -93,22 +93,121 @@ final class SidebarViewController: NSViewController {
     }()
 
     // MARK: - Lifecycle
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
         configureGlobalControls()
         configureOutlineView()
         rebuildItems()
+        updateControlsFromGlobalState()
+
+        setupGlobalSelectionObservers()
+    }
+    
+    
+   
+
+    // MARK: - Global Selection
+
+    @objc private func currencyChanged(
+        _ sender: NSSegmentedControl
+    ) {
+
+        switch sender.selectedSegment {
+
+        case 0:
+            AppSelectionState.shared.setCurrency(
+                .tryCurrency
+            )
+
+        case 1:
+            AppSelectionState.shared.setCurrency(
+                .usd
+            )
+
+        default:
+            break
+        }
     }
 
+    @objc private func fetchButtonClicked() {
+
+        let symbol =
+            symbolTextField.stringValue
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+                .uppercased()
+
+        guard !symbol.isEmpty else {
+            return
+        }
+
+        symbolTextField.stringValue = symbol
+
+        AppSelectionState.shared.setSymbol(
+            symbol
+        )
+    }
+    
+    private func updateControlsFromGlobalState() {
+
+        symbolTextField.stringValue =
+            AppSelectionState.shared.selectedSymbol
+
+        switch AppSelectionState.shared.selectedCurrency {
+
+        case .tryCurrency:
+            currencyControl.selectedSegment = 0
+
+        case .usd:
+            currencyControl.selectedSegment = 1
+        }
+    }
+    
+    private func setupGlobalSelectionObservers() {
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(globalSymbolChanged(_:)),
+            name: AppSelectionState.symbolDidChange,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(globalCurrencyChanged(_:)),
+            name: AppSelectionState.currencyDidChange,
+            object: nil
+        )
+    }
+    
+    @objc private func globalSymbolChanged(
+        _ notification: Notification
+    ) {
+        symbolTextField.stringValue =
+            AppSelectionState.shared.selectedSymbol
+    }
+    
+    @objc private func globalCurrencyChanged(
+        _ notification: Notification
+    ) {
+        switch AppSelectionState.shared.selectedCurrency {
+
+        case .tryCurrency:
+            currencyControl.selectedSegment = 0
+
+        case .usd:
+            currencyControl.selectedSegment = 1
+        }
+    }
+    
     // MARK: - Global Controls
 
     private func configureGlobalControls() {
 
         globalControlsStack.translatesAutoresizingMaskIntoConstraints = false
         symbolRowStack.translatesAutoresizingMaskIntoConstraints = false
-
         currencyControl.translatesAutoresizingMaskIntoConstraints = false
         symbolTextField.translatesAutoresizingMaskIntoConstraints = false
         fetchButton.translatesAutoresizingMaskIntoConstraints = false
@@ -213,8 +312,26 @@ final class SidebarViewController: NSViewController {
             )
         ])
 
+        // -------------------------------------------------
+        // Actions
+        // -------------------------------------------------
+
+        currencyControl.target = self
+        currencyControl.action = #selector(currencyChanged)
+
+        fetchButton.target = self
+        fetchButton.action = #selector(fetchButtonClicked)
+
+        // Hisse kutusundayken Enter → veri getir
+        symbolTextField.target = self
+        symbolTextField.action = #selector(fetchButtonClicked)
+
         // Kontroller scroll view'ın üzerinde görünsün.
-        view.addSubview(globalControlsStack, positioned: .above, relativeTo: scrollView)
+        view.addSubview(
+            globalControlsStack,
+            positioned: .above,
+            relativeTo: scrollView
+        )
     }
 
     // MARK: - Scroll View Constraints

@@ -14,8 +14,7 @@ class ChartDetailViewController: NSViewController {
     
     // MARK: - IBOutlets
     
-    @IBOutlet weak var symbolTextField: NSTextField!
-    @IBOutlet weak var fetchButton: NSButton!
+   
     @IBOutlet weak var chartContainerView: NSView!
     
     // MARK: - Properties
@@ -58,34 +57,40 @@ class ChartDetailViewController: NSViewController {
         return control
     }()
     
-    // MARK: - Currency Control
-    
-    private let currencyControl: NSSegmentedControl = {
-        
-        let control = NSSegmentedControl(
-            labels: ["TRY", "USD"],
-            trackingMode: .selectOne,
-            target: nil,
-            action: nil
-        )
-        
-        control.selectedSegment = 0
-        control.translatesAutoresizingMaskIntoConstraints = false
-        
-        return control
-    }()
+ 
     
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
-        
+
         super.viewDidLoad()
-        
-        symbolTextField.delegate = self
-        
+
+       // symbolTextField.delegate = self
+
         setupView()
         setupUI()
         setupChartView()
+
+        setupGlobalSelectionObservers()
+    }
+    
+    // MARK: - Global Selection
+
+    private func setupGlobalSelectionObservers() {
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(globalSymbolChanged(_:)),
+            name: AppSelectionState.symbolDidChange,
+            object: nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(globalCurrencyChanged(_:)),
+            name: AppSelectionState.currencyDidChange,
+            object: nil
+        )
     }
     
     private func setupView() {
@@ -113,18 +118,7 @@ class ChartDetailViewController: NSViewController {
     // MARK: - Setup UI
     
     private func setupUI() {
-        
-        symbolTextField.placeholderString =
-            "Hisse Kodu (örn: SISE)"
-        
-        symbolTextField.stringValue = "SISE"
-        symbolTextField.translatesAutoresizingMaskIntoConstraints = false
-        
-        fetchButton.title = "Veri Getir"
-        fetchButton.target = self
-        fetchButton.action = #selector(fetchButtonClicked)
-        fetchButton.translatesAutoresizingMaskIntoConstraints = false
-        
+    
         chartContainerView.translatesAutoresizingMaskIntoConstraints = false
         
         // -------------------------------------------------
@@ -156,10 +150,7 @@ class ChartDetailViewController: NSViewController {
         // Currency Control
         // -------------------------------------------------
         
-        view.addSubview(currencyControl)
         
-        currencyControl.target = self
-        currencyControl.action = #selector(currencyChanged)
         
         // -------------------------------------------------
         // SMA Container
@@ -171,136 +162,85 @@ class ChartDetailViewController: NSViewController {
         
         view.addSubview(smaContainerView)
         
-        NSLayoutConstraint.deactivate(
-            view.constraints
-        )
+      
         
         NSLayoutConstraint.activate([
-            
-            // -------------------------------------------------
-            // Symbol
-            // -------------------------------------------------
-            
-            symbolTextField.topAnchor.constraint(
-                equalTo: view.topAnchor,
-                constant: 40
-            ),
-            
-            symbolTextField.leadingAnchor.constraint(
-                equalTo: view.leadingAnchor,
-                constant: 20
-            ),
-            
-            symbolTextField.widthAnchor.constraint(
-                equalToConstant: 150
-            ),
-            
-            // -------------------------------------------------
-            // Fetch Button
-            // -------------------------------------------------
-            
-            fetchButton.leadingAnchor.constraint(
-                equalTo: symbolTextField.trailingAnchor,
-                constant: 8
-            ),
-            
-            fetchButton.centerYAnchor.constraint(
-                equalTo: symbolTextField.centerYAnchor
-            ),
-            
-            // -------------------------------------------------
-            // Chart
-            // -------------------------------------------------
-            
-            chartContainerView.topAnchor.constraint(
-                equalTo: symbolTextField.bottomAnchor,
-                constant: 20
-            ),
-            
-            chartContainerView.leadingAnchor.constraint(
-                equalTo: view.leadingAnchor,
-                constant: 20
-            ),
-            
-            chartContainerView.trailingAnchor.constraint(
-                equalTo: view.trailingAnchor,
-                constant: -20
-            ),
-            
-            chartContainerView.bottomAnchor.constraint(
-                equalTo: view.bottomAnchor,
-                constant: -20
-            ),
-            
+
             // -------------------------------------------------
             // Indicator Button
             // -------------------------------------------------
-            
+
             indicatorButton.leadingAnchor.constraint(
-                equalTo: fetchButton.trailingAnchor,
-                constant: 8
+                equalTo: view.leadingAnchor,
+                constant: 20
             ),
-            
-            indicatorButton.centerYAnchor.constraint(
-                equalTo: symbolTextField.centerYAnchor
+
+            indicatorButton.topAnchor.constraint(
+                equalTo: view.topAnchor,
+                constant: 40
             ),
-            
+
             // -------------------------------------------------
             // Period Control
             // -------------------------------------------------
-            
+
             periodControl.leadingAnchor.constraint(
                 equalTo: indicatorButton.trailingAnchor,
                 constant: 8
             ),
-            
+
             periodControl.centerYAnchor.constraint(
                 equalTo: indicatorButton.centerYAnchor
             ),
-            
+
             periodControl.widthAnchor.constraint(
                 equalToConstant: 150
             ),
-            
-            // -------------------------------------------------
-            // Currency Control - SAĞ ÜST
-            // -------------------------------------------------
-            
-            currencyControl.trailingAnchor.constraint(
-                equalTo: view.trailingAnchor,
-                constant: -20
-            ),
-            
-            currencyControl.topAnchor.constraint(
-                equalTo: view.topAnchor,
-                constant: 40
-            ),
-            
-            currencyControl.widthAnchor.constraint(
-                equalToConstant: 100
-            ),
-            
+
             // -------------------------------------------------
             // SMA Container
             // -------------------------------------------------
-            
-            smaContainerView.topAnchor.constraint(
-                equalTo: view.topAnchor,
-                constant: 40
-            ),
-            
+
             smaContainerView.leadingAnchor.constraint(
                 equalTo: periodControl.trailingAnchor,
                 constant: 10
             ),
-            
+
             smaContainerView.trailingAnchor.constraint(
-                equalTo: currencyControl.leadingAnchor,
-                constant: -10
+                equalTo: view.trailingAnchor,
+                constant: -20
             ),
-            
+
+            smaContainerView.centerYAnchor.constraint(
+                equalTo: indicatorButton.centerYAnchor
+            ),
+
             smaContainerView.heightAnchor.constraint(
                 equalToConstant: 25
+            ),
+
+            // -------------------------------------------------
+            // Chart
+            // -------------------------------------------------
+
+            chartContainerView.topAnchor.constraint(
+                equalTo: indicatorButton.bottomAnchor,
+                constant: 20
+            ),
+
+            chartContainerView.leadingAnchor.constraint(
+                equalTo: view.leadingAnchor,
+                constant: 20
+            ),
+
+            chartContainerView.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -20
+            ),
+
+            chartContainerView.bottomAnchor.constraint(
+                equalTo: view.bottomAnchor,
+                constant: -20
             )
         ])
         
@@ -351,104 +291,133 @@ class ChartDetailViewController: NSViewController {
         )
     }
     
-    // MARK: - External Stock Selection
 
-    func selectStock(symbol: String) {
+    // MARK: - Actions
+    
+    @objc private func globalCurrencyChanged(
+        _ notification: Notification
+    ) {
 
-        let normalizedSymbol = symbol
-            .trimmingCharacters(
-                in: .whitespacesAndNewlines
-            )
-            .uppercased()
+        switch AppSelectionState.shared.selectedCurrency {
+
+        case .tryCurrency:
+            chartCurrency = .tryCurrency
+
+        case .usd:
+            chartCurrency = .usd
+        }
+
+        guard !dailyCandlesticks.isEmpty else {
+            return
+        }
+
+        if chartCurrency == .usd {
+
+            let hasUSDData =
+                dailyCandlesticks.contains {
+                    $0.usdMax != nil ||
+                    $0.usdMin != nil ||
+                    $0.usdWeightedAverage != nil
+                }
+
+            guard hasUSDData else {
+
+                chartCurrency = .tryCurrency
+
+                AppSelectionState.shared.setCurrency(
+                    .tryCurrency
+                )
+
+                showAlert(
+                    message:
+                        "Bu hisse için USD bazlı fiyat verisi bulunamadı."
+                )
+
+                return
+            }
+        }
+
+        rebuildCurrentCandlesticks()
+        applyDefaultSMAsForCurrentPeriod()
+        resetViewportForCurrentPeriod()
+
+        chartView?.needsDisplay = true
+
+        updateWindowTitle()
+    }
+    
+    @objc private func globalSymbolChanged(
+        _ notification: Notification
+    ) {
+
+        let symbol =
+            AppSelectionState.shared.selectedSymbol
+
+        fetchStockData(
+            symbol: symbol
+        )
+    }
+    
+    private func fetchStockData(symbol: String) {
+
+        let normalizedSymbol =
+            symbol
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+                .uppercased()
 
         guard !normalizedSymbol.isEmpty else {
             return
         }
 
-        symbolTextField.stringValue = normalizedSymbol
-
-        fetchButtonClicked()
-    }
-    
-    // MARK: - Actions
-    
-    @objc private func fetchButtonClicked() {
-        
-        let symbol =
-            symbolTextField.stringValue
-                .trimmingCharacters(
-                    in: .whitespacesAndNewlines
-                )
-                .uppercased()
-        
-        guard !symbol.isEmpty else {
-            
-            showAlert(
-                message:
-                    "Lütfen bir hisse kodu girin (örn: SISE, SNGYO, THYAO)"
-            )
-            
-            return
-        }
-        
         let endDate = Date()
-        
+
         let startDate =
             Calendar.current.date(
                 byAdding: .day,
                 value: -1000,
                 to: endDate
             ) ?? endDate
-        
-        fetchButton.isEnabled = false
-        fetchButton.title = "Yükleniyor..."
-        
+
         IsYatirimService.shared.fetchHisseVerileri(
-            hisse: symbol,
+            hisse: normalizedSymbol,
             startDate: startDate,
             endDate: endDate
         ) { [weak self] result in
-            
+
             DispatchQueue.main.async {
-                
-                self?.fetchButton.isEnabled = true
-                self?.fetchButton.title = "Veri Getir"
-                
+
                 switch result {
-                    
+
                 case .success(let candlesticks):
-                    
+
                     if candlesticks.isEmpty {
-                        
+
                         self?.showAlert(
                             message:
-                                "\(symbol) için veri bulunamadı.\nLütfen tarih aralığını kontrol edin."
+                                "\(normalizedSymbol) için veri bulunamadı.\nLütfen tarih aralığını kontrol edin."
                         )
-                        
+
                     } else {
-                        
+
                         self?.dailyCandlesticks =
                             candlesticks
-                        
+
                         self?.rebuildCurrentCandlesticks()
-                        
                         self?.applyDefaultSMAsForCurrentPeriod()
-                        
                         self?.resetViewportForCurrentPeriod()
-                        
                         self?.updateWindowTitle()
                     }
-                    
+
                 case .failure(let error):
-                    
+
                     self?.showAlert(
                         message:
                             "Veri çekilirken hata oluştu:\n\(error.localizedDescription)"
                     )
-                    
-                    print(
-                        "Hata: \(error)"
-                    )
+
+                    print("Hata: \(error)")
                 }
             }
         }
@@ -487,68 +456,6 @@ class ChartDetailViewController: NSViewController {
         updateWindowTitle()
     }
     
-    // MARK: - Currency
-    
-    @objc
-    private func currencyChanged(
-        _ sender: NSSegmentedControl
-    ) {
-        
-        switch sender.selectedSegment {
-            
-        case 0:
-            
-            chartCurrency = .tryCurrency
-            
-        case 1:
-            
-            chartCurrency = .usd
-            
-        default:
-            
-            return
-        }
-        
-        // Veri henüz yüklenmediyse sadece seçimi sakla.
-        guard !dailyCandlesticks.isEmpty else {
-            return
-        }
-        
-        // USD verisi gerçekten mevcut mu?
-        if chartCurrency == .usd {
-            
-            let hasUSDData =
-                dailyCandlesticks.contains {
-                    $0.usdMax != nil ||
-                    $0.usdMin != nil ||
-                    $0.usdWeightedAverage != nil
-                }
-            
-            guard hasUSDData else {
-                
-                // USD verisi yoksa TRY'ye geri dön.
-                chartCurrency = .tryCurrency
-                currencyControl.selectedSegment = 0
-                
-                showAlert(
-                    message:
-                        "Bu hisse için USD bazlı fiyat verisi bulunamadı."
-                )
-                
-                return
-            }
-        }
-        
-        rebuildCurrentCandlesticks()
-        
-        applyDefaultSMAsForCurrentPeriod()
-        
-        resetViewportForCurrentPeriod()
-        
-        chartView?.needsDisplay = true
-        
-        updateWindowTitle()
-    }
     
     // MARK: - Rebuild Current Candlesticks
     
@@ -689,8 +596,7 @@ class ChartDetailViewController: NSViewController {
     
     private func updateWindowTitle() {
         
-        let symbol =
-            symbolTextField.stringValue.uppercased()
+        let symbol = AppSelectionState.shared.selectedSymbol
         
         let periodText: String
         
@@ -909,23 +815,6 @@ class ChartDetailViewController: NSViewController {
     }
 }
 
-// MARK: - SidebarSelection Delegate
-extension ChartDetailViewController: SidebarSelectionDelegate {
-
-    func sidebar(
-        _ sidebar: SidebarViewController,
-        didSelect selection: SidebarSelection
-    ) {
-        switch selection {
-
-        case .stock(let symbol):
-            symbolTextField.stringValue = symbol
-            fetchButtonClicked()
-        }
-    }
-}
-
-
 // MARK: - Refresh
 
 extension ChartDetailViewController {
@@ -993,27 +882,3 @@ extension ChartDetailViewController:
     }
 }
 
-// MARK: - NSTextFieldDelegate
-
-extension ChartDetailViewController:
-    NSTextFieldDelegate {
-    
-    func control(
-        _ control: NSControl,
-        textView: NSTextView,
-        doCommandBy commandSelector: Selector
-    ) -> Bool {
-        
-        if commandSelector ==
-            #selector(
-                NSResponder.insertNewline(_:)
-            ) {
-            
-            self.fetchButtonClicked()
-            
-            return true
-        }
-        
-        return false
-    }
-}

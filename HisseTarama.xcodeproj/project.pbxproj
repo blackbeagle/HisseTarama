@@ -56,6 +56,7 @@
 		1C9726F73034E4C50078AC24 /* FundamentalsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9726F63034E4C50078AC24 /* FundamentalsViewController.swift */; };
 		1C9726F93034EA8D0078AC24 /* DetailTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9726F83034EA8D0078AC24 /* DetailTabViewController.swift */; };
 		1C9726FB3034EAFA0078AC24 /* DashboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9726FA3034EAFA0078AC24 /* DashboardViewController.swift */; };
+		1CEDCE83303CC625007BA494 /* AppSelectionState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CEDCE82303CC625007BA494 /* AppSelectionState.swift */; };
 		1CFA03312F798352008D3A52 /* IndicatorCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */; };
 		1CFA03332F798392008D3A52 /* IndicatorPopupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */; };
 /* End PBXBuildFile section */
@@ -112,6 +113,7 @@
 		1C9726F63034E4C50078AC24 /* FundamentalsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundamentalsViewController.swift; sourceTree = "<group>"; };
 		1C9726F83034EA8D0078AC24 /* DetailTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTabViewController.swift; sourceTree = "<group>"; };
 		1C9726FA3034EAFA0078AC24 /* DashboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewController.swift; sourceTree = "<group>"; };
+		1CEDCE82303CC625007BA494 /* AppSelectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSelectionState.swift; sourceTree = "<group>"; };
 		1CFA03302F798352008D3A52 /* IndicatorCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorCalculator.swift; sourceTree = "<group>"; };
 		1CFA03322F798392008D3A52 /* IndicatorPopupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndicatorPopupViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -145,6 +147,7 @@
 				1C64D7A83036504300D69EFB /* StockCurrency.swift */,
 				1C64D7AA3036505C00D69EFB /* StockDataQuery.swift */,
 				1C42C458303A45720069583B /* FinancialStatementItem.swift */,
+				1CEDCE82303CC625007BA494 /* AppSelectionState.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -404,6 +407,7 @@
 				1C645CA92F7735F0007E1F5C /* SidebarViewController.swift in Sources */,
 				1C64D7A33036453D00D69EFB /* FinancialStatements.swift in Sources */,
 				1C64D7A93036504300D69EFB /* StockCurrency.swift in Sources */,
+				1CEDCE83303CC625007BA494 /* AppSelectionState.swift in Sources */,
 				1C4ED3722FFAEA3F00DC0AAC /* SMARenderer.swift in Sources */,
 				1C645CC92F7884F2007E1F5C /* IsYatirimResponse.swift in Sources */,
 				1C42C45D303A55710069583B /* FundamentalChartViewController.swift in Sources */,
