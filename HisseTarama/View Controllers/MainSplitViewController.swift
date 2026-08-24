@@ -186,7 +186,7 @@ class MainSplitViewController: NSSplitViewController,
         }
         
         // GEÇİCİ TEST
-            FinancialDataService.shared.testFetch()
+           // FinancialDataService.shared.testFetch()
     }
 
     override func viewDidLayout() {

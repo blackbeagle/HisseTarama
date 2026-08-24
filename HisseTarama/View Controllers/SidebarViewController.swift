@@ -18,25 +18,237 @@ final class SidebarViewController: NSViewController {
 
     private var items: [SidebarItem] = []
 
+    // MARK: - Global Controls
+
+    private let currencyControl: NSSegmentedControl = {
+        let control = NSSegmentedControl(
+            labels: ["TRY", "USD"],
+            trackingMode: .selectOne,
+            target: nil,
+            action: nil
+        )
+
+        control.selectedSegment = 0
+        control.segmentStyle = .rounded
+
+        // Daha büyük yazı
+        control.font = NSFont.systemFont(
+            ofSize: 16,
+            weight: .semibold
+        )
+
+        return control
+    }()
+
+    private let symbolTextField: NSTextField = {
+        let textField = NSTextField()
+
+        textField.placeholderString = "Hisse"
+        textField.font = NSFont.systemFont(ofSize: 13)
+
+        return textField
+    }()
+
+    private let fetchButton: NSButton = {
+        let button = NSButton()
+
+        button.bezelStyle = .texturedRounded
+        button.isBordered = true
+        button.imagePosition = .imageOnly
+        button.toolTip = "Hisse verilerini getir / güncelle"
+
+        if #available(macOS 11.0, *) {
+            button.image = NSImage(
+                systemSymbolName: "arrow.clockwise",
+                accessibilityDescription: "Güncelle"
+            )
+        } else {
+            button.title = "↻"
+        }
+
+        return button
+    }()
+
+    private let globalControlsStack: NSStackView = {
+
+        let stack = NSStackView()
+
+        stack.orientation = .vertical
+        stack.alignment = .leading
+        stack.distribution = .fill
+        stack.spacing = 8
+
+        return stack
+    }()
+
+    private let symbolRowStack: NSStackView = {
+        let stack = NSStackView()
+
+        stack.orientation = .horizontal
+        stack.alignment = .centerY
+        stack.distribution = .fill
+        stack.spacing = 6
+
+        return stack
+    }()
+
     // MARK: - Lifecycle
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        configureGlobalControls()
         configureOutlineView()
         rebuildItems()
     }
 
-    // MARK: - Setup
+    // MARK: - Global Controls
+
+    private func configureGlobalControls() {
+
+        globalControlsStack.translatesAutoresizingMaskIntoConstraints = false
+        symbolRowStack.translatesAutoresizingMaskIntoConstraints = false
+
+        currencyControl.translatesAutoresizingMaskIntoConstraints = false
+        symbolTextField.translatesAutoresizingMaskIntoConstraints = false
+        fetchButton.translatesAutoresizingMaskIntoConstraints = false
+
+        // -------------------------------------------------
+        // Hisse satırı
+        // -------------------------------------------------
+
+        symbolRowStack.addArrangedSubview(symbolTextField)
+        symbolRowStack.addArrangedSubview(fetchButton)
+
+        // -------------------------------------------------
+        // Ana kontrol alanı
+        // -------------------------------------------------
+
+        globalControlsStack.addArrangedSubview(currencyControl)
+        globalControlsStack.addArrangedSubview(symbolRowStack)
+
+        view.addSubview(globalControlsStack)
+
+        // -------------------------------------------------
+        // Kontrol alanı
+        // -------------------------------------------------
+
+        NSLayoutConstraint.activate([
+
+            globalControlsStack.leadingAnchor.constraint(
+                equalTo: view.leadingAnchor,
+                constant: 10
+            ),
+
+            globalControlsStack.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor,
+                constant: -10
+            ),
+
+            globalControlsStack.topAnchor.constraint(
+                equalTo: view.topAnchor,
+                constant: 50
+            ),
+
+            currencyControl.widthAnchor.constraint(
+                equalTo: globalControlsStack.widthAnchor
+            ),
+
+            currencyControl.heightAnchor.constraint(
+                equalToConstant: 44
+            ),
+
+            symbolRowStack.leadingAnchor.constraint(
+                equalTo: globalControlsStack.leadingAnchor
+            ),
+
+            symbolRowStack.trailingAnchor.constraint(
+                equalTo: globalControlsStack.trailingAnchor
+            ),
+
+            symbolTextField.heightAnchor.constraint(
+                equalToConstant: 26
+            ),
+
+            fetchButton.widthAnchor.constraint(
+                equalToConstant: 30
+            ),
+
+            fetchButton.heightAnchor.constraint(
+                equalToConstant: 26
+            )
+        ])
+
+        // -------------------------------------------------
+        // OutlineView'ın içinde bulunduğu ScrollView
+        // -------------------------------------------------
+
+        guard let scrollView = outlineView.enclosingScrollView else {
+            return
+        }
+
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+
+        // Storyboard'dan gelen mevcut konum constraint'lerini
+        // kaldırıyoruz.
+        removeConstraintsForScrollView(scrollView)
+
+        NSLayoutConstraint.activate([
+
+            scrollView.leadingAnchor.constraint(
+                equalTo: view.leadingAnchor
+            ),
+
+            scrollView.trailingAnchor.constraint(
+                equalTo: view.trailingAnchor
+            ),
+
+            scrollView.bottomAnchor.constraint(
+                equalTo: view.bottomAnchor
+            ),
+
+            scrollView.topAnchor.constraint(
+                equalTo: globalControlsStack.bottomAnchor,
+                constant: 12
+            )
+        ])
+
+        // Kontroller scroll view'ın üzerinde görünsün.
+        view.addSubview(globalControlsStack, positioned: .above, relativeTo: scrollView)
+    }
+
+    // MARK: - Scroll View Constraints
+
+    private func removeConstraintsForScrollView(
+        _ scrollView: NSScrollView
+    ) {
+
+        let constraints = view.constraints.filter { constraint in
+
+            guard
+                let firstView = constraint.firstItem as? NSView
+            else {
+                return false
+            }
+
+            let secondView =
+                constraint.secondItem as? NSView
+
+            return firstView === scrollView ||
+                   secondView === scrollView
+        }
+
+        view.removeConstraints(constraints)
+    }
+
+    // MARK: - Outline View
 
     private func configureOutlineView() {
 
         outlineView.dataSource = self
         outlineView.delegate = self
-
         outlineView.allowsEmptySelection = false
         outlineView.allowsMultipleSelection = false
-
         outlineView.selectionHighlightStyle = .sourceList
     }
 
@@ -106,9 +318,10 @@ final class SidebarViewController: NSViewController {
                 expandChildren: true
             )
         }
-        
     }
 }
+
+// MARK: - NSOutlineViewDataSource
 
 extension SidebarViewController: NSOutlineViewDataSource {
 
@@ -150,6 +363,7 @@ extension SidebarViewController: NSOutlineViewDataSource {
     }
 }
 
+// MARK: - NSOutlineViewDelegate
 
 extension SidebarViewController: NSOutlineViewDelegate {
 
@@ -199,6 +413,7 @@ extension SidebarViewController: NSOutlineViewDelegate {
         }
 
         // Sadece hisse seçilebilir.
+
         guard
             let stock = item.stock
         else {
