@@ -8,6 +8,19 @@ class MainSplitViewController: NSSplitViewController,
     // MARK: - Properties
 
     private var sidebarWasCollapsed = false
+    
+    
+    // MARK: - Data Fetch Coordination
+
+    private var fetchStatusSymbol: String?
+
+    private var technicalFetchFinished = false
+    private var fundamentalFetchFinished = false
+
+    private var technicalFetchSuccess = false
+    private var fundamentalFetchSuccess = false
+    
+
 
     // MARK: - View Lifecycle
 
@@ -326,9 +339,17 @@ class MainSplitViewController: NSSplitViewController,
             )
         }
     }
+    
     private func showSelectedStock(
         _ stock: Stock
     ) {
+
+        // Yeni hisse için teknik + temel veri
+        // sonuç takibini başlat.
+        beginFetchTracking(
+            for: stock.symbol
+        )
+
         print(
             "Seçilen hisse: \(stock.symbol)"
         )
@@ -345,9 +366,11 @@ class MainSplitViewController: NSSplitViewController,
         guard let detailTabVC =
             children.last as? DetailTabViewController
         else {
+
             print(
                 "HATA: DetailTabViewController bulunamadı."
             )
+
             return
         }
 
@@ -355,6 +378,226 @@ class MainSplitViewController: NSSplitViewController,
             symbol: stock.symbol
         )
     }
+    
+
+    
+    
+    // MARK: - Data Fetch Coordination
+
+    private func beginFetchTracking(
+        for symbol: String
+    ) {
+
+        let normalizedSymbol =
+            symbol
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+                .uppercased()
+
+        fetchStatusSymbol = normalizedSymbol
+
+        technicalFetchFinished = false
+        fundamentalFetchFinished = false
+
+        technicalFetchSuccess = false
+        fundamentalFetchSuccess = false
+
+        print(
+            "VERİ TAKİBİ BAŞLADI: \(normalizedSymbol)"
+        )
+    }
+
+    // MARK: - Technical Data Result
+
+    func technicalDataDidFinish(
+        symbol: String,
+        success: Bool
+    ) {
+
+        print( "MAIN SPLIT: technicalDataDidFinish GELDİ - \(symbol) - \(success)" )
+        DispatchQueue.main.async { [weak self] in
+
+            guard let self = self else {
+                return
+            }
+
+            let normalizedSymbol =
+                symbol
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+                    .uppercased()
+
+            guard
+                let currentSymbol =
+                    self.fetchStatusSymbol,
+                normalizedSymbol == currentSymbol
+            else {
+                return
+            }
+
+            self.technicalFetchFinished = true
+            self.technicalFetchSuccess = success
+
+        
+            print(
+                "TRACKING DURUMU - TEKNİK: " +
+                "technical=\(self.technicalFetchFinished), " +
+                "fundamental=\(self.fundamentalFetchFinished), " +
+                "symbol=\(self.fetchStatusSymbol ?? "-")"
+            )
+            
+
+            self.evaluateFetchResult()
+        }
+    }
+
+    // MARK: - Fundamental Data Result
+
+    func fundamentalDataDidFinish(
+        symbol: String,
+        success: Bool
+    ) {
+        
+        print( "MAIN SPLIT: fundamentalDataDidFinish GELDİ - \(symbol) - \(success)" )
+
+        DispatchQueue.main.async { [weak self] in
+
+            guard let self = self else {
+                return
+            }
+
+            let normalizedSymbol =
+                symbol
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+                    .uppercased()
+
+            guard
+                let currentSymbol =
+                    self.fetchStatusSymbol,
+                normalizedSymbol == currentSymbol
+            else {
+                return
+            }
+
+            self.fundamentalFetchFinished = true
+            self.fundamentalFetchSuccess = success
+
+            print(
+                "TRACKING DURUMU - TEMEL: " +
+                "technical=\(self.technicalFetchFinished), " +
+                "fundamental=\(self.fundamentalFetchFinished), " +
+                "symbol=\(self.fetchStatusSymbol ?? "-")"
+            )
+
+            self.evaluateFetchResult()
+        }
+    }
+
+    // MARK: - Evaluate Fetch Result
+
+    private func evaluateFetchResult() {
+
+        // İki veri kaynağından da cevap gelmeden
+        // alert gösterme.
+        guard
+            technicalFetchFinished,
+            fundamentalFetchFinished
+        else {
+            print(
+                "VERİ TAKİBİ: İki sonuç da henüz gelmedi."
+            )
+            return
+        }
+
+        guard
+            let symbol = fetchStatusSymbol
+        else {
+            return
+        }
+
+        print(
+            "================================"
+        )
+
+        print(
+            "TEKNİK + TEMEL VERİ TAKİBİ TAMAMLANDI"
+        )
+
+        print(
+            "Hisse: \(symbol)"
+        )
+
+        print(
+            "Teknik başarılı: \(technicalFetchSuccess)"
+        )
+
+        print(
+            "Temel başarılı: \(fundamentalFetchSuccess)"
+        )
+
+        print(
+            "================================"
+        )
+
+        var messages: [String] = []
+
+        if !technicalFetchSuccess {
+            messages.append(
+                "Hisse fiyat bilgileri alınamadı."
+            )
+        }
+
+        if !fundamentalFetchSuccess {
+            messages.append(
+                "Hisse Bilanço verisi alınamadı."
+            )
+        }
+
+        // İki veri de başarılıysa alert gösterme.
+        guard !messages.isEmpty else {
+            print(
+                "Her iki veri de başarıyla alındı."
+            )
+            return
+        }
+
+        showCombinedDataErrorAlert(
+            symbol: symbol,
+            messages: messages
+        )
+    }
+
+    // MARK: - Combined Data Error Alert
+
+    private func showCombinedDataErrorAlert(
+        symbol: String,
+        messages: [String]
+    ) {
+
+        let alert = NSAlert()
+
+        alert.messageText =
+            "\(symbol) verileri alınamadı"
+
+        alert.informativeText =
+            messages.joined(
+                separator: "\n"
+            )
+
+        alert.alertStyle = .warning
+
+        alert.addButton(
+            withTitle: "Tamam"
+        )
+
+        alert.runModal()
+    }
+    
+
 
     // MARK: - Deinit
 

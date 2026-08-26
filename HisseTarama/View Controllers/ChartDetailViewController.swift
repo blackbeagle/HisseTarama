@@ -64,6 +64,11 @@ class ChartDetailViewController: NSViewController {
 
         return control
     }()
+    
+    // MARK: - Data Fetch Result
+
+    var onDataFetchCompleted:
+        ((String, Bool) -> Void)?
 
     // MARK: - Lifecycle
 
@@ -437,10 +442,7 @@ class ChartDetailViewController: NSViewController {
                     .tryCurrency
                 )
 
-                showAlert(
-                    message:
-                        "Bu hisse için USD bazlı fiyat verisi bulunamadı."
-                )
+           
 
                 return
             }
@@ -464,7 +466,7 @@ class ChartDetailViewController: NSViewController {
             symbol: symbol
         )
     }
-
+ 
     // MARK: - Fetch Stock Data
 
     private func fetchStockData(
@@ -542,57 +544,38 @@ class ChartDetailViewController: NSViewController {
                 }
 
                 switch result {
-
+                    
                 case .success(let candlesticks):
-
-                    // -------------------------------------------------
-                    // Loading kapat
-                    // -------------------------------------------------
 
                     self.hideLoadingOverlay()
 
                     if candlesticks.isEmpty {
-
-                        // Eski grafik korunuyor.
-
-                        self.showAlert(
-                            message:
-                                "\(normalizedSymbol) için veri bulunamadı.\nLütfen tekrar deneyin."
+                        self.onDataFetchCompleted?(
+                            normalizedSymbol,
+                            false
                         )
-
                         return
                     }
 
-                    // -------------------------------------------------
-                    // Yeni veri
-                    // -------------------------------------------------
-
-                    self.dailyCandlesticks =
-                        candlesticks
+                    self.dailyCandlesticks = candlesticks
 
                     self.rebuildCurrentCandlesticks()
-
                     self.applyDefaultSMAsForCurrentPeriod()
-
                     self.resetViewportForCurrentPeriod()
-
                     self.chartView?.needsDisplay = true
 
+                    self.onDataFetchCompleted?(
+                        normalizedSymbol,
+                        true
+                    )
+        
                 case .failure(let error):
-
-                    // -------------------------------------------------
-                    // Loading kapat
-                    // -------------------------------------------------
 
                     self.hideLoadingOverlay()
 
-                    // -------------------------------------------------
-                    // Eski grafik korunuyor.
-                    // -------------------------------------------------
-
-                    self.showAlert(
-                        message:
-                            "\(normalizedSymbol) verileri alınamadı.\n\n\(error.localizedDescription)"
+                    self.onDataFetchCompleted?(
+                        normalizedSymbol,
+                        false
                     )
 
                     print(
@@ -744,28 +727,7 @@ class ChartDetailViewController: NSViewController {
         chartView.needsDisplay = true
     }
 
-    // MARK: - Alert
 
-    private func showAlert(
-        message: String
-    ) {
-
-        let alert = NSAlert()
-
-        alert.messageText = "Veri Alınamadı"
-
-        alert.informativeText =
-            message
-
-        alert.alertStyle =
-            .warning
-
-        alert.addButton(
-            withTitle: "Tamam"
-        )
-
-        alert.runModal()
-    }
 
     // MARK: - Indicators
 

@@ -21,6 +21,22 @@ final class FundamentalsViewController: NSViewController {
     private var currentStockSymbol:
         String?
 
+    // -------------------------------------------------
+    // Veri çekme durumu
+    // -------------------------------------------------
+
+    private var currentFetchID = UUID()
+
+    // MARK: - Loading Overlay
+
+    private var loadingOverlay: NSView?
+
+    private var loadingIndicator:
+        NSProgressIndicator?
+
+    private var loadingLabel:
+        NSTextField?
+
     // MARK: - UI
 
     private let separatorView: NSBox = {
@@ -29,10 +45,17 @@ final class FundamentalsViewController: NSViewController {
 
         box.boxType = .separator
 
-        box.translatesAutoresizingMaskIntoConstraints = false
+        box.translatesAutoresizingMaskIntoConstraints =
+            false
 
         return box
     }()
+    
+    
+    // MARK: - Data Fetch Result
+
+    var onDataFetchCompleted:
+        ((String, Bool) -> Void)?
 
     // MARK: - Lifecycle
 
@@ -42,38 +65,50 @@ final class FundamentalsViewController: NSViewController {
     }
 
     override func viewDidLoad() {
+
         super.viewDidLoad()
 
-        // FinancialDataService.shared.testFetch()
-
         setupView()
+
         setupSidebar()
+
         setupChart()
+
         setupGlobalSelectionObservers()
 
-        // Uygulama açılırken global state'te bir hisse varsa yükle.
-        let symbol = AppSelectionState.shared.selectedSymbol
+        // Uygulama açılırken global state'te
+        // bir hisse varsa yükle.
+
+        let symbol =
+            AppSelectionState.shared.selectedSymbol
 
         if !symbol.isEmpty {
-            selectStock(symbol: symbol)
+
+            selectStock(
+                symbol: symbol
+            )
         }
     }
-    
+
     // MARK: - Global Selection
 
     private func setupGlobalSelectionObservers() {
 
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(globalSymbolChanged(_:)),
-            name: AppSelectionState.symbolDidChange,
+            selector:
+                #selector(globalSymbolChanged(_:)),
+            name:
+                AppSelectionState.symbolDidChange,
             object: nil
         )
 
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(globalCurrencyChanged(_:)),
-            name: AppSelectionState.currencyDidChange,
+            selector:
+                #selector(globalCurrencyChanged(_:)),
+            name:
+                AppSelectionState.currencyDidChange,
             object: nil
         )
     }
@@ -81,6 +116,7 @@ final class FundamentalsViewController: NSViewController {
     @objc private func globalSymbolChanged(
         _ notification: Notification
     ) {
+
         let symbol =
             AppSelectionState.shared.selectedSymbol
 
@@ -88,18 +124,23 @@ final class FundamentalsViewController: NSViewController {
             return
         }
 
-        selectStock(symbol: symbol)
+        selectStock(
+            symbol: symbol
+        )
     }
 
     @objc private func globalCurrencyChanged(
         _ notification: Notification
     ) {
-        
+
         print(
-               "TEMEL GLOBAL PARA BİRİMİ:",
-               AppSelectionState.shared.selectedCurrency.title
-           )
-        
+            "TEMEL GLOBAL PARA BİRİMİ:",
+            AppSelectionState.shared
+                .selectedCurrency
+                .stockCurrency
+                .apiValue
+        )
+
         guard
             let symbol = currentStockSymbol,
             !symbol.isEmpty
@@ -107,12 +148,20 @@ final class FundamentalsViewController: NSViewController {
             return
         }
 
-        // Para birimi değiştiğinde finansal verileri
-        // yeni para birimiyle tekrar çek.
-        financialItems.removeAll()
-        financialPeriods.removeAll()
+        // -------------------------------------------------
+        // Para birimi değiştiğinde eski finansal verileri
+        // temizliyoruz.
+        // -------------------------------------------------
 
-        chartViewController.clearChart()
+        //financialItems.removeAll()
+
+        //financialPeriods.removeAll()
+
+        //chartViewController.clearChart()
+
+        // -------------------------------------------------
+        // Yeni para birimiyle tekrar veri çek.
+        // -------------------------------------------------
 
         fetchFinancialData(
             for: symbol
@@ -120,7 +169,10 @@ final class FundamentalsViewController: NSViewController {
     }
 
     deinit {
-        NotificationCenter.default.removeObserver(self)
+
+        NotificationCenter.default.removeObserver(
+            self
+        )
     }
 
     // MARK: - Setup
@@ -155,35 +207,43 @@ final class FundamentalsViewController: NSViewController {
         NSLayoutConstraint.activate([
 
             sidebarView.leadingAnchor.constraint(
-                equalTo: view.leadingAnchor
+                equalTo:
+                    view.leadingAnchor
             ),
 
             sidebarView.topAnchor.constraint(
-                equalTo: view.topAnchor
+                equalTo:
+                    view.topAnchor
             ),
 
             sidebarView.bottomAnchor.constraint(
-                equalTo: view.bottomAnchor
+                equalTo:
+                    view.bottomAnchor
             ),
 
             sidebarView.widthAnchor.constraint(
-                equalToConstant: 250
+                equalToConstant:
+                    250
             ),
 
             separatorView.leadingAnchor.constraint(
-                equalTo: sidebarView.trailingAnchor
+                equalTo:
+                    sidebarView.trailingAnchor
             ),
 
             separatorView.topAnchor.constraint(
-                equalTo: view.topAnchor
+                equalTo:
+                    view.topAnchor
             ),
 
             separatorView.bottomAnchor.constraint(
-                equalTo: view.bottomAnchor
+                equalTo:
+                    view.bottomAnchor
             ),
 
             separatorView.widthAnchor.constraint(
-                equalToConstant: 1
+                equalToConstant:
+                    1
             )
         ])
     }
@@ -207,24 +267,183 @@ final class FundamentalsViewController: NSViewController {
         NSLayoutConstraint.activate([
 
             chartView.leadingAnchor.constraint(
-                equalTo: separatorView.trailingAnchor
+                equalTo:
+                    separatorView.trailingAnchor
             ),
 
             chartView.trailingAnchor.constraint(
-                equalTo: view.trailingAnchor
+                equalTo:
+                    view.trailingAnchor
             ),
 
             chartView.topAnchor.constraint(
-                equalTo: view.topAnchor
+                equalTo:
+                    view.topAnchor
             ),
 
             chartView.bottomAnchor.constraint(
-                equalTo: view.bottomAnchor
+                equalTo:
+                    view.bottomAnchor
             )
         ])
     }
 
+    // MARK: - Loading Overlay
+
+    private func showLoadingOverlay(
+        for symbol: String
+    ) {
+
+        hideLoadingOverlay()
+
+        let overlay = NSView()
+
+        overlay.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        overlay.wantsLayer = true
+
+        overlay.layer?.backgroundColor =
+            NSColor.windowBackgroundColor
+                .withAlphaComponent(0.78)
+                .cgColor
+
+        // -------------------------------------------------
+        // Loading sadece temel grafik alanını kaplar.
+        //
+        // Sidebar çalışmaya devam eder.
+        // Eski grafik ise overlay'in altında korunur.
+        // -------------------------------------------------
+
+        let targetView =
+            chartViewController.view
+
+        targetView.addSubview(
+            overlay
+        )
+
+        NSLayoutConstraint.activate([
+
+            overlay.leadingAnchor.constraint(
+                equalTo:
+                    targetView.leadingAnchor
+            ),
+
+            overlay.trailingAnchor.constraint(
+                equalTo:
+                    targetView.trailingAnchor
+            ),
+
+            overlay.topAnchor.constraint(
+                equalTo:
+                    targetView.topAnchor
+            ),
+
+            overlay.bottomAnchor.constraint(
+                equalTo:
+                    targetView.bottomAnchor
+            )
+        ])
+
+        // -------------------------------------------------
+        // Indicator
+        // -------------------------------------------------
+
+        let indicator =
+            NSProgressIndicator()
+
+        indicator.style = .spinning
+
+        indicator.controlSize = .regular
+
+        indicator.isIndeterminate = true
+
+        indicator.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        indicator.startAnimation(nil)
+
+        overlay.addSubview(
+            indicator
+        )
+
+        // -------------------------------------------------
+        // Label
+        // -------------------------------------------------
+
+        let label =
+            NSTextField(
+                labelWithString:
+                    "\(symbol) temel verileri getiriliyor..."
+            )
+
+        label.font =
+            NSFont.systemFont(
+                ofSize: 14,
+                weight: .medium
+            )
+
+        label.textColor =
+            NSColor.labelColor
+
+        label.alignment = .center
+
+        label.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        overlay.addSubview(
+            label
+        )
+
+        NSLayoutConstraint.activate([
+
+            indicator.centerXAnchor.constraint(
+                equalTo:
+                    overlay.centerXAnchor
+            ),
+
+            indicator.centerYAnchor.constraint(
+                equalTo:
+                    overlay.centerYAnchor,
+                constant:
+                    -12
+            ),
+
+            label.centerXAnchor.constraint(
+                equalTo:
+                    overlay.centerXAnchor
+            ),
+
+            label.topAnchor.constraint(
+                equalTo:
+                    indicator.bottomAnchor,
+                constant:
+                    12
+            )
+        ])
+
+        loadingOverlay = overlay
+
+        loadingIndicator = indicator
+
+        loadingLabel = label
+    }
+
+    private func hideLoadingOverlay() {
+
+        loadingIndicator?.stopAnimation(nil)
+
+        loadingOverlay?.removeFromSuperview()
+
+        loadingOverlay = nil
+
+        loadingIndicator = nil
+
+        loadingLabel = nil
+    }
+
     // MARK: - Stock Selection
+
     func selectStock(
         symbol: String
     ) {
@@ -247,29 +466,42 @@ final class FundamentalsViewController: NSViewController {
             "Temel sekmesi hisse güncellendi: \(normalizedSymbol)"
         )
 
+        // -------------------------------------------------
         // Önce eski finansal verileri temizle.
-        financialItems.removeAll()
-        financialPeriods.removeAll()
+        // -------------------------------------------------
 
+        //financialItems.removeAll()
+
+        //financialPeriods.removeAll()
+
+        // -------------------------------------------------
         // Eski grafiği temizle.
-        chartViewController.clearChart()
+        // -------------------------------------------------
 
+        //chartViewController.clearChart()
+
+        // -------------------------------------------------
         // Sidebar'daki hisseyi güncelle.
+        // -------------------------------------------------
+
         sidebarViewController.updateStock(
-            symbol: normalizedSymbol
+            symbol:
+                normalizedSymbol
         )
 
-        // YENİ:
-        // Seçilen hisse için finansal verileri çek.
+        // -------------------------------------------------
+        // Yeni veri çek.
+        // -------------------------------------------------
+
         fetchFinancialData(
-            for: normalizedSymbol
+            for:
+                normalizedSymbol
         )
     }
 
     
-
-    // MARK: - Financial Data
-
+ 
+    
     // MARK: - Financial Data
 
     private func fetchFinancialData(
@@ -277,85 +509,169 @@ final class FundamentalsViewController: NSViewController {
     ) {
 
         print("================================")
-        print("TEMEL VERİ ÇEKİMİ BAŞLADI")
-        print("Hisse: \(symbol)")
+
+        print(
+            "TEMEL VERİ ÇEKİMİ BAŞLADI"
+        )
+
+        print(
+            "Hisse: \(symbol)"
+        )
+
         print("================================")
 
-        
+        let currency =
+            AppSelectionState.shared
+                .selectedCurrency
+                .stockCurrency
+
         print(
             "TEMEL SORGU PARA BİRİMİ:",
-            AppSelectionState.shared.selectedCurrency.stockCurrency.apiValue
+            currency.apiValue
         )
-        
-        let query = StockDataQuery(
-            lastFinancialPeriod: nil,
-            financialQuarterCount: 10,
-            currency: AppSelectionState.shared.selectedCurrency.stockCurrency
+
+        // -------------------------------------------------
+        // Yeni istek kimliği
+        //
+        // Teknik sekmedeki mantığın aynısı:
+        //
+        // Örneğin:
+        //
+        // SISE temel verisi beklenirken
+        // THYAO seçilirse ve SISE cevabı
+        // daha sonra gelirse SISE sonucu
+        // kabul edilmeyecek.
+        // -------------------------------------------------
+
+        let fetchID = UUID()
+
+        currentFetchID = fetchID
+
+        // -------------------------------------------------
+        // Loading göster.
+        //
+        // Eski grafik temizlenmedi.
+        // Overlay grafiğin üzerinde gösterilecek.
+        // -------------------------------------------------
+
+        showLoadingOverlay(
+            for:
+                symbol
         )
-        
-        FinancialDataService.shared.fetchFinancialStatements(
-            companyCode: symbol,
-            query: query
-        ) { [weak self] result in
 
-            DispatchQueue.main.async {
+        let query =
+            StockDataQuery(
+                lastFinancialPeriod:
+                    nil,
+                financialQuarterCount:
+                    10,
+                currency:
+                    currency
+            )
 
-                guard let self = self else {
-                    return
-                }
+        FinancialDataService.shared
+            .fetchFinancialStatements(
+                companyCode:
+                    symbol,
+                query:
+                    query
+            ) { [weak self] result in
 
-                switch result {
+                DispatchQueue.main.async {
 
-                case .success(let statements):
+                    guard let self = self else {
+                        return
+                    }
 
-                    print("================================")
-                    print("TEMEL VERİ ALINDI")
-                    print("================================")
+                    // -------------------------------------------------
+                    // Bu cevap artık güncel değil.
+                    // -------------------------------------------------
 
-                    print(
-                        "Dönem sayısı: \(statements.periods.count)"
-                    )
+                    guard
+                        self.currentFetchID == fetchID
+                    else {
+                        return
+                    }
+                    switch result {
 
-                    print(
-                        "Finansal kalem sayısı: \(statements.items.count)"
-                    )
+                    case .success(let statements):
 
-                    self.updateFinancialData(
-                        items: statements.allItems,
-                        periods: statements.periods
-                    )
+                        // -------------------------------------------------
+                        // Loading kapat
+                        // -------------------------------------------------
 
-                case .failure(let error):
+                        self.hideLoadingOverlay()
 
-                    print("================================")
-                    print("TEMEL VERİ HATASI")
-                    print("================================")
+                        self.onDataFetchCompleted?(
+                            symbol,
+                            true
+                        )
 
-                    print(
-                        "Hata: \(error.localizedDescription)"
-                    )
+                        print("================================")
+                        print("TEMEL VERİ ALINDI")
+                        print("================================")
+                        print(
+                            "Dönem sayısı: \(statements.periods.count)"
+                        )
+                        print(
+                            "Finansal kalem sayısı: \(statements.items.count)"
+                        )
+
+                        self.updateFinancialData(
+                            items: statements.allItems,
+                            periods: statements.periods
+                        )
+
+                    case .failure(let error):
+
+                        // -------------------------------------------------
+                        // Loading kapat
+                        // -------------------------------------------------
+
+                        self.hideLoadingOverlay()
+                        
+                        print(
+                                "TEMEL CALLBACK ÇAĞRILIYOR: \(symbol) - false"
+                            )
+
+                        self.onDataFetchCompleted?(
+                            symbol,
+                            false
+                        )
+
+                        print("================================")
+                        print("TEMEL VERİ HATASI")
+                        print("================================")
+                        print(
+                            "Hata: \(error.localizedDescription)"
+                        )
+                    }
                 }
             }
-        }
     }
-    
-    // MARK: - Financial Data
-    // MARK: - Financial Data
 
-    // MARK: - Financial Data
+    // MARK: - Financial Data Update
 
     func updateFinancialData(
-        items: [FinancialStatementItem],
-        periods: [FinancialPeriod]
+        items:
+            [FinancialStatementItem],
+        periods:
+            [FinancialPeriod]
     ) {
-        print(">>> updateFinancialData ÇAĞRILDI <<<")
+
+        print(
+            ">>> updateFinancialData ÇAĞRILDI <<<"
+        )
 
         // ---------------------------------------------------------
         // Finansal verileri controller içinde sakla
         // ---------------------------------------------------------
 
-        financialItems = items
-        financialPeriods = periods
+        financialItems =
+            items
+
+        financialPeriods =
+            periods
 
         print(
             "Gelen finansal kalem sayısı: \(items.count)"
@@ -378,7 +694,8 @@ final class FundamentalsViewController: NSViewController {
         // ---------------------------------------------------------
 
         sidebarViewController.updateFinancialItems(
-            items: financialItems
+            items:
+                financialItems
         )
 
         print(
@@ -395,18 +712,23 @@ final class FundamentalsViewController: NSViewController {
         // Test amacıyla ilk finansal kalemi grafiğe gönder
         // ---------------------------------------------------------
 
-        if !financialItems.isEmpty &&
-            !financialPeriods.isEmpty {
+        if
+            !financialItems.isEmpty &&
+            !financialPeriods.isEmpty
+        {
 
-            let firstItem = financialItems[0]
+            let firstItem =
+                financialItems[0]
 
             print(
                 "Test grafik kalemi: \(firstItem.itemCode) - \(firstItem.titleTR)"
             )
 
             chartViewController.show(
-                items: [firstItem],
-                periods: financialPeriods
+                items:
+                    [firstItem],
+                periods:
+                    financialPeriods
             )
 
             print(
@@ -422,11 +744,13 @@ final class FundamentalsViewController: NSViewController {
     // MARK: - Selection
 
     private func showSelection(
-        _ selection: FundamentalSelection
+        _ selection:
+            FundamentalSelection
     ) {
 
-        guard !financialItems.isEmpty,
-              !financialPeriods.isEmpty
+        guard
+            !financialItems.isEmpty,
+            !financialPeriods.isEmpty
         else {
 
             print(
@@ -448,7 +772,8 @@ final class FundamentalsViewController: NSViewController {
             selectedItems =
                 financialItems.filter {
 
-                    $0.itemCode == itemCode
+                    $0.itemCode ==
+                        itemCode
                 }
 
         case .group(
@@ -457,12 +782,12 @@ final class FundamentalsViewController: NSViewController {
 
             selectedItems =
                 itemCodes.compactMap {
-
                     code in
 
                     financialItems.first {
 
-                        $0.itemCode == code
+                        $0.itemCode ==
+                            code
                     }
                 }
         }
@@ -488,9 +813,37 @@ final class FundamentalsViewController: NSViewController {
         }
 
         chartViewController.show(
-            items: selectedItems,
-            periods: financialPeriods
+            items:
+                selectedItems,
+            periods:
+                financialPeriods
         )
+    }
+
+    // MARK: - Alert
+
+    private func showAlert(
+        message: String
+    ) {
+
+        let alert =
+            NSAlert()
+
+        alert.messageText =
+            "Temel Veri Alınamadı"
+
+        alert.informativeText =
+            message
+
+        alert.alertStyle =
+            .warning
+
+        alert.addButton(
+            withTitle:
+                "Tamam"
+        )
+
+        alert.runModal()
     }
 }
 
@@ -511,4 +864,3 @@ extension FundamentalsViewController:
         )
     }
 }
-

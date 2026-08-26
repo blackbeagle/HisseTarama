@@ -21,6 +21,10 @@ final class FinancialDataService {
     // 4 periyot kullanacak şekilde çalışıyor.
     private let maximumPeriodsPerRequest = 4
 
+    // Son yayınlanmış bilanço dönemini ararken
+    // geriye doğru yapılabilecek maksimum kontrol sayısı.
+    private let maximumDiscoveryAttempts = 3
+
     // MARK: - Public Fetch
 
     func fetchFinancialStatements(
@@ -47,7 +51,6 @@ final class FinancialDataService {
                     )
                 )
             )
-
             return
         }
 
@@ -65,6 +68,7 @@ final class FinancialDataService {
 
          Kullanıcı bir dönem verdiyse onu kullanıyoruz.
          nil ise API üzerinden otomatik keşif yapıyoruz.
+
          -----------------------------------------------------
          */
 
@@ -159,6 +163,8 @@ final class FinancialDataService {
                 firstCandidate,
             currency:
                 currency,
+            remainingAttempts:
+                maximumDiscoveryAttempts,
             completion:
                 completion
         )
@@ -202,6 +208,7 @@ final class FinancialDataService {
 
          Örneğin:
          Ağustos 2026 -> 2026 Q2
+
          -----------------------------------------------------
          */
 
@@ -215,7 +222,6 @@ final class FinancialDataService {
             year
 
         if completedQuarter == 0 {
-
             completedQuarter = 4
             completedYear -= 1
         }
@@ -234,13 +240,32 @@ final class FinancialDataService {
         companyCode: String,
         period: FinancialPeriod,
         currency: StockCurrency,
+        remainingAttempts: Int,
         completion: @escaping (
             Result<FinancialPeriod, Error>
         ) -> Void
     ) {
 
+        guard remainingAttempts > 0 else {
+            completion(
+                .failure(
+                    makeError(
+                        code:
+                            -13,
+                        message:
+                            "\(companyCode) için yayınlanmış bilanço dönemi bulunamadı."
+                    )
+                )
+            )
+            return
+        }
+
         print(
             "Finansal dönem kontrol ediliyor: \(period.title)"
+        )
+
+        print(
+            "Kalan dönem kontrol hakkı: \(remainingAttempts)"
         )
 
         /*
@@ -408,6 +433,31 @@ final class FinancialDataService {
                             "\(period.title) için veri yok."
                         )
 
+                        // -------------------------------------------------
+                        // Daha fazla deneme hakkı varsa bir önceki döneme geç.
+                        // Son hakkımızı kullandıysak artık yeni istek gönderme.
+                        // -------------------------------------------------
+
+                        guard remainingAttempts > 1 else {
+
+                            print(
+                                "\(companyCode) için maksimum \(self.maximumDiscoveryAttempts) dönem kontrolü tamamlandı."
+                            )
+
+                            completion(
+                                .failure(
+                                    self.makeError(
+                                        code:
+                                            -13,
+                                        message:
+                                            "\(companyCode) için yayınlanmış bilanço dönemi bulunamadı."
+                                    )
+                                )
+                            )
+
+                            return
+                        }
+
                         let previousPeriod =
                             self.previousPeriod(
                                 from:
@@ -425,6 +475,8 @@ final class FinancialDataService {
                                 previousPeriod,
                             currency:
                                 currency,
+                            remainingAttempts:
+                                remainingAttempts - 1,
                             completion:
                                 completion
                         )
@@ -486,6 +538,7 @@ final class FinancialDataService {
          4 dönem
          4 dönem
          2 dönem
+
          ---------------------------------------------------------
          */
 
@@ -739,6 +792,7 @@ final class FinancialDataService {
                             for (period, value)
                                 in item.values
                             {
+
                                 mergedValues[period] =
                                     value
                             }
@@ -936,6 +990,7 @@ final class FinancialDataService {
         if let string =
             value as? String
         {
+
             return string.trimmingCharacters(
                 in:
                     .whitespacesAndNewlines
@@ -945,6 +1000,7 @@ final class FinancialDataService {
         if let number =
             value as? NSNumber
         {
+
             return number.stringValue
         }
 
@@ -971,12 +1027,14 @@ final class FinancialDataService {
         if let number =
             value as? NSNumber
         {
+
             return number.intValue
         }
 
         if let string =
             value as? String
         {
+
             return Int(
                 string.trimmingCharacters(
                     in:
@@ -1001,6 +1059,7 @@ final class FinancialDataService {
         if let number =
             value as? NSNumber
         {
+
             return number.doubleValue
         }
 
@@ -1035,7 +1094,9 @@ final class FinancialDataService {
              Türkçe sayı formatı ihtimali:
 
              1.234,56
+
              ->
+
              1234.56
              -----------------------------------------------------
              */
@@ -1099,7 +1160,6 @@ final class FinancialDataService {
             quarter -= 1
 
             if quarter == 0 {
-
                 quarter = 4
                 year -= 1
             }
@@ -1348,7 +1408,6 @@ final class FinancialDataService {
         guard let value =
                 jsonObject["value"]
         else {
-
             return false
         }
 

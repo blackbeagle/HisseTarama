@@ -679,7 +679,7 @@
                 <customObject id="YLy-65-1bz" customClass="NSFontManager"/>
                 <customObject id="Ady-hI-5gd" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1844" y="-1301"/>
+            <point key="canvasLocation" x="-2390" y="-1479"/>
         </scene>
         <!--Window Controller-->
         <scene sceneID="R2V-B0-nI4">
@@ -699,7 +699,7 @@
                 </windowController>
                 <customObject id="Oky-zY-oP4" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1824" y="-1074"/>
+            <point key="canvasLocation" x="-2370" y="-1250"/>
         </scene>
         <!--Main Split View Controller-->
         <scene sceneID="pH0-Go-ICw">
@@ -724,7 +724,7 @@
                 </splitViewController>
                 <customObject id="UHZ-c3-5ei" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1824" y="-560"/>
+            <point key="canvasLocation" x="-1731" y="-1340"/>
         </scene>
         <!--Sidebar View Controller-->
         <scene sceneID="Rhq-8T-Jzd">
@@ -842,7 +842,7 @@
                 </viewController>
                 <customObject id="a6b-Es-oNt" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-2002" y="-2"/>
+            <point key="canvasLocation" x="-2202" y="-768"/>
         </scene>
         <!--Detail Tab View Controller-->
         <scene sceneID="Ry8-VR-XQC">
@@ -889,7 +889,7 @@
                 </tabViewController>
                 <customObject id="tIB-ld-6n0" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1166" y="-57"/>
+            <point key="canvasLocation" x="-1102" y="-1340"/>
         </scene>
         <!--Chart Detail View Controller-->
         <scene sceneID="Pma-Dx-3ZX">
@@ -911,7 +911,7 @@
                 </viewController>
                 <customObject id="gXg-2R-hwb" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-680" y="558"/>
+            <point key="canvasLocation" x="-699" y="-665"/>
         </scene>
         <!--Fundamentals View Controller-->
         <scene sceneID="vpZ-ZO-yLy">
@@ -924,7 +924,7 @@
                 </viewController>
                 <customObject id="Nd6-xQ-2db" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1166" y="590"/>
+            <point key="canvasLocation" x="-1219" y="-633"/>
         </scene>
         <!--Dashboard View Controller-->
         <scene sceneID="fdE-JB-Kqh">
@@ -937,7 +937,7 @@
                 </viewController>
                 <customObject id="hB9-we-RP7" userLabel="First Responder" customClass="NSResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-1680" y="558"/>
+            <point key="canvasLocation" x="-1703" y="-665"/>
         </scene>
     </scenes>
 </document>
