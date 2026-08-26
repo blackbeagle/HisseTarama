@@ -1,4 +1,3 @@
-// MainSplitViewController.swift
 
 import Cocoa
 
@@ -8,24 +7,18 @@ class MainSplitViewController: NSSplitViewController,
     // MARK: - Properties
 
     private var sidebarWasCollapsed = false
-    
-    
+
     // MARK: - Data Fetch Coordination
 
     private var fetchStatusSymbol: String?
-
     private var technicalFetchFinished = false
     private var fundamentalFetchFinished = false
-
     private var technicalFetchSuccess = false
     private var fundamentalFetchSuccess = false
-    
-
 
     // MARK: - View Lifecycle
 
     override func viewDidLoad() {
-
         super.viewDidLoad()
 
         // Split view ayarları
@@ -43,7 +36,7 @@ class MainSplitViewController: NSSplitViewController,
             name: AppSelectionState.symbolDidChange,
             object: nil
         )
-        
+
         // Pencere boyut değişikliklerini dinle
         NotificationCenter.default.addObserver(
             self,
@@ -179,8 +172,6 @@ class MainSplitViewController: NSSplitViewController,
     override func viewDidAppear() {
 
         super.viewDidAppear()
-        
-        //print("ANA PENCERE BAŞLIĞI: \(view.window?.title ?? "nil")")
 
         if let window = view.window {
 
@@ -203,12 +194,11 @@ class MainSplitViewController: NSSplitViewController,
 
         // Pencere açıldığında sidebar genişliğini ayarla
         DispatchQueue.main.async { [weak self] in
-
             self?.adjustSidebarWidth()
         }
-        
+
         // GEÇİCİ TEST
-           // FinancialDataService.shared.testFetch()
+        // FinancialDataService.shared.testFetch()
     }
 
     override func viewDidLayout() {
@@ -221,25 +211,38 @@ class MainSplitViewController: NSSplitViewController,
 
         // Sidebar kapalıyken genişlik ayarı yapma.
         if !sidebarItem.isCollapsed {
-
             adjustSidebarWidth()
         }
     }
 
     // MARK: - Window Notifications
-    
+
     @objc private func globalSymbolChanged(
         _ notification: Notification
     ) {
-        let symbol = AppSelectionState.shared.selectedSymbol
+
+        let symbol =
+            AppSelectionState.shared.selectedSymbol
 
         guard !symbol.isEmpty else {
             return
         }
 
-        view.window?.title = "\(symbol) - Teknik & Temel Analiz"
+        print(
+            ">>> GLOBAL SYMBOL DEĞİŞTİ: \(symbol) <<<"
+        )
 
-       // print("ANA PENCERE BAŞLIĞI GÜNCELLENDİ: \(symbol)")
+        // Yeni hisse için veri takibini başlat.
+        beginFetchTracking(
+            for: symbol
+        )
+
+        // DİKKAT:
+        // Burada pencere başlığı değiştirmiyoruz.
+        //
+        // Pencere başlığı yalnızca teknik + temel
+        // verilerin ikisi de başarıyla alındığında
+        // evaluateFetchResult() içinde değiştirilecek.
     }
 
     @objc private func windowDidResize(
@@ -339,7 +342,7 @@ class MainSplitViewController: NSSplitViewController,
             )
         }
     }
-    
+
     private func showSelectedStock(
         _ stock: Stock
     ) {
@@ -359,9 +362,12 @@ class MainSplitViewController: NSSplitViewController,
             "\(AppStockState.shared.selectedStock?.symbol ?? "-")"
         )
 
-        // Ana pencere başlığını güncelle
-        view.window?.title =
-            "\(stock.symbol) - Teknik & Temel Analiz"
+        // DİKKAT:
+        // Burada pencere başlığını değiştirmiyoruz.
+        //
+        // Başlık yalnızca iki veri kaynağı da
+        // başarılı olduğunda evaluateFetchResult()
+        // içinde değiştirilecek.
 
         guard let detailTabVC =
             children.last as? DetailTabViewController
@@ -378,18 +384,12 @@ class MainSplitViewController: NSSplitViewController,
             symbol: stock.symbol
         )
     }
-    
 
-    
-    
     // MARK: - Data Fetch Coordination
 
     private func beginFetchTracking(
         for symbol: String
     ) {
-
-        print(">>> BEGIN TRACKING SELF: \(ObjectIdentifier(self)) <<<")
-        print(">>> BEGIN TRACKING SYMBOL: \(symbol) <<<")
 
         let normalizedSymbol =
             symbol
@@ -399,22 +399,18 @@ class MainSplitViewController: NSSplitViewController,
                 .uppercased()
 
         fetchStatusSymbol = normalizedSymbol
+
         technicalFetchFinished = false
         fundamentalFetchFinished = false
+
         technicalFetchSuccess = false
         fundamentalFetchSuccess = false
 
         print(
             "VERİ TAKİBİ BAŞLADI: \(normalizedSymbol)"
         )
-
-        print(
-            ">>> BEGIN TRACKING STORED SYMBOL: \(fetchStatusSymbol ?? "nil") <<<"
-        )
-        print(">>> BEGIN TRACKING SELF END: \(ObjectIdentifier(self)) <<<")
     }
 
-    // MARK: - Technical Data Result
     // MARK: - Technical Data Result
 
     func technicalDataDidFinish(
@@ -432,10 +428,6 @@ class MainSplitViewController: NSSplitViewController,
                 return
             }
 
-            print(
-                ">>> TECHNICAL MAIN QUEUE BLOĞUNA GİRİLDİ <<<"
-            )
-
             let normalizedSymbol =
                 symbol
                     .trimmingCharacters(
@@ -443,32 +435,9 @@ class MainSplitViewController: NSSplitViewController,
                     )
                     .uppercased()
 
-            print(
-                ">>> TECHNICAL CALLBACK SELF: \(ObjectIdentifier(self)) <<<"
-            )
-
-            print(
-                ">>> TECHNICAL SELF GEÇTİ <<<"
-            )
-
-            // Tracking daha önce başlatılmadıysa
-            // callback üzerinden başlat.
-            if self.fetchStatusSymbol == nil {
-
-                self.fetchStatusSymbol = normalizedSymbol
-
-                self.technicalFetchFinished = false
-                self.fundamentalFetchFinished = false
-                self.technicalFetchSuccess = false
-                self.fundamentalFetchSuccess = false
-
-                print(
-                    ">>> TECHNICAL TRACKING CALLBACK ÜZERİNDEN BAŞLATILDI: \(normalizedSymbol) <<<"
-                )
-            }
-
             guard
-                let currentSymbol = self.fetchStatusSymbol,
+                let currentSymbol =
+                    self.fetchStatusSymbol,
                 normalizedSymbol == currentSymbol
             else {
 
@@ -495,7 +464,6 @@ class MainSplitViewController: NSSplitViewController,
         }
     }
 
- 
     // MARK: - Fundamental Data Result
 
     func fundamentalDataDidFinish(
@@ -513,10 +481,6 @@ class MainSplitViewController: NSSplitViewController,
                 return
             }
 
-            print(
-                ">>> FUNDAMENTAL MAIN QUEUE BLOĞUNA GİRİLDİ <<<"
-            )
-
             let normalizedSymbol =
                 symbol
                     .trimmingCharacters(
@@ -524,28 +488,9 @@ class MainSplitViewController: NSSplitViewController,
                     )
                     .uppercased()
 
-            print(
-                ">>> FUNDAMENTAL CALLBACK SELF: \(ObjectIdentifier(self)) <<<"
-            )
-
-            // Tracking daha önce başlatılmadıysa
-            // callback üzerinden başlat.
-            if self.fetchStatusSymbol == nil {
-
-                self.fetchStatusSymbol = normalizedSymbol
-
-                self.technicalFetchFinished = false
-                self.fundamentalFetchFinished = false
-                self.technicalFetchSuccess = false
-                self.fundamentalFetchSuccess = false
-
-                print(
-                    ">>> FUNDAMENTAL TRACKING CALLBACK ÜZERİNDEN BAŞLATILDI: \(normalizedSymbol) <<<"
-                )
-            }
-
             guard
-                let currentSymbol = self.fetchStatusSymbol,
+                let currentSymbol =
+                    self.fetchStatusSymbol,
                 normalizedSymbol == currentSymbol
             else {
 
@@ -582,9 +527,11 @@ class MainSplitViewController: NSSplitViewController,
             technicalFetchFinished,
             fundamentalFetchFinished
         else {
+
             print(
                 "VERİ TAKİBİ: İki sonuç da henüz gelmedi."
             )
+
             return
         }
 
@@ -621,22 +568,30 @@ class MainSplitViewController: NSSplitViewController,
         var messages: [String] = []
 
         if !technicalFetchSuccess {
+
             messages.append(
                 "Hisse fiyat bilgileri alınamadı."
             )
         }
 
         if !fundamentalFetchSuccess {
+
             messages.append(
                 "Hisse Bilanço verisi alınamadı."
             )
         }
 
-        // İki veri de başarılıysa alert gösterme.
+        // İki veri de başarılıysa:
+        // yalnızca bu durumda pencere başlığını değiştir.
         guard !messages.isEmpty else {
+
             print(
                 "Her iki veri de başarıyla alındı."
             )
+
+            view.window?.title =
+                "\(symbol) - Teknik & Temel Analiz"
+
             return
         }
 
@@ -652,8 +607,10 @@ class MainSplitViewController: NSSplitViewController,
         symbol: String,
         messages: [String]
     ) {
-        
-        print("!!! NSALERT ÇAĞRILIYOR: \(symbol) !!!")
+
+        print(
+            "!!! NSALERT ÇAĞRILIYOR: \(symbol) !!!"
+        )
 
         let alert = NSAlert()
 
@@ -673,13 +630,16 @@ class MainSplitViewController: NSSplitViewController,
 
         alert.runModal()
     }
-    
-
 
     // MARK: - Deinit
 
     deinit {
 
-        NotificationCenter.default.removeObserver(self)
+        NotificationCenter.default.removeObserver(
+            self
+        )
     }
 }
+
+
+
