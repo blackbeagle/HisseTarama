@@ -388,6 +388,9 @@ class MainSplitViewController: NSSplitViewController,
         for symbol: String
     ) {
 
+        print(">>> BEGIN TRACKING SELF: \(ObjectIdentifier(self)) <<<")
+        print(">>> BEGIN TRACKING SYMBOL: \(symbol) <<<")
+
         let normalizedSymbol =
             symbol
                 .trimmingCharacters(
@@ -396,18 +399,22 @@ class MainSplitViewController: NSSplitViewController,
                 .uppercased()
 
         fetchStatusSymbol = normalizedSymbol
-
         technicalFetchFinished = false
         fundamentalFetchFinished = false
-
         technicalFetchSuccess = false
         fundamentalFetchSuccess = false
 
         print(
             "VERİ TAKİBİ BAŞLADI: \(normalizedSymbol)"
         )
+
+        print(
+            ">>> BEGIN TRACKING STORED SYMBOL: \(fetchStatusSymbol ?? "nil") <<<"
+        )
+        print(">>> BEGIN TRACKING SELF END: \(ObjectIdentifier(self)) <<<")
     }
 
+    // MARK: - Technical Data Result
     // MARK: - Technical Data Result
 
     func technicalDataDidFinish(
@@ -415,12 +422,19 @@ class MainSplitViewController: NSSplitViewController,
         success: Bool
     ) {
 
-        print( "MAIN SPLIT: technicalDataDidFinish GELDİ - \(symbol) - \(success)" )
+        print(
+            "MAIN SPLIT: technicalDataDidFinish GELDİ - \(symbol) - \(success)"
+        )
+
         DispatchQueue.main.async { [weak self] in
 
             guard let self = self else {
                 return
             }
+
+            print(
+                ">>> TECHNICAL MAIN QUEUE BLOĞUNA GİRİLDİ <<<"
+            )
 
             let normalizedSymbol =
                 symbol
@@ -429,44 +443,79 @@ class MainSplitViewController: NSSplitViewController,
                     )
                     .uppercased()
 
+            print(
+                ">>> TECHNICAL CALLBACK SELF: \(ObjectIdentifier(self)) <<<"
+            )
+
+            print(
+                ">>> TECHNICAL SELF GEÇTİ <<<"
+            )
+
+            // Tracking daha önce başlatılmadıysa
+            // callback üzerinden başlat.
+            if self.fetchStatusSymbol == nil {
+
+                self.fetchStatusSymbol = normalizedSymbol
+
+                self.technicalFetchFinished = false
+                self.fundamentalFetchFinished = false
+                self.technicalFetchSuccess = false
+                self.fundamentalFetchSuccess = false
+
+                print(
+                    ">>> TECHNICAL TRACKING CALLBACK ÜZERİNDEN BAŞLATILDI: \(normalizedSymbol) <<<"
+                )
+            }
+
             guard
-                let currentSymbol =
-                    self.fetchStatusSymbol,
+                let currentSymbol = self.fetchStatusSymbol,
                 normalizedSymbol == currentSymbol
             else {
+
+                print(
+                    ">>> TECHNICAL SYMBOL EŞLEŞMEDİ: " +
+                    "\(normalizedSymbol) / " +
+                    "\(self.fetchStatusSymbol ?? "nil") <<<"
+                )
+
                 return
             }
 
             self.technicalFetchFinished = true
             self.technicalFetchSuccess = success
 
-        
             print(
                 "TRACKING DURUMU - TEKNİK: " +
                 "technical=\(self.technicalFetchFinished), " +
                 "fundamental=\(self.fundamentalFetchFinished), " +
                 "symbol=\(self.fetchStatusSymbol ?? "-")"
             )
-            
 
             self.evaluateFetchResult()
         }
     }
 
+ 
     // MARK: - Fundamental Data Result
 
     func fundamentalDataDidFinish(
         symbol: String,
         success: Bool
     ) {
-        
-        print( "MAIN SPLIT: fundamentalDataDidFinish GELDİ - \(symbol) - \(success)" )
+
+        print(
+            "MAIN SPLIT: fundamentalDataDidFinish GELDİ - \(symbol) - \(success)"
+        )
 
         DispatchQueue.main.async { [weak self] in
 
             guard let self = self else {
                 return
             }
+
+            print(
+                ">>> FUNDAMENTAL MAIN QUEUE BLOĞUNA GİRİLDİ <<<"
+            )
 
             let normalizedSymbol =
                 symbol
@@ -475,11 +524,37 @@ class MainSplitViewController: NSSplitViewController,
                     )
                     .uppercased()
 
+            print(
+                ">>> FUNDAMENTAL CALLBACK SELF: \(ObjectIdentifier(self)) <<<"
+            )
+
+            // Tracking daha önce başlatılmadıysa
+            // callback üzerinden başlat.
+            if self.fetchStatusSymbol == nil {
+
+                self.fetchStatusSymbol = normalizedSymbol
+
+                self.technicalFetchFinished = false
+                self.fundamentalFetchFinished = false
+                self.technicalFetchSuccess = false
+                self.fundamentalFetchSuccess = false
+
+                print(
+                    ">>> FUNDAMENTAL TRACKING CALLBACK ÜZERİNDEN BAŞLATILDI: \(normalizedSymbol) <<<"
+                )
+            }
+
             guard
-                let currentSymbol =
-                    self.fetchStatusSymbol,
+                let currentSymbol = self.fetchStatusSymbol,
                 normalizedSymbol == currentSymbol
             else {
+
+                print(
+                    ">>> FUNDAMENTAL SYMBOL EŞLEŞMEDİ: " +
+                    "\(normalizedSymbol) / " +
+                    "\(self.fetchStatusSymbol ?? "nil") <<<"
+                )
+
                 return
             }
 
@@ -577,6 +652,8 @@ class MainSplitViewController: NSSplitViewController,
         symbol: String,
         messages: [String]
     ) {
+        
+        print("!!! NSALERT ÇAĞRILIYOR: \(symbol) !!!")
 
         let alert = NSAlert()
 
