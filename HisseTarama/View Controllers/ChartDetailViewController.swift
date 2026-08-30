@@ -558,7 +558,7 @@ class ChartDetailViewController: NSViewController {
                     }
 
                     self.dailyCandlesticks = candlesticks
-
+                    
                     self.rebuildCurrentCandlesticks()
                     self.applyDefaultSMAsForCurrentPeriod()
                     self.resetViewportForCurrentPeriod()
@@ -691,10 +691,14 @@ class ChartDetailViewController: NSViewController {
                     min: usdMin,
                     weightedAverage: usdAOF,
                     date: candle.date,
+                    volume: candle.volume,
+                    usdVolume: candle.usdVolume,
                     usdMax: usdMax,
                     usdMin: usdMin,
                     usdWeightedAverage: usdAOF
                 )
+                
+                
             }
         }
     }
@@ -943,6 +947,8 @@ extension ChartDetailViewController {
 
         chartContainerView.layoutSubtreeIfNeeded()
     }
+
+
 }
 
 // MARK: - IndicatorPopupDelegate
@@ -993,3 +999,4 @@ extension ChartDetailViewController:
         updateSMAButtons()
     }
 }
+

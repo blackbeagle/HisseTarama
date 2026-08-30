@@ -287,17 +287,20 @@ final class IsYatirimService {
             // Candlestick
             // -------------------------------------------------
 
-            let candlestick =
-                Candlestick(
+         
+            let candlestick = Candlestick(
                     max: tryMax,
                     min: tryMin,
                     weightedAverage: tryAOF,
                     date: date,
+                    volume: veri.HGDG_HACIM,
+                    usdVolume: veri.DOLAR_HACIM ?? 0,
                     usdMax: usdMax,
                     usdMin: usdMin,
                     usdWeightedAverage: usdAOF
-                )
+            )
 
+            
             candlesticks.append(
                 candlestick
             )
