@@ -172,11 +172,6 @@ final class FundamentalBarChartView: NSView {
 
         guard range > 0
         else {
-            drawZeroLine(
-                context: context,
-                chartRect: chartRect
-            )
-
             drawPeriodLabels(
                 chartRect: chartRect
             )
@@ -185,6 +180,13 @@ final class FundamentalBarChartView: NSView {
         }
 
         drawGrid(
+            context: context,
+            chartRect: chartRect,
+            minimum: minimum,
+            maximum: maximum
+        )
+        
+        drawZeroLine(
             context: context,
             chartRect: chartRect,
             minimum: minimum,
@@ -302,13 +304,27 @@ final class FundamentalBarChartView: NSView {
 
     // MARK: - Zero Line
 
+    // MARK: - Zero Line
+
     private func drawZeroLine(
         context: CGContext,
-        chartRect: CGRect
+        chartRect: CGRect,
+        minimum: Double,
+        maximum: Double
     ) {
+        let range = maximum - minimum
+
+        guard range > 0 else {
+            return
+        }
+
+        let zeroRatio =
+            (0.0 - minimum) / range
 
         let zeroY =
-            chartRect.midY
+            chartRect.minY +
+            CGFloat(zeroRatio) *
+            chartRect.height
 
         context.saveGState()
 
@@ -317,7 +333,7 @@ final class FundamentalBarChartView: NSView {
         )
 
         context.setLineWidth(
-            1
+            1.0
         )
 
         context.move(
@@ -337,6 +353,15 @@ final class FundamentalBarChartView: NSView {
         context.strokePath()
 
         context.restoreGState()
+        
+        drawValueLabel(
+            value: 0,
+            at: CGPoint(
+                x: chartRect.minX - 8,
+                y: zeroY
+            )
+        )
+        
     }
 
     // MARK: - Bars
