@@ -1,4 +1,6 @@
+
 import Cocoa
+
 // MARK: - Bar Chart View
 
 final class FundamentalBarChartView: NSView {
@@ -6,15 +8,18 @@ final class FundamentalBarChartView: NSView {
     // MARK: - Data
 
     private var items: [FinancialStatementItem] = []
-
     private var periods: [FinancialPeriod] = []
 
     // MARK: - Layout
 
-    private let leftMargin: CGFloat = 80
-    private let rightMargin: CGFloat = 20
-    private let topMargin: CGFloat = 20
-    private let bottomMargin: CGFloat = 55
+    // Daha kompakt ve finansal terminal benzeri görünüm.
+    private let leftMargin: CGFloat = 58
+    private let rightMargin: CGFloat = 10
+    private let topMargin: CGFloat = 8
+    private let bottomMargin: CGFloat = 32
+
+    // Grafik üst / alt nefes payı.
+    private let scalePaddingRatio: Double = 0.08
 
     // MARK: - Colors
 
@@ -36,23 +41,13 @@ final class FundamentalBarChartView: NSView {
 
     // MARK: - Init
 
-    override init(
-        frame frameRect: NSRect
-    ) {
-        super.init(
-            frame: frameRect
-        )
-
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
         wantsLayer = true
     }
 
-    required init?(
-        coder: NSCoder
-    ) {
-        super.init(
-            coder: coder
-        )
-
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
         wantsLayer = true
     }
 
@@ -79,12 +74,8 @@ final class FundamentalBarChartView: NSView {
 
     // MARK: - Draw
 
-    override func draw(
-        _ dirtyRect: NSRect
-    ) {
-        super.draw(
-            dirtyRect
-        )
+    override func draw(_ dirtyRect: NSRect) {
+        super.draw(dirtyRect)
 
         guard !items.isEmpty,
               !periods.isEmpty
@@ -93,9 +84,9 @@ final class FundamentalBarChartView: NSView {
         }
 
         guard let context =
-            NSGraphicsContext
-                .current?
-                .cgContext
+                NSGraphicsContext
+                    .current?
+                    .cgContext
         else {
             return
         }
@@ -114,9 +105,7 @@ final class FundamentalBarChartView: NSView {
     private func drawBackground(
         context: CGContext
     ) {
-        NSColor.controlBackgroundColor
-            .setFill()
-
+        NSColor.controlBackgroundColor.setFill()
         bounds.fill()
     }
 
@@ -125,6 +114,7 @@ final class FundamentalBarChartView: NSView {
     private func drawChart(
         context: CGContext
     ) {
+
         let chartRect = CGRect(
             x: leftMargin,
             y: bottomMargin,
@@ -155,23 +145,32 @@ final class FundamentalBarChartView: NSView {
             return
         }
 
-        let maximum =
+        let rawMaximum =
             max(
                 values.max() ?? 0,
                 0
             )
 
-        let minimum =
+        let rawMinimum =
             min(
                 values.min() ?? 0,
                 0
             )
 
-        let range =
-            maximum - minimum
+        let rawRange =
+            rawMaximum - rawMinimum
 
-        guard range > 0
+        // Tüm değerler sıfır ise.
+        guard rawRange > 0
         else {
+
+            drawZeroLine(
+                context: context,
+                chartRect: chartRect,
+                minimum: -1,
+                maximum: 1
+            )
+
             drawPeriodLabels(
                 chartRect: chartRect
             )
@@ -179,25 +178,60 @@ final class FundamentalBarChartView: NSView {
             return
         }
 
+        // -------------------------------------------------
+        // Grafik ölçeğine nefes payı ekle.
+        // -------------------------------------------------
+
+        let padding =
+            rawRange * scalePaddingRatio
+
+        let minimum =
+            rawMinimum - padding
+
+        let maximum =
+            rawMaximum + padding
+
+        let range =
+            maximum - minimum
+
+        guard range > 0
+        else {
+            return
+        }
+
+        // -------------------------------------------------
+        // Profesyonel görünümlü grid ölçeği.
+        // -------------------------------------------------
+
+        let scale =
+            makeNiceScale(
+                minimum: minimum,
+                maximum: maximum,
+                desiredTickCount: 8
+            )
+
         drawGrid(
             context: context,
             chartRect: chartRect,
-            minimum: minimum,
-            maximum: maximum
-        )
-        
-        drawZeroLine(
-            context: context,
-            chartRect: chartRect,
-            minimum: minimum,
-            maximum: maximum
+            minimum: scale.minimum,
+            maximum: scale.maximum,
+            step: scale.step
         )
 
         drawBars(
             context: context,
             chartRect: chartRect,
-            minimum: minimum,
-            maximum: maximum
+            minimum: scale.minimum,
+            maximum: scale.maximum
+        )
+
+        // 0 çizgisi grid çizgilerinden sonra çiziliyor.
+        // Böylece daha belirgin kalıyor.
+        drawZeroLine(
+            context: context,
+            chartRect: chartRect,
+            minimum: scale.minimum,
+            maximum: scale.maximum
         )
 
         drawPeriodLabels(
@@ -216,13 +250,13 @@ final class FundamentalBarChartView: NSView {
             for period in periods {
 
                 guard let optionalValue =
-                    item.values[period]
+                        item.values[period]
                 else {
                     continue
                 }
 
                 guard let value =
-                    optionalValue
+                        optionalValue
                 else {
                     continue
                 }
@@ -234,75 +268,176 @@ final class FundamentalBarChartView: NSView {
         return result
     }
 
+    // MARK: - Nice Scale
+
+    private struct NiceScale {
+
+        let minimum: Double
+        let maximum: Double
+        let step: Double
+    }
+
+    private func makeNiceScale(
+        minimum: Double,
+        maximum: Double,
+        desiredTickCount: Int
+    ) -> NiceScale {
+
+        let range =
+            maximum - minimum
+
+        guard range > 0 else {
+            return NiceScale(
+                minimum: minimum,
+                maximum: maximum,
+                step: 1
+            )
+        }
+
+        let rawStep =
+            range /
+            Double(
+                max(
+                    desiredTickCount,
+                    1
+                )
+            )
+
+        let magnitude =
+            pow(
+                10,
+                floor(
+                    log10(rawStep)
+                )
+            )
+
+        let normalized =
+            rawStep / magnitude
+
+        let niceNormalized: Double
+
+        if normalized <= 1 {
+            niceNormalized = 1
+        } else if normalized <= 2 {
+            niceNormalized = 2
+        } else if normalized <= 5 {
+            niceNormalized = 5
+        } else {
+            niceNormalized = 10
+        }
+
+        let step =
+            niceNormalized *
+            magnitude
+
+        let niceMinimum =
+            floor(
+                minimum / step
+            ) * step
+
+        let niceMaximum =
+            ceil(
+                maximum / step
+            ) * step
+
+        return NiceScale(
+            minimum: niceMinimum,
+            maximum: niceMaximum,
+            step: step
+        )
+    }
+
     // MARK: - Grid
 
     private func drawGrid(
         context: CGContext,
         chartRect: CGRect,
         minimum: Double,
-        maximum: Double
+        maximum: Double,
+        step: Double
     ) {
 
-        let gridCount = 5
+        guard step > 0
+        else {
+            return
+        }
 
-        for index in 0...gridCount {
+        let range =
+            maximum - minimum
+
+        guard range > 0
+        else {
+            return
+        }
+
+        let firstTick =
+            ceil(
+                minimum / step
+            ) * step
+
+        var value =
+            firstTick
+
+        while value <= maximum + step * 0.001 {
 
             let ratio =
-                CGFloat(index) /
-                CGFloat(gridCount)
+                (value - minimum) /
+                range
 
             let y =
                 chartRect.minY +
-                ratio *
+                CGFloat(ratio) *
                 chartRect.height
 
-            context.saveGState()
+            // -------------------------------------------------
+            // 0 çizgisini burada çizme.
+            // Ayrı olarak daha belirgin çizilecek.
+            // -------------------------------------------------
 
-            context.setStrokeColor(
-                NSColor.separatorColor.cgColor
-            )
+            if abs(value) > step * 0.0001 {
 
-            context.setLineWidth(
-                0.5
-            )
+                context.saveGState()
 
-            context.move(
-                to: CGPoint(
-                    x: chartRect.minX,
-                    y: y
+                context.setStrokeColor(
+                    NSColor.separatorColor
+                        .withAlphaComponent(0.45)
+                        .cgColor
                 )
-            )
 
-            context.addLine(
-                to: CGPoint(
-                    x: chartRect.maxX,
-                    y: y
+                context.setLineWidth(
+                    0.5
                 )
-            )
 
-            context.strokePath()
+                context.move(
+                    to: CGPoint(
+                        x: chartRect.minX,
+                        y: y
+                    )
+                )
 
-            context.restoreGState()
+                context.addLine(
+                    to: CGPoint(
+                        x: chartRect.maxX,
+                        y: y
+                    )
+                )
 
-            let value =
-                minimum +
-                (
-                    maximum -
-                    minimum
-                ) *
-                Double(ratio)
+                context.strokePath()
+
+                context.restoreGState()
+            }
 
             drawValueLabel(
                 value: value,
                 at: CGPoint(
-                    x: chartRect.minX - 8,
+                    x: chartRect.minX - 7,
                     y: y
                 )
             )
+
+            value += step
         }
     }
-
-    // MARK: - Zero Line
 
     // MARK: - Zero Line
 
@@ -312,14 +447,25 @@ final class FundamentalBarChartView: NSView {
         minimum: Double,
         maximum: Double
     ) {
-        let range = maximum - minimum
 
-        guard range > 0 else {
+        let range =
+            maximum - minimum
+
+        guard range > 0
+        else {
+            return
+        }
+
+        // 0 ölçeğin dışındaysa çizme.
+        guard minimum <= 0,
+              maximum >= 0
+        else {
             return
         }
 
         let zeroRatio =
-            (0.0 - minimum) / range
+            (0.0 - minimum) /
+            range
 
         let zeroY =
             chartRect.minY +
@@ -329,11 +475,11 @@ final class FundamentalBarChartView: NSView {
         context.saveGState()
 
         context.setStrokeColor(
-            zeroColor.cgColor
+            zeroColor.withAlphaComponent(0.85).cgColor
         )
 
         context.setLineWidth(
-            1.0
+            1.2
         )
 
         context.move(
@@ -353,15 +499,15 @@ final class FundamentalBarChartView: NSView {
         context.strokePath()
 
         context.restoreGState()
-        
+
+        // 0 etiketi.
         drawValueLabel(
             value: 0,
             at: CGPoint(
-                x: chartRect.minX - 8,
+                x: chartRect.minX - 7,
                 y: zeroY
             )
         )
-        
     }
 
     // MARK: - Bars
@@ -391,32 +537,29 @@ final class FundamentalBarChartView: NSView {
             chartRect.width /
             CGFloat(periodCount)
 
+        // Bar grubu biraz daha kompakt.
         let totalBarWidth =
-            groupWidth * 0.72
+            groupWidth * 0.76
 
         let barWidth =
             totalBarWidth /
             CGFloat(seriesCount)
 
-        let minValue =
-            minimum
+        let range =
+            maximum - minimum
 
-        let maxValue =
-            maximum
+        guard range > 0
+        else {
+            return
+        }
 
-        let calculatedRange =
-            maxValue - minValue
-
-        let safeRange =
-            calculatedRange == 0.0
-            ? 1.0
-            : calculatedRange
-
-        // Sıfırın grafik üzerindeki konumu
+        // -------------------------------------------------
+        // Sıfırın grafik üzerindeki konumu.
+        // -------------------------------------------------
 
         let zeroRatio =
-            (0.0 - minValue) /
-            safeRange
+            (0.0 - minimum) /
+            range
 
         let zeroY =
             chartRect.minY +
@@ -438,13 +581,13 @@ final class FundamentalBarChartView: NSView {
                     items[itemIndex]
 
                 guard let optionalValue =
-                    item.values[period]
+                        item.values[period]
                 else {
                     continue
                 }
 
                 guard let value =
-                    optionalValue
+                        optionalValue
                 else {
                     continue
                 }
@@ -455,9 +598,9 @@ final class FundamentalBarChartView: NSView {
                 let valueRatio =
                     (
                         numericValue -
-                        minValue
+                        minimum
                     ) /
-                    safeRange
+                    range
 
                 let valueY =
                     chartRect.minY +
@@ -497,8 +640,6 @@ final class FundamentalBarChartView: NSView {
                         ),
                         height: height
                     )
-
-                // Pozitif / negatif renk
 
                 let color =
                     chartColor(
@@ -558,7 +699,7 @@ final class FundamentalBarChartView: NSView {
 
                     .font:
                         NSFont.systemFont(
-                            ofSize: 10
+                            ofSize: 8
                         ),
 
                     .foregroundColor:
@@ -579,9 +720,8 @@ final class FundamentalBarChartView: NSView {
 
                     y:
                         chartRect.minY -
-                        28
+                        21
                 ),
-
                 withAttributes:
                     attributes
             )
@@ -605,7 +745,7 @@ final class FundamentalBarChartView: NSView {
 
                 .font:
                     NSFont.systemFont(
-                        ofSize: 9
+                        ofSize: 8
                     ),
 
                 .foregroundColor:
@@ -628,7 +768,6 @@ final class FundamentalBarChartView: NSView {
                     point.y -
                     size.height / 2
             ),
-
             withAttributes:
                 attributes
         )
@@ -699,4 +838,5 @@ final class FundamentalBarChartView: NSView {
         return "\(period.year) Q\(period.quarter)"
     }
 }
+
 
