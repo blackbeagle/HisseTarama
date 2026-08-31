@@ -656,6 +656,11 @@ final class FundamentalBarChartView: NSView {
                     )
 
                 path.fill()
+                drawBarValueLabel(
+                    value: numericValue,
+                    rect: rect,
+                    zeroY: zeroY
+                )
             }
         }
     }
@@ -836,6 +841,48 @@ final class FundamentalBarChartView: NSView {
     ) -> String {
 
         return "\(period.year) Q\(period.quarter)"
+    }
+    
+    private func drawBarValueLabel(
+        value: Double,
+        rect: CGRect,
+        zeroY: CGFloat
+    ) {
+        let text = formatValue(value)
+
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: NSFont.systemFont(
+                ofSize: 14,
+                weight: .medium
+            ),
+            .foregroundColor: NSColor.labelColor
+        ]
+
+        let size = text.size(
+            withAttributes: attributes
+        )
+
+        let spacing: CGFloat = 4
+
+        let x =
+            rect.midX -
+            size.width / 2
+
+        let y: CGFloat
+
+        if value >= 0 {
+            y = rect.maxY + spacing
+        } else {
+            y = rect.minY - size.height - spacing
+        }
+
+        text.draw(
+            at: CGPoint(
+                x: x,
+                y: y
+            ),
+            withAttributes: attributes
+        )
     }
 }
 
