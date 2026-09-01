@@ -34,6 +34,9 @@ final class FundamentalBarChartView: NSView {
 
     /// Mouse'un tam üzerinde olduğu gerçek bar.
     private var hoveredBarRect: CGRect?
+    
+    
+    private var isUSDMode = false
 
     // MARK: - Initialization
 
@@ -51,8 +54,13 @@ final class FundamentalBarChartView: NSView {
         updateTrackingAreas()
     }
 
+    
+    func setCurrency(isUSD: Bool) {
+        isUSDMode = isUSD
+        needsDisplay = true
+    }
+    
     // MARK: - Data
-
     func setData(
         items: [FinancialStatementItem],
         periods: [FinancialPeriod]
@@ -1037,8 +1045,11 @@ final class FundamentalBarChartView: NSView {
         zeroY: CGFloat
     ) {
 
+     
         let text =
-            formatValue(value)
+            isUSDMode
+            ? "\(formatValue(value))$"
+            : formatValue(value)
 
         let attributes:
             [NSAttributedString.Key: Any] = [

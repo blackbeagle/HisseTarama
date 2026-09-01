@@ -40,18 +40,13 @@ final class FundamentalsViewController: NSViewController {
     // MARK: - UI
 
     private let separatorView: NSBox = {
-
         let box = NSBox()
-
         box.boxType = .separator
-
         box.translatesAutoresizingMaskIntoConstraints =
             false
-
         return box
     }()
-    
-    
+
     // MARK: - Data Fetch Result
 
     var onDataFetchCompleted:
@@ -60,7 +55,6 @@ final class FundamentalsViewController: NSViewController {
     // MARK: - Lifecycle
 
     override func loadView() {
-
         view = NSView()
     }
 
@@ -69,11 +63,8 @@ final class FundamentalsViewController: NSViewController {
         super.viewDidLoad()
 
         setupView()
-
         setupSidebar()
-
         setupChart()
-
         setupGlobalSelectionObservers()
 
         // Uygulama açılırken global state'te
@@ -83,7 +74,6 @@ final class FundamentalsViewController: NSViewController {
             AppSelectionState.shared.selectedSymbol
 
         if !symbol.isEmpty {
-
             selectStock(
                 symbol: symbol
             )
@@ -153,11 +143,9 @@ final class FundamentalsViewController: NSViewController {
         // temizliyoruz.
         // -------------------------------------------------
 
-        //financialItems.removeAll()
-
-        //financialPeriods.removeAll()
-
-        //chartViewController.clearChart()
+        // financialItems.removeAll()
+        // financialPeriods.removeAll()
+        // chartViewController.clearChart()
 
         // -------------------------------------------------
         // Yeni para birimiyle tekrar veri çek.
@@ -353,9 +341,7 @@ final class FundamentalsViewController: NSViewController {
             NSProgressIndicator()
 
         indicator.style = .spinning
-
         indicator.controlSize = .regular
-
         indicator.isIndeterminate = true
 
         indicator.translatesAutoresizingMaskIntoConstraints =
@@ -423,9 +409,7 @@ final class FundamentalsViewController: NSViewController {
         ])
 
         loadingOverlay = overlay
-
         loadingIndicator = indicator
-
         loadingLabel = label
     }
 
@@ -436,9 +420,7 @@ final class FundamentalsViewController: NSViewController {
         loadingOverlay?.removeFromSuperview()
 
         loadingOverlay = nil
-
         loadingIndicator = nil
-
         loadingLabel = nil
     }
 
@@ -470,15 +452,14 @@ final class FundamentalsViewController: NSViewController {
         // Önce eski finansal verileri temizle.
         // -------------------------------------------------
 
-        //financialItems.removeAll()
-
-        //financialPeriods.removeAll()
+        // financialItems.removeAll()
+        // financialPeriods.removeAll()
 
         // -------------------------------------------------
         // Eski grafiği temizle.
         // -------------------------------------------------
 
-        //chartViewController.clearChart()
+        // chartViewController.clearChart()
 
         // -------------------------------------------------
         // Sidebar'daki hisseyi güncelle.
@@ -499,9 +480,6 @@ final class FundamentalsViewController: NSViewController {
         )
     }
 
-    
- 
-    
     // MARK: - Financial Data
 
     private func fetchFinancialData(
@@ -592,6 +570,7 @@ final class FundamentalsViewController: NSViewController {
                     else {
                         return
                     }
+
                     switch result {
 
                     case .success(let statements):
@@ -610,16 +589,20 @@ final class FundamentalsViewController: NSViewController {
                         print("================================")
                         print("TEMEL VERİ ALINDI")
                         print("================================")
+
                         print(
                             "Dönem sayısı: \(statements.periods.count)"
                         )
+
                         print(
                             "Finansal kalem sayısı: \(statements.items.count)"
                         )
 
                         self.updateFinancialData(
-                            items: statements.allItems,
-                            periods: statements.periods
+                            items:
+                                statements.allItems,
+                            periods:
+                                statements.periods
                         )
 
                     case .failure(let error):
@@ -629,10 +612,10 @@ final class FundamentalsViewController: NSViewController {
                         // -------------------------------------------------
 
                         self.hideLoadingOverlay()
-                        
+
                         print(
-                                "TEMEL CALLBACK ÇAĞRILIYOR: \(symbol) - false"
-                            )
+                            "TEMEL CALLBACK ÇAĞRILIYOR: \(symbol) - false"
+                        )
 
                         self.onDataFetchCompleted?(
                             symbol,
@@ -642,6 +625,7 @@ final class FundamentalsViewController: NSViewController {
                         print("================================")
                         print("TEMEL VERİ HATASI")
                         print("================================")
+
                         print(
                             "Hata: \(error.localizedDescription)"
                         )
@@ -700,6 +684,25 @@ final class FundamentalsViewController: NSViewController {
 
         print(
             ">>> Fundamental sidebar finansal verilerle güncellendi <<<"
+        )
+
+        // ---------------------------------------------------------
+        // Grafik para birimini güncelle
+        //
+        // USD modunda sütun değerlerinin sonunda "$"
+        // gösterilecek.
+        // ---------------------------------------------------------
+
+        let isUSD =
+            AppSelectionState.shared
+                .selectedCurrency
+                .stockCurrency
+                .apiValue
+                .uppercased() == "USD"
+
+        chartViewController.setCurrency(
+            isUSD:
+                isUSD
         )
 
         // ---------------------------------------------------------
@@ -771,7 +774,6 @@ final class FundamentalsViewController: NSViewController {
 
             selectedItems =
                 financialItems.filter {
-
                     $0.itemCode ==
                         itemCode
                 }
@@ -785,7 +787,6 @@ final class FundamentalsViewController: NSViewController {
                     code in
 
                     financialItems.first {
-
                         $0.itemCode ==
                             code
                     }
@@ -864,3 +865,5 @@ extension FundamentalsViewController:
         )
     }
 }
+
+
