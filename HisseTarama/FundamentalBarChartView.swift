@@ -1,5 +1,6 @@
 import Cocoa
 
+
 final class FundamentalBarChartView: NSView {
 
     // MARK: - Data
@@ -37,7 +38,14 @@ final class FundamentalBarChartView: NSView {
     
     
     private var isUSDMode = false
+    
+    
+    // MARK: - Chart Style
 
+   
+
+    //private let revenueCostRenderer = RevenueCostChartRenderer()
+    
     // MARK: - Initialization
 
     override init(frame frameRect: NSRect) {
@@ -59,6 +67,10 @@ final class FundamentalBarChartView: NSView {
         isUSDMode = isUSD
         needsDisplay = true
     }
+    
+  
+   
+    
     
     // MARK: - Data
     func setData(
@@ -325,14 +337,15 @@ final class FundamentalBarChartView: NSView {
                 maximum: scale.maximum,
                 step: scale.step
             )
-
+           
             drawBars(
                 context: context,
                 chartRect: chartRect,
                 minimum: scale.minimum,
                 maximum: scale.maximum
             )
-
+           
+            
             drawZeroLine(
                 context: context,
                 chartRect: chartRect,
@@ -400,13 +413,15 @@ final class FundamentalBarChartView: NSView {
         // ---------------------------------------------------------
         // Bars
         // ---------------------------------------------------------
-
+        
         drawBars(
             context: context,
             chartRect: chartRect,
             minimum: scale.minimum,
             maximum: scale.maximum
         )
+         
+   
 
         // ---------------------------------------------------------
         // Zero line
@@ -428,8 +443,12 @@ final class FundamentalBarChartView: NSView {
         )
     }
 
-   
 
+      
+
+       
+
+    
     // MARK: - Bars
 
     private func drawBars(

@@ -1,3 +1,4 @@
+
 import Cocoa
 
 final class FundamentalsViewController: NSViewController {
@@ -21,15 +22,20 @@ final class FundamentalsViewController: NSViewController {
     private var currentStockSymbol:
         String?
 
-    // -------------------------------------------------
-    // Veri çekme durumu
-    // -------------------------------------------------
+    // MARK: - Selection
 
-    private var currentFetchID = UUID()
+    private var currentSelection:
+        FundamentalSelection?
+
+    // MARK: - Request Control
+
+    private var currentFetchID =
+        UUID()
 
     // MARK: - Loading Overlay
 
-    private var loadingOverlay: NSView?
+    private var loadingOverlay:
+        NSView?
 
     private var loadingIndicator:
         NSProgressIndicator?
@@ -40,10 +46,16 @@ final class FundamentalsViewController: NSViewController {
     // MARK: - UI
 
     private let separatorView: NSBox = {
-        let box = NSBox()
-        box.boxType = .separator
+
+        let box =
+            NSBox()
+
+        box.boxType =
+            .separator
+
         box.translatesAutoresizingMaskIntoConstraints =
             false
+
         return box
     }()
 
@@ -55,7 +67,9 @@ final class FundamentalsViewController: NSViewController {
     // MARK: - Lifecycle
 
     override func loadView() {
-        view = NSView()
+
+        view =
+            NSView()
     }
 
     override func viewDidLoad() {
@@ -63,8 +77,11 @@ final class FundamentalsViewController: NSViewController {
         super.viewDidLoad()
 
         setupView()
+
         setupSidebar()
+
         setupChart()
+
         setupGlobalSelectionObservers()
 
         // Uygulama açılırken global state'te
@@ -74,86 +91,12 @@ final class FundamentalsViewController: NSViewController {
             AppSelectionState.shared.selectedSymbol
 
         if !symbol.isEmpty {
+
             selectStock(
-                symbol: symbol
+                symbol:
+                    symbol
             )
         }
-    }
-
-    // MARK: - Global Selection
-
-    private func setupGlobalSelectionObservers() {
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector:
-                #selector(globalSymbolChanged(_:)),
-            name:
-                AppSelectionState.symbolDidChange,
-            object: nil
-        )
-
-        NotificationCenter.default.addObserver(
-            self,
-            selector:
-                #selector(globalCurrencyChanged(_:)),
-            name:
-                AppSelectionState.currencyDidChange,
-            object: nil
-        )
-    }
-
-    @objc private func globalSymbolChanged(
-        _ notification: Notification
-    ) {
-
-        let symbol =
-            AppSelectionState.shared.selectedSymbol
-
-        guard !symbol.isEmpty else {
-            return
-        }
-
-        selectStock(
-            symbol: symbol
-        )
-    }
-
-    @objc private func globalCurrencyChanged(
-        _ notification: Notification
-    ) {
-
-        print(
-            "TEMEL GLOBAL PARA BİRİMİ:",
-            AppSelectionState.shared
-                .selectedCurrency
-                .stockCurrency
-                .apiValue
-        )
-
-        guard
-            let symbol = currentStockSymbol,
-            !symbol.isEmpty
-        else {
-            return
-        }
-
-        // -------------------------------------------------
-        // Para birimi değiştiğinde eski finansal verileri
-        // temizliyoruz.
-        // -------------------------------------------------
-
-        // financialItems.removeAll()
-        // financialPeriods.removeAll()
-        // chartViewController.clearChart()
-
-        // -------------------------------------------------
-        // Yeni para birimiyle tekrar veri çek.
-        // -------------------------------------------------
-
-        fetchFinancialData(
-            for: symbol
-        )
     }
 
     deinit {
@@ -167,7 +110,8 @@ final class FundamentalsViewController: NSViewController {
 
     private func setupView() {
 
-        view.wantsLayer = true
+        view.wantsLayer =
+            true
     }
 
     private func setupSidebar() {
@@ -176,7 +120,8 @@ final class FundamentalsViewController: NSViewController {
             sidebarViewController
         )
 
-        sidebarViewController.delegate = self
+        sidebarViewController.delegate =
+            self
 
         let sidebarView =
             sidebarViewController.view
@@ -276,32 +221,117 @@ final class FundamentalsViewController: NSViewController {
         ])
     }
 
+    // MARK: - Global Selection
+
+    private func setupGlobalSelectionObservers() {
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector:
+                #selector(
+                    globalSymbolChanged(_:)
+                ),
+            name:
+                AppSelectionState.symbolDidChange,
+            object:
+                nil
+        )
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector:
+                #selector(
+                    globalCurrencyChanged(_:)
+                ),
+            name:
+                AppSelectionState.currencyDidChange,
+            object:
+                nil
+        )
+    }
+
+    @objc
+    private func globalSymbolChanged(
+        _ notification:
+            Notification
+    ) {
+
+        let symbol =
+            AppSelectionState.shared.selectedSymbol
+
+        guard
+            !symbol.isEmpty
+        else {
+            return
+        }
+
+        selectStock(
+            symbol:
+                symbol
+        )
+    }
+
+    @objc
+    private func globalCurrencyChanged(
+        _ notification:
+            Notification
+    ) {
+
+        print(
+            "TEMEL GLOBAL PARA BİRİMİ:",
+            AppSelectionState.shared
+                .selectedCurrency
+                .stockCurrency
+                .apiValue
+        )
+
+        guard
+            let symbol =
+                currentStockSymbol,
+            !symbol.isEmpty
+        else {
+            return
+        }
+
+        // Para birimi değiştiğinde aynı finansal
+        // kalem / grup seçimi korunur.
+        //
+        // Sadece veriler yeni para birimiyle
+        // tekrar alınır.
+
+        fetchFinancialData(
+            for:
+                symbol
+        )
+    }
+
     // MARK: - Loading Overlay
 
     private func showLoadingOverlay(
-        for symbol: String
+        for symbol:
+            String
     ) {
 
         hideLoadingOverlay()
 
-        let overlay = NSView()
+        let overlay =
+            NSView()
 
         overlay.translatesAutoresizingMaskIntoConstraints =
             false
 
-        overlay.wantsLayer = true
+        overlay.wantsLayer =
+            true
 
         overlay.layer?.backgroundColor =
             NSColor.windowBackgroundColor
-                .withAlphaComponent(0.78)
+                .withAlphaComponent(
+                    0.78
+                )
                 .cgColor
 
-        // -------------------------------------------------
-        // Loading sadece temel grafik alanını kaplar.
-        //
-        // Sidebar çalışmaya devam eder.
-        // Eski grafik ise overlay'in altında korunur.
-        // -------------------------------------------------
+        // Loading sadece temel grafik alanını
+        // kaplar. Sidebar çalışmaya devam eder.
 
         let targetView =
             chartViewController.view
@@ -333,29 +363,32 @@ final class FundamentalsViewController: NSViewController {
             )
         ])
 
-        // -------------------------------------------------
-        // Indicator
-        // -------------------------------------------------
+        // MARK: Indicator
 
         let indicator =
             NSProgressIndicator()
 
-        indicator.style = .spinning
-        indicator.controlSize = .regular
-        indicator.isIndeterminate = true
+        indicator.style =
+            .spinning
+
+        indicator.controlSize =
+            .regular
+
+        indicator.isIndeterminate =
+            true
 
         indicator.translatesAutoresizingMaskIntoConstraints =
             false
 
-        indicator.startAnimation(nil)
+        indicator.startAnimation(
+            nil
+        )
 
         overlay.addSubview(
             indicator
         )
 
-        // -------------------------------------------------
-        // Label
-        // -------------------------------------------------
+        // MARK: Label
 
         let label =
             NSTextField(
@@ -365,14 +398,17 @@ final class FundamentalsViewController: NSViewController {
 
         label.font =
             NSFont.systemFont(
-                ofSize: 14,
-                weight: .medium
+                ofSize:
+                    14,
+                weight:
+                    .medium
             )
 
         label.textColor =
             NSColor.labelColor
 
-        label.alignment = .center
+        label.alignment =
+            .center
 
         label.translatesAutoresizingMaskIntoConstraints =
             false
@@ -408,36 +444,52 @@ final class FundamentalsViewController: NSViewController {
             )
         ])
 
-        loadingOverlay = overlay
-        loadingIndicator = indicator
-        loadingLabel = label
+        loadingOverlay =
+            overlay
+
+        loadingIndicator =
+            indicator
+
+        loadingLabel =
+            label
     }
 
     private func hideLoadingOverlay() {
 
-        loadingIndicator?.stopAnimation(nil)
+        loadingIndicator?.stopAnimation(
+            nil
+        )
 
         loadingOverlay?.removeFromSuperview()
 
-        loadingOverlay = nil
-        loadingIndicator = nil
-        loadingLabel = nil
+        loadingOverlay =
+            nil
+
+        loadingIndicator =
+            nil
+
+        loadingLabel =
+            nil
     }
 
     // MARK: - Stock Selection
 
     func selectStock(
-        symbol: String
+        symbol:
+            String
     ) {
 
         let normalizedSymbol =
             symbol
                 .trimmingCharacters(
-                    in: .whitespacesAndNewlines
+                    in:
+                        .whitespacesAndNewlines
                 )
                 .uppercased()
 
-        guard !normalizedSymbol.isEmpty else {
+        guard
+            !normalizedSymbol.isEmpty
+        else {
             return
         }
 
@@ -448,31 +500,10 @@ final class FundamentalsViewController: NSViewController {
             "Temel sekmesi hisse güncellendi: \(normalizedSymbol)"
         )
 
-        // -------------------------------------------------
-        // Önce eski finansal verileri temizle.
-        // -------------------------------------------------
-
-        // financialItems.removeAll()
-        // financialPeriods.removeAll()
-
-        // -------------------------------------------------
-        // Eski grafiği temizle.
-        // -------------------------------------------------
-
-        // chartViewController.clearChart()
-
-        // -------------------------------------------------
-        // Sidebar'daki hisseyi güncelle.
-        // -------------------------------------------------
-
         sidebarViewController.updateStock(
             symbol:
                 normalizedSymbol
         )
-
-        // -------------------------------------------------
-        // Yeni veri çek.
-        // -------------------------------------------------
 
         fetchFinancialData(
             for:
@@ -483,19 +514,17 @@ final class FundamentalsViewController: NSViewController {
     // MARK: - Financial Data
 
     private func fetchFinancialData(
-        for symbol: String
+        for symbol:
+            String
     ) {
 
         print("================================")
-
         print(
             "TEMEL VERİ ÇEKİMİ BAŞLADI"
         )
-
         print(
             "Hisse: \(symbol)"
         )
-
         print("================================")
 
         let currency =
@@ -508,29 +537,15 @@ final class FundamentalsViewController: NSViewController {
             currency.apiValue
         )
 
-        // -------------------------------------------------
-        // Yeni istek kimliği
-        //
-        // Teknik sekmedeki mantığın aynısı:
-        //
-        // Örneğin:
-        //
-        // SISE temel verisi beklenirken
-        // THYAO seçilirse ve SISE cevabı
-        // daha sonra gelirse SISE sonucu
-        // kabul edilmeyecek.
-        // -------------------------------------------------
+        // MARK: Request ID
 
-        let fetchID = UUID()
+        let fetchID =
+            UUID()
 
-        currentFetchID = fetchID
+        currentFetchID =
+            fetchID
 
-        // -------------------------------------------------
-        // Loading göster.
-        //
-        // Eski grafik temizlenmedi.
-        // Overlay grafiğin üzerinde gösterilecek.
-        // -------------------------------------------------
+        // MARK: Loading
 
         showLoadingOverlay(
             for:
@@ -553,31 +568,32 @@ final class FundamentalsViewController: NSViewController {
                     symbol,
                 query:
                     query
-            ) { [weak self] result in
+            ) {
+                [weak self] result in
 
                 DispatchQueue.main.async {
 
-                    guard let self = self else {
+                    guard
+                        let self =
+                            self
+                    else {
                         return
                     }
 
-                    // -------------------------------------------------
-                    // Bu cevap artık güncel değil.
-                    // -------------------------------------------------
+                    // Eski istek artık geçersiz.
 
                     guard
-                        self.currentFetchID == fetchID
+                        self.currentFetchID ==
+                            fetchID
                     else {
                         return
                     }
 
                     switch result {
 
-                    case .success(let statements):
-
-                        // -------------------------------------------------
-                        // Loading kapat
-                        // -------------------------------------------------
+                    case .success(
+                        let statements
+                    ):
 
                         self.hideLoadingOverlay()
 
@@ -586,9 +602,17 @@ final class FundamentalsViewController: NSViewController {
                             true
                         )
 
-                        print("================================")
-                        print("TEMEL VERİ ALINDI")
-                        print("================================")
+                        print(
+                            "================================"
+                        )
+
+                        print(
+                            "TEMEL VERİ ALINDI"
+                        )
+
+                        print(
+                            "================================"
+                        )
 
                         print(
                             "Dönem sayısı: \(statements.periods.count)"
@@ -605,11 +629,9 @@ final class FundamentalsViewController: NSViewController {
                                 statements.periods
                         )
 
-                    case .failure(let error):
-
-                        // -------------------------------------------------
-                        // Loading kapat
-                        // -------------------------------------------------
+                    case .failure(
+                        let error
+                    ):
 
                         self.hideLoadingOverlay()
 
@@ -622,9 +644,17 @@ final class FundamentalsViewController: NSViewController {
                             false
                         )
 
-                        print("================================")
-                        print("TEMEL VERİ HATASI")
-                        print("================================")
+                        print(
+                            "================================"
+                        )
+
+                        print(
+                            "TEMEL VERİ HATASI"
+                        )
+
+                        print(
+                            "================================"
+                        )
 
                         print(
                             "Hata: \(error.localizedDescription)"
@@ -647,9 +677,31 @@ final class FundamentalsViewController: NSViewController {
             ">>> updateFinancialData ÇAĞRILDI <<<"
         )
 
-        // ---------------------------------------------------------
-        // Finansal verileri controller içinde sakla
-        // ---------------------------------------------------------
+        // -------------------------------------------------
+        // Eski sidebar kalem kodlarını sakla.
+        // -------------------------------------------------
+
+        let previousItemCodes =
+            Set(
+                financialItems.map {
+                    $0.itemCode
+                }
+            )
+
+        let newItemCodes =
+            Set(
+                items.map {
+                    $0.itemCode
+                }
+            )
+
+        let sidebarNeedsUpdate =
+            previousItemCodes !=
+                newItemCodes
+
+        // -------------------------------------------------
+        // Finansal verileri controller içinde sakla.
+        // -------------------------------------------------
 
         financialItems =
             items
@@ -673,69 +725,55 @@ final class FundamentalsViewController: NSViewController {
             "financialPeriods artık: \(financialPeriods.count)"
         )
 
-        // ---------------------------------------------------------
-        // Finansal kalemleri sol sidebar'a gönder
-        // ---------------------------------------------------------
+        // -------------------------------------------------
+        // Sidebar
+        // -------------------------------------------------
 
-        sidebarViewController.updateFinancialItems(
-            items:
-                financialItems
-        )
+        if sidebarNeedsUpdate {
 
-        print(
-            ">>> Fundamental sidebar finansal verilerle güncellendi <<<"
-        )
+            sidebarViewController.updateFinancialItems(
+                items:
+                    financialItems
+            )
 
-        // ---------------------------------------------------------
-        // Grafik para birimini güncelle
-        //
-        // USD modunda sütun değerlerinin sonunda "$"
-        // gösterilecek.
-        // ---------------------------------------------------------
+            print(
+                ">>> Fundamental sidebar yeniden oluşturuldu <<<"
+            )
+
+        } else {
+
+            print(
+                ">>> Fundamental sidebar yeniden yüklenmedi <<<"
+            )
+        }
+
+        // -------------------------------------------------
+        // Grafik para birimini güncelle.
+        // -------------------------------------------------
 
         let isUSD =
             AppSelectionState.shared
                 .selectedCurrency
                 .stockCurrency
                 .apiValue
-                .uppercased() == "USD"
+                .uppercased() ==
+                "USD"
 
         chartViewController.setCurrency(
             isUSD:
                 isUSD
         )
 
-        // ---------------------------------------------------------
-        // Mevcut grafiği temizle
-        // ---------------------------------------------------------
+        // -------------------------------------------------
+        // Daha önce seçilmiş bir Kalem veya Grup varsa
+        // yeni gelen verilerle tekrar çiz.
+        // -------------------------------------------------
 
-        chartViewController.clearChart()
+        if let selection =
+            currentSelection {
 
-        // ---------------------------------------------------------
-        // Test amacıyla ilk finansal kalemi grafiğe gönder
-        // ---------------------------------------------------------
-
-        if
-            !financialItems.isEmpty &&
-            !financialPeriods.isEmpty
-        {
-
-            let firstItem =
-                financialItems[0]
-
-            print(
-                "Test grafik kalemi: \(firstItem.itemCode) - \(firstItem.titleTR)"
-            )
-
-            chartViewController.show(
-                items:
-                    [firstItem],
-                periods:
-                    financialPeriods
-            )
-
-            print(
-                ">>> chartViewController.show() ÇAĞRILDI <<<"
+            showSelection(
+                selection
             )
         }
 
@@ -763,26 +801,97 @@ final class FundamentalsViewController: NSViewController {
             return
         }
 
-        let selectedItems:
-            [FinancialStatementItem]
+        // Son seçimi sakla.
+        //
+        // Böylece TRY <-> USD değişiminden sonra
+        // aynı Kalem veya Grup yeniden çizilebilir.
+
+        currentSelection =
+            selection
 
         switch selection {
+
+        // -------------------------------------------------
+        // KALEM MODU
+        // -------------------------------------------------
 
         case .single(
             let itemCode
         ):
 
-            selectedItems =
+            let selectedItems =
                 financialItems.filter {
                     $0.itemCode ==
                         itemCode
                 }
 
+            guard
+                !selectedItems.isEmpty
+            else {
+
+                print(
+                    "Temel grafik: Seçilen kalem bulunamadı."
+                )
+
+                return
+            }
+
+            print(
+                "Temel grafik seçimi: KALEM"
+            )
+
+            for item in selectedItems {
+
+                print(
+                    "\(item.itemCode) - \(item.name)"
+                )
+            }
+
+            chartViewController.show(
+                items:
+                    selectedItems,
+                periods:
+                    financialPeriods
+            )
+
+        // -------------------------------------------------
+        // GRUP MODU
+        // -------------------------------------------------
+
         case .group(
             let itemCodes
         ):
 
-            selectedItems =
+            guard
+                let firstItemCode =
+                    itemCodes.first
+            else {
+
+                print(
+                    "Temel grafik: Grup içinde kalem yok."
+                )
+
+                return
+            }
+
+            // Grup kodundan doğrudan template bul.
+
+            guard
+                let template =
+                    FundamentalChartTemplate.template(
+                        containing:
+                            firstItemCode
+                    )
+            else {
+
+                print(
+                    "Temel grafik: Grup için şablon bulunamadı."
+                )
+
+                return
+            }
+
+            let selectedItems =
                 itemCodes.compactMap {
                     code in
 
@@ -791,40 +900,54 @@ final class FundamentalsViewController: NSViewController {
                             code
                     }
                 }
-        }
 
-        guard !selectedItems.isEmpty else {
+            guard
+                !selectedItems.isEmpty
+            else {
 
-            print(
-                "Temel grafik: Seçilen kalem bulunamadı."
-            )
+                print(
+                    "Temel grafik: Grup kalemleri bulunamadı."
+                )
 
-            return
-        }
-
-        print(
-            "Temel grafik seçimi:"
-        )
-
-        for item in selectedItems {
+                return
+            }
 
             print(
-                "\(item.itemCode) - \(item.name)"
+                "Temel grafik seçimi: GRUP"
+            )
+
+            print(
+                "Şablon: \(template.title)"
+            )
+
+            for item in selectedItems {
+
+                print(
+                    "\(item.itemCode) - \(item.name)"
+                )
+            }
+
+            // Grup seçiminde standart show(...)
+            // kullanılmıyor.
+            //
+            // Doğrudan grup template'i açılıyor.
+
+            chartViewController.showGroup(
+                template:
+                    template,
+                items:
+                    selectedItems,
+                periods:
+                    financialPeriods
             )
         }
-
-        chartViewController.show(
-            items:
-                selectedItems,
-            periods:
-                financialPeriods
-        )
     }
 
     // MARK: - Alert
 
     private func showAlert(
-        message: String
+        message:
+            String
     ) {
 
         let alert =

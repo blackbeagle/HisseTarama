@@ -43,14 +43,7 @@ final class DetailTabViewController: NSTabViewController {
             $0 as? FundamentalsViewController
         }).first {
 
-            fundamentalsVC.onDataFetchCompleted = {
-                [weak self] symbol, success in
-
-                self?.fundamentalDataDidFinish(
-                    symbol: symbol,
-                    success: success
-                )
-            }
+            
         }
     }
 
