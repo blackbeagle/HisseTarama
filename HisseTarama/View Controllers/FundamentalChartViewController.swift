@@ -77,6 +77,8 @@ final class FundamentalChartViewController: NSViewController {
         return label
     }()
 
+    // MARK: - Standard Chart
+
     private let chartView:
         FundamentalBarChartView = {
 
@@ -88,6 +90,47 @@ final class FundamentalChartViewController: NSViewController {
 
         return chart
     }()
+
+    // MARK: - Group Charts Container
+
+    private let groupChartsContainer: NSView = {
+
+        let view =
+            NSView()
+
+        view.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        return view
+    }()
+
+    // MARK: - Sales Charts
+
+    private let revenueCostHostView:
+        RevenueCostHostView = {
+
+        let view =
+            RevenueCostHostView()
+
+        view.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        return view
+    }()
+
+    private let domesticExportSalesChart:
+        DomesticExportSalesChartRenderer = {
+
+        let chart =
+            DomesticExportSalesChartRenderer()
+
+        chart.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        return chart
+    }()
+
+    // MARK: - Empty State
 
     private let emptyStateLabel: NSTextField = {
 
@@ -158,6 +201,7 @@ final class FundamentalChartViewController: NSViewController {
         super.viewDidLoad()
 
         setupView()
+
         updateDisplay()
     }
 
@@ -181,11 +225,27 @@ final class FundamentalChartViewController: NSViewController {
         )
 
         view.addSubview(
+            groupChartsContainer
+        )
+
+        view.addSubview(
             emptyStateLabel
         )
 
         view.addSubview(
             groupStateLabel
+        )
+
+        // -------------------------------------------------
+        // Group chart container
+        // -------------------------------------------------
+
+        groupChartsContainer.addSubview(
+            revenueCostHostView
+        )
+
+        groupChartsContainer.addSubview(
+            domesticExportSalesChart
         )
 
         NSLayoutConstraint.activate([
@@ -264,6 +324,80 @@ final class FundamentalChartViewController: NSViewController {
                     -20
             ),
 
+            // MARK: Grup grafik alanı
+
+            groupChartsContainer.topAnchor.constraint(
+                equalTo:
+                    subtitleLabel.bottomAnchor,
+                constant:
+                    12
+            ),
+
+            groupChartsContainer.leadingAnchor.constraint(
+                equalTo:
+                    view.leadingAnchor,
+                constant:
+                    20
+            ),
+
+            groupChartsContainer.trailingAnchor.constraint(
+                equalTo:
+                    view.trailingAnchor,
+                constant:
+                    -20
+            ),
+
+            groupChartsContainer.bottomAnchor.constraint(
+                equalTo:
+                    view.bottomAnchor,
+                constant:
+                    -20
+            ),
+
+            // MARK: Revenue / Cost
+
+            revenueCostHostView.leadingAnchor.constraint(
+                equalTo:
+                    groupChartsContainer.leadingAnchor
+            ),
+
+            revenueCostHostView.trailingAnchor.constraint(
+                equalTo:
+                    groupChartsContainer.trailingAnchor
+            ),
+
+            revenueCostHostView.topAnchor.constraint(
+                equalTo:
+                    groupChartsContainer.topAnchor
+            ),
+
+            revenueCostHostView.bottomAnchor.constraint(
+                equalTo:
+                    groupChartsContainer.centerYAnchor
+            ),
+
+            // MARK: Yurtiçi / Yurtdışı
+
+            domesticExportSalesChart.leadingAnchor.constraint(
+                equalTo:
+                    groupChartsContainer.leadingAnchor
+            ),
+
+            domesticExportSalesChart.trailingAnchor.constraint(
+                equalTo:
+                    groupChartsContainer.trailingAnchor
+            ),
+
+            domesticExportSalesChart.topAnchor.constraint(
+                equalTo:
+                    groupChartsContainer.centerYAnchor
+            ),
+
+            domesticExportSalesChart.bottomAnchor.constraint(
+                equalTo:
+                    groupChartsContainer.bottomAnchor
+            ),
+
             // MARK: Boş durum
 
             emptyStateLabel.centerXAnchor.constraint(
@@ -316,14 +450,22 @@ final class FundamentalChartViewController: NSViewController {
                     -20
             )
         ])
+
+        groupChartsContainer.isHidden =
+            true
+
+        revenueCostHostView.isHidden =
+            false
+
+        domesticExportSalesChart.isHidden =
+            false
     }
 
     // MARK: - Public API
-    //
+
     // Kalem modu.
-    //
+
     // Mevcut davranış korunmuştur.
-    //
 
     func show(
         items:
@@ -345,15 +487,6 @@ final class FundamentalChartViewController: NSViewController {
     }
 
     // MARK: - Group API
-    //
-    // Grup modu.
-    //
-    // Şimdilik yalnızca şablon bilgisi
-    // controller'a aktarılır.
-    //
-    // Özel grafik renderer'ları bir sonraki
-    // aşamada burada devreye girecek.
-    //
 
     func showGroup(
         template:
@@ -394,6 +527,16 @@ final class FundamentalChartViewController: NSViewController {
                 isUSD
         )
 
+        revenueCostHostView.setCurrency(
+            isUSD:
+                isUSD
+        )
+
+        domesticExportSalesChart.setCurrency(
+            isUSD:
+                isUSD
+        )
+
         updateDisplay()
     }
 
@@ -403,15 +546,15 @@ final class FundamentalChartViewController: NSViewController {
 
         items.removeAll()
         periods.removeAll()
-
-        displayMode =
-            .item
+        displayMode = .item
 
         chartView.setData(
-            items:
-                [],
-            periods:
-                []
+            items: [],
+            periods: []
+        )
+
+        revenueCostHostView.setData(
+            data: []
         )
 
         updateDisplay()
@@ -443,6 +586,9 @@ final class FundamentalChartViewController: NSViewController {
     private func updateItemDisplay() {
 
         groupStateLabel.isHidden =
+            true
+
+        groupChartsContainer.isHidden =
             true
 
         guard
@@ -479,6 +625,11 @@ final class FundamentalChartViewController: NSViewController {
                 periods
         )
 
+        chartView.setCurrency(
+            isUSD:
+                isUSDMode
+        )
+
         updateItemTitle()
 
         updateItemSubtitle()
@@ -497,13 +648,6 @@ final class FundamentalChartViewController: NSViewController {
             FundamentalChartTemplate
     ) {
 
-        chartView.setData(
-            items:
-                [],
-            periods:
-                []
-        )
-
         chartView.isHidden =
             true
 
@@ -511,6 +655,9 @@ final class FundamentalChartViewController: NSViewController {
             true
 
         groupStateLabel.isHidden =
+            true
+
+        groupChartsContainer.isHidden =
             false
 
         titleLabel.stringValue =
@@ -519,11 +666,159 @@ final class FundamentalChartViewController: NSViewController {
         subtitleLabel.stringValue =
             "\(template.group.title) • Grup görünümü"
 
-        groupStateLabel.stringValue =
-            groupPlaceholderText(
-                template:
-                    template
+        switch template.id {
+
+        case "sales":
+
+            showSalesGroup()
+
+        default:
+
+            groupChartsContainer.isHidden =
+                true
+
+            groupStateLabel.isHidden =
+                false
+
+            groupStateLabel.stringValue =
+                groupPlaceholderText(
+                    template:
+                        template
+                )
+        }
+    }
+
+    // MARK: - Sales Group
+
+    private func showSalesGroup() {
+
+        // -------------------------------------------------
+        // 3C - Satış Gelirleri
+        // -------------------------------------------------
+
+        let revenueItem =
+            items.first {
+                $0.itemCode == "3C"
+            }
+
+        // -------------------------------------------------
+        // 3CA - Satışların Maliyeti
+        // -------------------------------------------------
+
+        let costItem =
+            items.first {
+                $0.itemCode == "3CA"
+            }
+
+        // -------------------------------------------------
+        // 4BC - Yurtiçi Satışlar
+        // -------------------------------------------------
+
+        let domesticItem =
+            items.first {
+                $0.itemCode == "4BC"
+            }
+
+        // -------------------------------------------------
+        // 4BD - Yurtdışı Satışlar
+        // -------------------------------------------------
+
+        let exportItem =
+            items.first {
+                $0.itemCode == "4BD"
+            }
+
+        // -------------------------------------------------
+        // Grafik 1
+        //
+        // Satış Gelirleri / Satışların Maliyeti /
+        // Brüt Kâr
+        // -------------------------------------------------
+
+        var revenueCostData:
+            [RevenueCostChartRenderer.DataPoint] = []
+
+        if
+            let revenueItem =
+                revenueItem,
+            let costItem =
+                costItem
+        {
+
+            for period in periods {
+
+                let revenue =
+                    revenueItem.value(
+                        for:
+                            period
+                    ) ?? 0
+
+                let cost =
+                    costItem.value(
+                        for:
+                            period
+                    ) ?? 0
+
+                revenueCostData.append(
+
+                    RevenueCostChartRenderer.DataPoint(
+                        revenue:
+                            revenue,
+                        cost:
+                            cost
+                    )
+                )
+            }
+        }
+
+        revenueCostHostView.setData(
+            data:
+                revenueCostData
+        )
+
+        revenueCostHostView.setCurrency(
+            isUSD:
+                isUSDMode
+        )
+
+        // -------------------------------------------------
+        // Grafik 2
+        //
+        // Yurtiçi / Yurtdışı Satışlar
+        // -------------------------------------------------
+
+        if
+            let domesticItem =
+                domesticItem,
+            let exportItem =
+                exportItem
+        {
+
+            domesticExportSalesChart.setData(
+                domesticItem:
+                    domesticItem,
+                exportItem:
+                    exportItem,
+                periods:
+                    periods
             )
+
+        }
+
+        domesticExportSalesChart.setCurrency(
+            isUSD:
+                isUSDMode
+        )
+
+        // -------------------------------------------------
+        // Şimdilik iki grafikli layout.
+        // -------------------------------------------------
+
+        revenueCostHostView.isHidden =
+            false
+
+        domesticExportSalesChart.isHidden =
+            false
     }
 
     // MARK: - Group Placeholder
@@ -597,6 +892,179 @@ final class FundamentalChartViewController: NSViewController {
             subtitleLabel.stringValue =
                 "\(items.count) finansal kalem"
         }
+    }
+}
+
+// MARK: - Revenue Cost Host View
+
+private final class RevenueCostHostView: NSView {
+
+    private let renderer =
+        RevenueCostChartRenderer()
+
+    private var data:
+        [RevenueCostChartRenderer.DataPoint] = []
+
+    private var isUSDMode =
+        false
+
+    override init(
+        frame frameRect: NSRect
+    ) {
+
+        super.init(
+            frame:
+                frameRect
+        )
+
+        wantsLayer =
+            true
+    }
+
+    required init?(
+        coder:
+            NSCoder
+    ) {
+
+        super.init(
+            coder:
+                coder
+        )
+
+        wantsLayer =
+            true
+    }
+
+    // MARK: - Data
+
+    func setData(
+        data:
+            [RevenueCostChartRenderer.DataPoint]
+    ) {
+
+        self.data =
+            data
+
+        needsDisplay =
+            true
+    }
+
+    // MARK: - Currency
+
+    func setCurrency(
+        isUSD:
+            Bool
+    ) {
+
+        self.isUSDMode =
+            isUSD
+
+        needsDisplay =
+            true
+    }
+
+    // MARK: - Drawing
+
+    override func draw(
+        _ dirtyRect: NSRect
+    ) {
+
+        super.draw(
+            dirtyRect
+        )
+
+        guard
+            !data.isEmpty
+        else {
+            return
+        }
+
+        let chartRect =
+            bounds.insetBy(
+                dx:
+                    30,
+                dy:
+                    35
+            )
+
+        let maximumValue =
+            data.reduce(
+                0
+            ) {
+
+                partialResult,
+                dataPoint in
+
+                max(
+                    partialResult,
+                    max(
+                        0,
+                        dataPoint.revenue
+                    )
+                )
+            }
+
+        guard
+            maximumValue > 0
+        else {
+            return
+        }
+
+        let count =
+            data.count
+
+        guard count > 0 else {
+            return
+        }
+
+        let availableWidth =
+            chartRect.width
+
+        let barSpacing =
+            min(
+                22,
+                max(
+                    5,
+                    availableWidth /
+                    CGFloat(
+                        count * 5
+                    )
+                )
+            )
+
+        let barWidth =
+            max(
+                12,
+                min(
+                    48,
+                    (
+                        availableWidth -
+                        CGFloat(
+                            max(
+                                0,
+                                count - 1
+                            )
+                        ) *
+                        barSpacing
+                    ) /
+                    CGFloat(count)
+                )
+            )
+
+        renderer.draw(
+            data:
+                data,
+            in:
+                chartRect,
+            barWidth:
+                barWidth,
+            barSpacing:
+                barSpacing,
+            maximumValue:
+                maximumValue
+        )
+
+        _ = isUSDMode
     }
 }
 

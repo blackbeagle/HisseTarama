@@ -52,6 +52,7 @@
 		1C64D7AB3036505C00D69EFB /* StockDataQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C64D7AA3036505C00D69EFB /* StockDataQuery.swift */; };
 		1C68CDE9302FD49400DD0670 /* AppMainWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C68CDE7302FD49400DD0670 /* AppMainWindowController.swift */; };
 		1C68CDEA302FD49400DD0670 /* AppMainWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 1C68CDE8302FD49400DD0670 /* AppMainWindowController.xib */; };
+		1C6B5759304D76C8006211A1 /* DomesticExportSalesChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C6B5758304D76C8006211A1 /* DomesticExportSalesChartRenderer.swift */; };
 		1C76A9DB2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */; };
 		1C9726F73034E4C50078AC24 /* FundamentalsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9726F63034E4C50078AC24 /* FundamentalsViewController.swift */; };
 		1C9726F93034EA8D0078AC24 /* DetailTabViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C9726F83034EA8D0078AC24 /* DetailTabViewController.swift */; };
@@ -112,6 +113,7 @@
 		1C64D7AA3036505C00D69EFB /* StockDataQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StockDataQuery.swift; sourceTree = "<group>"; };
 		1C68CDE7302FD49400DD0670 /* AppMainWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppMainWindowController.swift; sourceTree = "<group>"; };
 		1C68CDE8302FD49400DD0670 /* AppMainWindowController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = AppMainWindowController.xib; sourceTree = "<group>"; };
+		1C6B5758304D76C8006211A1 /* DomesticExportSalesChartRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomesticExportSalesChartRenderer.swift; sourceTree = "<group>"; };
 		1C76A9DA2FD5A6A100C8B563 /* WeeklyCandleStickBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklyCandleStickBuilder.swift; sourceTree = "<group>"; };
 		1C9726F63034E4C50078AC24 /* FundamentalsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundamentalsViewController.swift; sourceTree = "<group>"; };
 		1C9726F83034EA8D0078AC24 /* DetailTabViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailTabViewController.swift; sourceTree = "<group>"; };
@@ -244,6 +246,7 @@
 				1C4ED3732FFAEB5500DC0AAC /* AxisRenderer.swift */,
 				1C3246DD3002801700C2230B /* GridRenderer.swift */,
 				1CD6322B304C8C4B00C3BD49 /* RevenueCostChartRenderer.swift */,
+				1C6B5758304D76C8006211A1 /* DomesticExportSalesChartRenderer.swift */,
 			);
 			path = Renderers;
 			sourceTree = "<group>";
@@ -410,6 +413,7 @@
 				1C42C45B303A52130069583B /* FundamentalSidebarViewController.swift in Sources */,
 				1C645CCB2F788528007E1F5C /* IsYatirimService.swift in Sources */,
 				1C68CDE9302FD49400DD0670 /* AppMainWindowController.swift in Sources */,
+				1C6B5759304D76C8006211A1 /* DomesticExportSalesChartRenderer.swift in Sources */,
 				1C645CC12F787B91007E1F5C /* StockData.swift in Sources */,
 				1C64D7AB3036505C00D69EFB /* StockDataQuery.swift in Sources */,
 				1C17340630338BEE00EEF972 /* Watchlist.swift in Sources */,
