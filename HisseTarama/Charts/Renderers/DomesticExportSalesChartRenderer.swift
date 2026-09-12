@@ -22,13 +22,6 @@ final class DomesticExportSalesChartRenderer: NSView {
     private let topMargin: CGFloat = 58
     private let bottomMargin: CGFloat = 55
 
-    // En yüksek sütunun grafiğin tepesine
-    // yapışmasını engellemek için üst boşluk.
-    //
-    // %85 maksimum sütun yüksekliği
-    // %15 üst nefes payı.
-    private let chartHeadroomRatio: CGFloat = 0.15
-
     // MARK: - Colors
 
     // Kullanıcı tarafından onaylanan yavruağzı tonları.
@@ -70,13 +63,13 @@ final class DomesticExportSalesChartRenderer: NSView {
 
     private let periodFont =
         NSFont.systemFont(
-            ofSize: 10,
+            ofSize: 12,
             weight: .regular
         )
 
     private let axisFont =
         NSFont.systemFont(
-            ofSize: 10,
+            ofSize: 12,
             weight: .regular
         )
 
@@ -88,7 +81,7 @@ final class DomesticExportSalesChartRenderer: NSView {
 
     private let hoverValueFont =
         NSFont.systemFont(
-            ofSize: 9,
+            ofSize: 12,
             weight: .medium
         )
 
@@ -133,10 +126,12 @@ final class DomesticExportSalesChartRenderer: NSView {
         self.domesticItem = domesticItem
         self.exportItem = exportItem
 
-        // Soldan sağa:
-        // eski dönem -> yeni dönem
+        // Dönemleri kronolojik sıraya sokuyoruz.
         //
-        // Böylece en güncel çeyrek her zaman sağda olur.
+        // Genel grafik kuralımız:
+        // soldan sağa -> eskiden yeniye
+        //
+        // Böylece en güncel çeyrek her zaman en sağda olur.
         self.periods = periods.sorted {
             if $0.year != $1.year {
                 return $0.year < $1.year
@@ -200,30 +195,14 @@ final class DomesticExportSalesChartRenderer: NSView {
             exportItem: exportItem
         )
 
-        let actualMaximum = values
+        let maxTotal = values
             .map { $0.domestic + $0.export }
             .max() ?? 0
 
-        guard actualMaximum > 0 else {
+        guard maxTotal > 0 else {
             drawEmptyState(in: plottingRect)
             return
         }
-
-        // En yüksek gerçek değer grafik alanının yaklaşık
-        // %85'ini doldursun.
-        //
-        // Örneğin:
-        //
-        // gerçek maksimum = 1.000 M
-        //
-        // grafik maksimumu:
-        //
-        // 1.000 / 0.85 = 1.176 M
-        //
-        // Böylece üstte yaklaşık %15 boşluk kalır.
-        let maxTotal =
-            actualMaximum /
-            Double(1.0 - chartHeadroomRatio)
 
         drawGrid(
             in: plottingRect,
@@ -246,6 +225,9 @@ final class DomesticExportSalesChartRenderer: NSView {
         )
 
         // Hover bilgileri en son çiziliyor.
+        //
+        // Böylece yazılar sütunların ve diğer grafik
+        // elemanlarının üzerinde kalıyor.
         drawHoverValues(
             values: values,
             in: plottingRect,
@@ -328,7 +310,7 @@ final class DomesticExportSalesChartRenderer: NSView {
     private func drawLegend(in rect: NSRect) {
 
         let domesticText = "Yurtiçi Satışlar"
-        let exportText = "Yurtdışı Satış"
+        let exportText = "Yurtdışı Satışlar"
 
         let domesticAttributes: [NSAttributedString.Key: Any] = [
             .font: legendFont,
@@ -345,7 +327,7 @@ final class DomesticExportSalesChartRenderer: NSView {
                 withAttributes: domesticAttributes
             )
 
-        let squareSize: CGFloat = 8
+        let squareSize: CGFloat = 10
         let squareGap: CGFloat = 5
         let textGap: CGFloat = 7
 
@@ -617,8 +599,8 @@ final class DomesticExportSalesChartRenderer: NSView {
                 )
             }
 
-            // Hover edilen çeyreğin bütün yıllarını
-            // belirginleştiriyoruz.
+            // Hover edilen dönemlerin tamamını aynı
+            // çeyrek bazında daha belirgin hale getiriyoruz.
             if isHighlighted {
 
                 let totalHeight =
@@ -903,25 +885,23 @@ final class DomesticExportSalesChartRenderer: NSView {
             )
 
         let lineHeight: CGFloat = 13
+        let totalHeight = lineHeight * 2
 
-        let totalHeight =
-            lineHeight * 2
-
+        // Normal durumda barın hemen üstü.
         var firstLineY =
             barTop + 6
 
+        // Eğer yazı üst sınıra fazla yaklaşırsa,
+        // mümkün olduğunca chart alanı içinde tutuyoruz.
         let maximumTop =
-            chartRect.maxY
-            - totalHeight
-            - 2
+            chartRect.maxY - totalHeight - 2
 
         if firstLineY > maximumTop {
             firstLineY = maximumTop
         }
 
         let centerTextX =
-            centerX
-            - maxTextWidth / 2
+            centerX - maxTextWidth / 2
 
         domesticText.draw(
             at: NSPoint(
@@ -998,7 +978,6 @@ final class DomesticExportSalesChartRenderer: NSView {
             if hoveredPeriodIndex != nil {
 
                 hoveredPeriodIndex = nil
-
                 needsDisplay = true
             }
 
@@ -1119,55 +1098,12 @@ final class DomesticExportSalesChartRenderer: NSView {
         let sign =
             value < 0 ? "-" : ""
 
-        // USD
-        //
-        // 1,250,000,000 -> $1.25 B
-        // 125,000,000   -> $125 M
-        // 125,000       -> $125 K
-        //
-        // TRY
-        //
-        // 1,250,000,000 -> ₺1,25 Mly
-        // 125,000,000   -> ₺125 M
-        // 125,000       -> ₺125 B
-
-        if isUSDMode {
-
-            if absoluteValue >= 1_000_000_000 {
-
-                let formatted =
-                    absoluteValue / 1_000_000_000
-
-                return "\(sign)$\(formatDecimal(formatted)) B"
-            }
-
-            if absoluteValue >= 1_000_000 {
-
-                let formatted =
-                    absoluteValue / 1_000_000
-
-                return "\(sign)$\(formatDecimal(formatted)) M"
-            }
-
-            if absoluteValue >= 1_000 {
-
-                let formatted =
-                    absoluteValue / 1_000
-
-                return "\(sign)$\(formatDecimal(formatted)) K"
-            }
-
-            return "\(sign)$\(formatDecimal(absoluteValue))"
-        }
-
-        // TRY
-
         if absoluteValue >= 1_000_000_000 {
 
             let formatted =
                 absoluteValue / 1_000_000_000
 
-            return "\(sign)₺\(formatDecimal(formatted)) Mly"
+            return "\(sign)\(formatDecimal(formatted)) Mly"
         }
 
         if absoluteValue >= 1_000_000 {
@@ -1175,7 +1111,7 @@ final class DomesticExportSalesChartRenderer: NSView {
             let formatted =
                 absoluteValue / 1_000_000
 
-            return "\(sign)₺\(formatDecimal(formatted)) M"
+            return "\(sign)\(formatDecimal(formatted)) M"
         }
 
         if absoluteValue >= 1_000 {
@@ -1183,10 +1119,10 @@ final class DomesticExportSalesChartRenderer: NSView {
             let formatted =
                 absoluteValue / 1_000
 
-            return "\(sign)₺\(formatDecimal(formatted)) B"
+            return "\(sign)\(formatDecimal(formatted)) B"
         }
 
-        return "\(sign)₺\(formatDecimal(absoluteValue))"
+        return "\(sign)\(formatDecimal(absoluteValue))"
     }
 
     private func formatAxisValue(
@@ -1196,45 +1132,22 @@ final class DomesticExportSalesChartRenderer: NSView {
         let absoluteValue =
             abs(value)
 
-        // USD ekseni
-        if isUSDMode {
-
-            if absoluteValue >= 1_000_000_000 {
-
-                return "$\(formatDecimal(value / 1_000_000_000)) B"
-            }
-
-            if absoluteValue >= 1_000_000 {
-
-                return "$\(formatDecimal(value / 1_000_000)) M"
-            }
-
-            if absoluteValue >= 1_000 {
-
-                return "$\(formatDecimal(value / 1_000)) K"
-            }
-
-            return "$\(formatDecimal(value))"
-        }
-
-        // TRY ekseni
-
         if absoluteValue >= 1_000_000_000 {
 
-            return "₺\(formatDecimal(value / 1_000_000_000)) Mly"
+            return "\(formatDecimal(value / 1_000_000_000)) Mly"
         }
 
         if absoluteValue >= 1_000_000 {
 
-            return "₺\(formatDecimal(value / 1_000_000)) M"
+            return "\(formatDecimal(value / 1_000_000)) M"
         }
 
         if absoluteValue >= 1_000 {
 
-            return "₺\(formatDecimal(value / 1_000)) B"
+            return "\(formatDecimal(value / 1_000)) B"
         }
 
-        return "₺\(formatDecimal(value))"
+        return formatDecimal(value)
     }
 
     private func formatPercentage(

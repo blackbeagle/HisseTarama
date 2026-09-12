@@ -5,155 +5,113 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Display Mode
 
     private enum DisplayMode {
-
         case item
-
-        case group(
-            template:
-                FundamentalChartTemplate
-        )
+        case group(template: FundamentalChartTemplate)
     }
 
-    private var displayMode:
-        DisplayMode = .item
+    private var displayMode: DisplayMode = .item
 
     // MARK: - Data
 
-    private var items:
-        [FinancialStatementItem] = []
-
-    private var periods:
-        [FinancialPeriod] = []
+    private var items: [FinancialStatementItem] = []
+    private var periods: [FinancialPeriod] = []
 
     // MARK: - Currency
 
-    private var isUSDMode =
-        false
+    private var isUSDMode = false
 
     // MARK: - UI
 
     private let titleLabel: NSTextField = {
+        let label = NSTextField(
+            labelWithString: "Finansal Grafik"
+        )
 
-        let label =
-            NSTextField(
-                labelWithString:
-                    "Finansal Grafik"
-            )
+        label.font = NSFont.systemFont(
+            ofSize: 18,
+            weight: .semibold
+        )
 
-        label.font =
-            NSFont.systemFont(
-                ofSize:
-                    18,
-                weight:
-                    .semibold
-            )
-
-        label.translatesAutoresizingMaskIntoConstraints =
-            false
+        label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
     }()
 
     private let subtitleLabel: NSTextField = {
+        let label = NSTextField(
+            labelWithString: ""
+        )
 
-        let label =
-            NSTextField(
-                labelWithString:
-                    ""
-            )
+        label.font = NSFont.systemFont(
+            ofSize: 12
+        )
 
-        label.font =
-            NSFont.systemFont(
-                ofSize:
-                    12
-            )
-
-        label.textColor =
-            .secondaryLabelColor
-
-        label.translatesAutoresizingMaskIntoConstraints =
-            false
+        label.textColor = .secondaryLabelColor
+        label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
     }()
 
     // MARK: - Standard Chart
 
-    private let chartView:
-        FundamentalBarChartView = {
-
-        let chart =
-            FundamentalBarChartView()
-
-        chart.translatesAutoresizingMaskIntoConstraints =
-            false
-
+    private let chartView: FundamentalBarChartView = {
+        let chart = FundamentalBarChartView()
+        chart.translatesAutoresizingMaskIntoConstraints = false
         return chart
     }()
 
     // MARK: - Group Charts Container
 
     private let groupChartsContainer: NSView = {
-
-        let view =
-            NSView()
-
-        view.translatesAutoresizingMaskIntoConstraints =
-            false
-
+        let view = NSView()
+        view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
 
     // MARK: - Sales Charts
 
-    private let revenueCostHostView:
-        RevenueCostHostView = {
+    private let revenueCostChartView: FundamentalChartHostView = {
+        let view = FundamentalChartHostView(
+            renderer: RevenueCostChartRenderer()
+        )
 
-        let view =
-            RevenueCostHostView()
-
-        view.translatesAutoresizingMaskIntoConstraints =
-            false
+        view.translatesAutoresizingMaskIntoConstraints = false
 
         return view
     }()
 
-    private let domesticExportSalesChart:
-        DomesticExportSalesChartRenderer = {
-
-        let chart =
-            DomesticExportSalesChartRenderer()
-
-        chart.translatesAutoresizingMaskIntoConstraints =
-            false
-
+    private let domesticExportSalesChart: DomesticExportSalesChartRenderer = {
+        let chart = DomesticExportSalesChartRenderer()
+        chart.translatesAutoresizingMaskIntoConstraints = false
         return chart
+    }()
+
+    private let lowerRevenueCostChartView: FundamentalChartHostView = {
+        let view = FundamentalChartHostView(
+            renderer: RevenueCostChartRenderer()
+        )
+
+        view.translatesAutoresizingMaskIntoConstraints = false
+
+        return view
     }()
 
     // MARK: - Empty State
 
     private let emptyStateLabel: NSTextField = {
+        let label = NSTextField(
+            labelWithString:
+                "Görüntülenecek finansal veri yok."
+        )
 
-        let label =
-            NSTextField(
-                labelWithString:
-                    "Görüntülenecek finansal veri yok."
-            )
+        label.alignment = .center
 
-        label.alignment =
-            .center
+        label.font = NSFont.systemFont(
+            ofSize: 15
+        )
 
-        label.font =
-            NSFont.systemFont(
-                ofSize:
-                    15
-            )
-
-        label.textColor =
-            .secondaryLabelColor
-
-        label.translatesAutoresizingMaskIntoConstraints =
-            false
+        label.textColor = .secondaryLabelColor
+        label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
     }()
@@ -161,29 +119,19 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Group State Label
 
     private let groupStateLabel: NSTextField = {
+        let label = NSTextField(
+            labelWithString: ""
+        )
 
-        let label =
-            NSTextField(
-                labelWithString:
-                    ""
-            )
+        label.alignment = .center
 
-        label.alignment =
-            .center
+        label.font = NSFont.systemFont(
+            ofSize: 15,
+            weight: .medium
+        )
 
-        label.font =
-            NSFont.systemFont(
-                ofSize:
-                    15,
-                weight:
-                    .medium
-            )
-
-        label.textColor =
-            .secondaryLabelColor
-
-        label.translatesAutoresizingMaskIntoConstraints =
-            false
+        label.textColor = .secondaryLabelColor
+        label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
     }()
@@ -191,17 +139,13 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Lifecycle
 
     override func loadView() {
-
-        view =
-            NSView()
+        view = NSView()
     }
 
     override func viewDidLoad() {
-
         super.viewDidLoad()
 
         setupView()
-
         updateDisplay()
     }
 
@@ -209,43 +153,29 @@ final class FundamentalChartViewController: NSViewController {
 
     private func setupView() {
 
-        view.wantsLayer =
-            true
+        view.wantsLayer = true
 
-        view.addSubview(
-            titleLabel
-        )
-
-        view.addSubview(
-            subtitleLabel
-        )
-
-        view.addSubview(
-            chartView
-        )
-
-        view.addSubview(
-            groupChartsContainer
-        )
-
-        view.addSubview(
-            emptyStateLabel
-        )
-
-        view.addSubview(
-            groupStateLabel
-        )
+        view.addSubview(titleLabel)
+        view.addSubview(subtitleLabel)
+        view.addSubview(chartView)
+        view.addSubview(groupChartsContainer)
+        view.addSubview(emptyStateLabel)
+        view.addSubview(groupStateLabel)
 
         // -------------------------------------------------
         // Group chart container
         // -------------------------------------------------
 
         groupChartsContainer.addSubview(
-            revenueCostHostView
+            revenueCostChartView
         )
 
         groupChartsContainer.addSubview(
             domesticExportSalesChart
+        )
+
+        groupChartsContainer.addSubview(
+            lowerRevenueCostChartView
         )
 
         NSLayoutConstraint.activate([
@@ -253,235 +183,209 @@ final class FundamentalChartViewController: NSViewController {
             // MARK: Başlık
 
             titleLabel.topAnchor.constraint(
-                equalTo:
-                    view.topAnchor,
-                constant:
-                    16
+                equalTo: view.topAnchor,
+                constant: 16
             ),
 
             titleLabel.leadingAnchor.constraint(
-                equalTo:
-                    view.leadingAnchor,
-                constant:
-                    20
+                equalTo: view.leadingAnchor,
+                constant: 20
             ),
 
             titleLabel.trailingAnchor.constraint(
-                lessThanOrEqualTo:
-                    view.trailingAnchor,
-                constant:
-                    -20
+                lessThanOrEqualTo: view.trailingAnchor,
+                constant: -20
             ),
 
             // MARK: Alt başlık
 
             subtitleLabel.topAnchor.constraint(
-                equalTo:
-                    titleLabel.bottomAnchor,
-                constant:
-                    4
+                equalTo: titleLabel.bottomAnchor,
+                constant: 4
             ),
 
             subtitleLabel.leadingAnchor.constraint(
-                equalTo:
-                    titleLabel.leadingAnchor
+                equalTo: titleLabel.leadingAnchor
             ),
 
             subtitleLabel.trailingAnchor.constraint(
-                lessThanOrEqualTo:
-                    view.trailingAnchor,
-                constant:
-                    -20
+                lessThanOrEqualTo: view.trailingAnchor,
+                constant: -20
             ),
 
             // MARK: Standart grafik
 
             chartView.topAnchor.constraint(
-                equalTo:
-                    subtitleLabel.bottomAnchor,
-                constant:
-                    16
+                equalTo: subtitleLabel.bottomAnchor,
+                constant: 16
             ),
 
             chartView.leadingAnchor.constraint(
-                equalTo:
-                    view.leadingAnchor,
-                constant:
-                    20
+                equalTo: view.leadingAnchor,
+                constant: 20
             ),
 
             chartView.trailingAnchor.constraint(
-                equalTo:
-                    view.trailingAnchor,
-                constant:
-                    -20
+                equalTo: view.trailingAnchor,
+                constant: -20
             ),
 
             chartView.bottomAnchor.constraint(
-                equalTo:
-                    view.bottomAnchor,
-                constant:
-                    -20
+                equalTo: view.bottomAnchor,
+                constant: -20
             ),
 
             // MARK: Grup grafik alanı
 
             groupChartsContainer.topAnchor.constraint(
-                equalTo:
-                    subtitleLabel.bottomAnchor,
-                constant:
-                    12
+                equalTo: subtitleLabel.bottomAnchor,
+                constant: 12
             ),
 
             groupChartsContainer.leadingAnchor.constraint(
-                equalTo:
-                    view.leadingAnchor,
-                constant:
-                    20
+                equalTo: view.leadingAnchor,
+                constant: 20
             ),
 
             groupChartsContainer.trailingAnchor.constraint(
-                equalTo:
-                    view.trailingAnchor,
-                constant:
-                    -20
+                equalTo: view.trailingAnchor,
+                constant: -20
             ),
 
             groupChartsContainer.bottomAnchor.constraint(
-                equalTo:
-                    view.bottomAnchor,
-                constant:
-                    -20
+                equalTo: view.bottomAnchor,
+                constant: -20
             ),
 
-            // MARK: Revenue / Cost
+            // =================================================
+            // ÜST SOL
+            // Revenue / Cost
+            // =================================================
 
-            revenueCostHostView.leadingAnchor.constraint(
-                equalTo:
-                    groupChartsContainer.leadingAnchor
+            revenueCostChartView.leadingAnchor.constraint(
+                equalTo: groupChartsContainer.leadingAnchor
             ),
 
-            revenueCostHostView.trailingAnchor.constraint(
-                equalTo:
-                    groupChartsContainer.trailingAnchor
+            revenueCostChartView.trailingAnchor.constraint(
+                equalTo: groupChartsContainer.centerXAnchor,
+                constant: -6
             ),
 
-            revenueCostHostView.topAnchor.constraint(
-                equalTo:
-                    groupChartsContainer.topAnchor
+            revenueCostChartView.topAnchor.constraint(
+                equalTo: groupChartsContainer.topAnchor
             ),
 
-            revenueCostHostView.bottomAnchor.constraint(
-                equalTo:
-                    groupChartsContainer.centerYAnchor
+            revenueCostChartView.bottomAnchor.constraint(
+                equalTo: groupChartsContainer.centerYAnchor,
+                constant: -6
             ),
 
-            // MARK: Yurtiçi / Yurtdışı
+            // =================================================
+            // ÜST SAĞ
+            // Yurtiçi / Yurtdışı
+            // =================================================
 
             domesticExportSalesChart.leadingAnchor.constraint(
-                equalTo:
-                    groupChartsContainer.leadingAnchor
+                equalTo: groupChartsContainer.centerXAnchor,
+                constant: 6
             ),
 
             domesticExportSalesChart.trailingAnchor.constraint(
-                equalTo:
-                    groupChartsContainer.trailingAnchor
+                equalTo: groupChartsContainer.trailingAnchor
             ),
 
             domesticExportSalesChart.topAnchor.constraint(
-                equalTo:
-                    groupChartsContainer.centerYAnchor
+                equalTo: groupChartsContainer.topAnchor
             ),
 
             domesticExportSalesChart.bottomAnchor.constraint(
-                equalTo:
-                    groupChartsContainer.bottomAnchor
+                equalTo: groupChartsContainer.centerYAnchor,
+                constant: -6
+            ),
+
+            // =================================================
+            // ALT
+            // Revenue / Cost
+            // =================================================
+
+            lowerRevenueCostChartView.leadingAnchor.constraint(
+                equalTo: groupChartsContainer.leadingAnchor
+            ),
+
+            lowerRevenueCostChartView.trailingAnchor.constraint(
+                equalTo: groupChartsContainer.trailingAnchor
+            ),
+
+            lowerRevenueCostChartView.topAnchor.constraint(
+                equalTo: groupChartsContainer.centerYAnchor,
+                constant: 6
+            ),
+
+            lowerRevenueCostChartView.bottomAnchor.constraint(
+                equalTo: groupChartsContainer.bottomAnchor
             ),
 
             // MARK: Boş durum
 
             emptyStateLabel.centerXAnchor.constraint(
-                equalTo:
-                    view.centerXAnchor
+                equalTo: view.centerXAnchor
             ),
 
             emptyStateLabel.centerYAnchor.constraint(
-                equalTo:
-                    view.centerYAnchor
+                equalTo: view.centerYAnchor
             ),
 
             emptyStateLabel.leadingAnchor.constraint(
-                greaterThanOrEqualTo:
-                    view.leadingAnchor,
-                constant:
-                    20
+                greaterThanOrEqualTo: view.leadingAnchor,
+                constant: 20
             ),
 
             emptyStateLabel.trailingAnchor.constraint(
-                lessThanOrEqualTo:
-                    view.trailingAnchor,
-                constant:
-                    -20
+                lessThanOrEqualTo: view.trailingAnchor,
+                constant: -20
             ),
 
             // MARK: Grup durum alanı
 
             groupStateLabel.centerXAnchor.constraint(
-                equalTo:
-                    view.centerXAnchor
+                equalTo: view.centerXAnchor
             ),
 
             groupStateLabel.centerYAnchor.constraint(
-                equalTo:
-                    view.centerYAnchor
+                equalTo: view.centerYAnchor
             ),
 
             groupStateLabel.leadingAnchor.constraint(
-                greaterThanOrEqualTo:
-                    view.leadingAnchor,
-                constant:
-                    20
+                greaterThanOrEqualTo: view.leadingAnchor,
+                constant: 20
             ),
 
             groupStateLabel.trailingAnchor.constraint(
-                lessThanOrEqualTo:
-                    view.trailingAnchor,
-                constant:
-                    -20
+                lessThanOrEqualTo: view.trailingAnchor,
+                constant: -20
             )
         ])
 
-        groupChartsContainer.isHidden =
-            true
+        groupChartsContainer.isHidden = true
 
-        revenueCostHostView.isHidden =
-            false
-
-        domesticExportSalesChart.isHidden =
-            false
+        revenueCostChartView.isHidden = false
+        domesticExportSalesChart.isHidden = false
+        lowerRevenueCostChartView.isHidden = false
     }
 
     // MARK: - Public API
 
     // Kalem modu.
-
     // Mevcut davranış korunmuştur.
 
     func show(
-        items:
-            [FinancialStatementItem],
-        periods:
-            [FinancialPeriod]
+        items: [FinancialStatementItem],
+        periods: [FinancialPeriod]
     ) {
 
-        self.displayMode =
-            .item
-
-        self.items =
-            items
-
-        self.periods =
-            periods
+        self.displayMode = .item
+        self.items = items
+        self.periods = periods
 
         updateDisplay()
     }
@@ -489,25 +393,17 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Group API
 
     func showGroup(
-        template:
-            FundamentalChartTemplate,
-        items:
-            [FinancialStatementItem],
-        periods:
-            [FinancialPeriod]
+        template: FundamentalChartTemplate,
+        items: [FinancialStatementItem],
+        periods: [FinancialPeriod]
     ) {
 
-        self.displayMode =
-            .group(
-                template:
-                    template
-            )
+        self.displayMode = .group(
+            template: template
+        )
 
-        self.items =
-            items
-
-        self.periods =
-            periods
+        self.items = items
+        self.periods = periods
 
         updateDisplay()
     }
@@ -515,26 +411,25 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Currency
 
     func setCurrency(
-        isUSD:
-            Bool
+        isUSD: Bool
     ) {
 
-        self.isUSDMode =
-            isUSD
+        self.isUSDMode = isUSD
 
         chartView.setCurrency(
-            isUSD:
-                isUSD
+            isUSD: isUSD
         )
 
-        revenueCostHostView.setCurrency(
-            isUSD:
-                isUSD
+        revenueCostChartView.setCurrency(
+            isUSD: isUSD
+        )
+
+        lowerRevenueCostChartView.setCurrency(
+            isUSD: isUSD
         )
 
         domesticExportSalesChart.setCurrency(
-            isUSD:
-                isUSD
+            isUSD: isUSD
         )
 
         updateDisplay()
@@ -546,6 +441,7 @@ final class FundamentalChartViewController: NSViewController {
 
         items.removeAll()
         periods.removeAll()
+
         displayMode = .item
 
         chartView.setData(
@@ -553,9 +449,9 @@ final class FundamentalChartViewController: NSViewController {
             periods: []
         )
 
-        revenueCostHostView.setData(
-            data: []
-        )
+        revenueCostChartView.clear()
+
+        lowerRevenueCostChartView.clear()
 
         updateDisplay()
     }
@@ -570,13 +466,10 @@ final class FundamentalChartViewController: NSViewController {
 
             updateItemDisplay()
 
-        case .group(
-            let template
-        ):
+        case .group(let template):
 
             updateGroupDisplay(
-                template:
-                    template
+                template: template
             )
         }
     }
@@ -585,11 +478,8 @@ final class FundamentalChartViewController: NSViewController {
 
     private func updateItemDisplay() {
 
-        groupStateLabel.isHidden =
-            true
-
-        groupChartsContainer.isHidden =
-            true
+        groupStateLabel.isHidden = true
+        groupChartsContainer.isHidden = true
 
         guard
             !items.isEmpty,
@@ -597,68 +487,48 @@ final class FundamentalChartViewController: NSViewController {
         else {
 
             chartView.setData(
-                items:
-                    [],
-                periods:
-                    []
+                items: [],
+                periods: []
             )
 
             titleLabel.stringValue =
                 "Finansal Grafik"
 
-            subtitleLabel.stringValue =
-                ""
+            subtitleLabel.stringValue = ""
 
-            chartView.isHidden =
-                true
-
-            emptyStateLabel.isHidden =
-                false
+            chartView.isHidden = true
+            emptyStateLabel.isHidden = false
 
             return
         }
 
         chartView.setData(
-            items:
-                items,
-            periods:
-                periods
+            items: items,
+            periods: periods
         )
 
         chartView.setCurrency(
-            isUSD:
-                isUSDMode
+            isUSD: isUSDMode
         )
 
         updateItemTitle()
-
         updateItemSubtitle()
 
-        chartView.isHidden =
-            false
-
-        emptyStateLabel.isHidden =
-            true
+        chartView.isHidden = false
+        emptyStateLabel.isHidden = true
     }
 
     // MARK: - Group Display
 
     private func updateGroupDisplay(
-        template:
-            FundamentalChartTemplate
+        template: FundamentalChartTemplate
     ) {
 
-        chartView.isHidden =
-            true
+        chartView.isHidden = true
+        emptyStateLabel.isHidden = true
+        groupStateLabel.isHidden = true
 
-        emptyStateLabel.isHidden =
-            true
-
-        groupStateLabel.isHidden =
-            true
-
-        groupChartsContainer.isHidden =
-            false
+        groupChartsContainer.isHidden = false
 
         titleLabel.stringValue =
             template.title
@@ -674,16 +544,12 @@ final class FundamentalChartViewController: NSViewController {
 
         default:
 
-            groupChartsContainer.isHidden =
-                true
-
-            groupStateLabel.isHidden =
-                false
+            groupChartsContainer.isHidden = true
+            groupStateLabel.isHidden = false
 
             groupStateLabel.stringValue =
                 groupPlaceholderText(
-                    template:
-                        template
+                    template: template
                 )
         }
     }
@@ -729,103 +595,99 @@ final class FundamentalChartViewController: NSViewController {
             }
 
         // -------------------------------------------------
-        // Grafik 1
-        //
-        // Satış Gelirleri / Satışların Maliyeti /
-        // Brüt Kâr
+        // Revenue / Cost verisi
         // -------------------------------------------------
 
         var revenueCostData:
             [RevenueCostChartRenderer.DataPoint] = []
 
         if
-            let revenueItem =
-                revenueItem,
-            let costItem =
-                costItem
+            let revenueItem = revenueItem,
+            let costItem = costItem
         {
 
             for period in periods {
 
                 let revenue =
                     revenueItem.value(
-                        for:
-                            period
+                        for: period
                     ) ?? 0
 
                 let cost =
                     costItem.value(
-                        for:
-                            period
+                        for: period
                     ) ?? 0
 
                 revenueCostData.append(
-
                     RevenueCostChartRenderer.DataPoint(
-                        revenue:
-                            revenue,
-                        cost:
-                            cost
+                        periodTitle: period.title,
+                        revenue: revenue,
+                        cost: cost
                     )
                 )
             }
         }
 
-        revenueCostHostView.setData(
-            data:
-                revenueCostData
+        // -------------------------------------------------
+        // Üst Revenue / Cost
+        // -------------------------------------------------
+
+        revenueCostChartView.setData(
+            revenueCostData
         )
 
-        revenueCostHostView.setCurrency(
-            isUSD:
-                isUSDMode
+        revenueCostChartView.setCurrency(
+            isUSD: isUSDMode
         )
 
         // -------------------------------------------------
-        // Grafik 2
+        // Alt Revenue / Cost
         //
-        // Yurtiçi / Yurtdışı Satışlar
+        // Aynı veri.
+        // Ama farklı boyuttaki host üzerinde test edilir.
+        // -------------------------------------------------
+
+        lowerRevenueCostChartView.setData(
+            revenueCostData
+        )
+
+        lowerRevenueCostChartView.setCurrency(
+            isUSD: isUSDMode
+        )
+
+        // -------------------------------------------------
+        // Yurtiçi / Yurtdışı
         // -------------------------------------------------
 
         if
-            let domesticItem =
-                domesticItem,
-            let exportItem =
-                exportItem
+            let domesticItem = domesticItem,
+            let exportItem = exportItem
         {
 
             domesticExportSalesChart.setData(
-                domesticItem:
-                    domesticItem,
-                exportItem:
-                    exportItem,
-                periods:
-                    periods
+                domesticItem: domesticItem,
+                exportItem: exportItem,
+                periods: periods
             )
-
         }
 
         domesticExportSalesChart.setCurrency(
-            isUSD:
-                isUSDMode
+            isUSD: isUSDMode
         )
 
         // -------------------------------------------------
-        // Şimdilik iki grafikli layout.
+        // Üç grafik görünür.
         // -------------------------------------------------
 
-        revenueCostHostView.isHidden =
-            false
-
-        domesticExportSalesChart.isHidden =
-            false
+        revenueCostChartView.isHidden = false
+        domesticExportSalesChart.isHidden = false
+        lowerRevenueCostChartView.isHidden = false
     }
 
     // MARK: - Group Placeholder
 
     private func groupPlaceholderText(
-        template:
-            FundamentalChartTemplate
+        template: FundamentalChartTemplate
     ) -> String {
 
         switch template.id {
@@ -846,9 +708,7 @@ final class FundamentalChartViewController: NSViewController {
 
     private func updateItemTitle() {
 
-        guard
-            !items.isEmpty
-        else {
+        guard !items.isEmpty else {
 
             titleLabel.stringValue =
                 "Finansal Grafik"
@@ -872,12 +732,9 @@ final class FundamentalChartViewController: NSViewController {
 
     private func updateItemSubtitle() {
 
-        guard
-            !items.isEmpty
-        else {
+        guard !items.isEmpty else {
 
-            subtitleLabel.stringValue =
-                ""
+            subtitleLabel.stringValue = ""
 
             return
         }
@@ -894,178 +751,3 @@ final class FundamentalChartViewController: NSViewController {
         }
     }
 }
-
-// MARK: - Revenue Cost Host View
-
-private final class RevenueCostHostView: NSView {
-
-    private let renderer =
-        RevenueCostChartRenderer()
-
-    private var data:
-        [RevenueCostChartRenderer.DataPoint] = []
-
-    private var isUSDMode =
-        false
-
-    override init(
-        frame frameRect: NSRect
-    ) {
-
-        super.init(
-            frame:
-                frameRect
-        )
-
-        wantsLayer =
-            true
-    }
-
-    required init?(
-        coder:
-            NSCoder
-    ) {
-
-        super.init(
-            coder:
-                coder
-        )
-
-        wantsLayer =
-            true
-    }
-
-    // MARK: - Data
-
-    func setData(
-        data:
-            [RevenueCostChartRenderer.DataPoint]
-    ) {
-
-        self.data =
-            data
-
-        needsDisplay =
-            true
-    }
-
-    // MARK: - Currency
-
-    func setCurrency(
-        isUSD:
-            Bool
-    ) {
-
-        self.isUSDMode =
-            isUSD
-
-        needsDisplay =
-            true
-    }
-
-    // MARK: - Drawing
-
-    override func draw(
-        _ dirtyRect: NSRect
-    ) {
-
-        super.draw(
-            dirtyRect
-        )
-
-        guard
-            !data.isEmpty
-        else {
-            return
-        }
-
-        let chartRect =
-            bounds.insetBy(
-                dx:
-                    30,
-                dy:
-                    35
-            )
-
-        let maximumValue =
-            data.reduce(
-                0
-            ) {
-
-                partialResult,
-                dataPoint in
-
-                max(
-                    partialResult,
-                    max(
-                        0,
-                        dataPoint.revenue
-                    )
-                )
-            }
-
-        guard
-            maximumValue > 0
-        else {
-            return
-        }
-
-        let count =
-            data.count
-
-        guard count > 0 else {
-            return
-        }
-
-        let availableWidth =
-            chartRect.width
-
-        let barSpacing =
-            min(
-                22,
-                max(
-                    5,
-                    availableWidth /
-                    CGFloat(
-                        count * 5
-                    )
-                )
-            )
-
-        let barWidth =
-            max(
-                12,
-                min(
-                    48,
-                    (
-                        availableWidth -
-                        CGFloat(
-                            max(
-                                0,
-                                count - 1
-                            )
-                        ) *
-                        barSpacing
-                    ) /
-                    CGFloat(count)
-                )
-            )
-
-        renderer.draw(
-            data:
-                data,
-            in:
-                chartRect,
-            barWidth:
-                barWidth,
-            barSpacing:
-                barSpacing,
-            maximumValue:
-                maximumValue
-        )
-
-        _ = isUSDMode
-    }
-}
-
-
