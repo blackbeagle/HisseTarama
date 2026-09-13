@@ -625,85 +625,138 @@ final class StandartBarChartRenderer: NSView {
         )
     }
 
-
     // MARK: - Scale
 
-    private func calculateScale()
-        -> (
-            minimum: Double,
-            maximum: Double
-        ) {
+    private struct AxisScale {
+
+        let minimum: Double
+        let maximum: Double
+        let gridStep: Double
+    }
+
+    private func calculateScale() -> AxisScale {
 
         guard !data.isEmpty else {
-
-            return (
-                0,
-                1
+            return AxisScale(
+                minimum: 0,
+                maximum: 1,
+                gridStep: 1
             )
         }
 
-        let maximumAbsoluteValue =
-            data
-                .map {
-                    abs(
-                        $0.value
-                    )
-                }
-                .max() ?? 0
+        let minimumValue =
+            data.map { $0.value }.min() ?? 0
 
-        if maximumAbsoluteValue == 0 {
-
-            return (
-                -1,
-                1
-            )
-        }
-
-        let paddedMaximum =
-            maximumAbsoluteValue *
-            1.18
-
-        let magnitude =
-            niceAxisMagnitude(
-                paddedMaximum
-            )
+        let maximumValue =
+            data.map { $0.value }.max() ?? 0
 
         let hasPositive =
-            data.contains {
-                $0.value > 0
-            }
+            maximumValue > 0
 
         let hasNegative =
-            data.contains {
-                $0.value < 0
-            }
+            minimumValue < 0
 
-        if hasPositive &&
-            !hasNegative {
+        // -------------------------------------------------
+        // Sadece pozitif değerler
+        // -------------------------------------------------
 
-            return (
-                0,
-                magnitude
+        if hasPositive && !hasNegative {
+
+            let step =
+                niceGridStep(
+                    maximumValue / 10
+                )
+
+            let maximum =
+                ceil(
+                    maximumValue / step
+                ) * step
+
+            return AxisScale(
+                minimum: 0,
+                maximum: maximum,
+                gridStep: step
             )
         }
 
-        if hasNegative &&
-            !hasPositive {
+        // -------------------------------------------------
+        // Sadece negatif değerler
+        // -------------------------------------------------
 
-            return (
-                -magnitude,
-                0
+        if hasNegative && !hasPositive {
+
+            let magnitude =
+                abs(minimumValue)
+
+            let step =
+                niceGridStep(
+                    magnitude / 10
+                )
+
+            let minimum =
+                -ceil(
+                    magnitude / step
+                ) * step
+
+            return AxisScale(
+                minimum: minimum,
+                maximum: 0,
+                gridStep: step
             )
         }
 
-        return (
-            -magnitude,
-            magnitude
+        // -------------------------------------------------
+        // Pozitif + negatif
+        // -------------------------------------------------
+
+        if hasPositive && hasNegative {
+
+            let maximumAbsoluteValue =
+                max(
+                    abs(minimumValue),
+                    abs(maximumValue)
+                )
+
+            let step =
+                niceGridStep(
+                    maximumAbsoluteValue / 4
+                )
+
+            let magnitude =
+                ceil(
+                    maximumAbsoluteValue / step
+                ) * step
+
+            return AxisScale(
+                minimum: -magnitude,
+                maximum: magnitude,
+                gridStep: step
+            )
+        }
+
+        // -------------------------------------------------
+        // Bütün değerler sıfır
+        // -------------------------------------------------
+
+        return AxisScale(
+            minimum: -1,
+            maximum: 1,
+            gridStep: 0.5
         )
     }
 
 
-    private func niceAxisMagnitude(
+    // -----------------------------------------------------
+    // Grid için okunabilir aralık seçer.
+    //
+    // Örnek:
+    //
+    // 83 / 5  = 16.6  → 20
+    // 47 / 5  = 9.4   → 10
+    // 12 / 5  = 2.4   → 2.5
+    // -----------------------------------------------------
+
+    private func niceGridStep(
         _ value: Double
     ) -> Double {
 
@@ -713,9 +766,7 @@ final class StandartBarChartRenderer: NSView {
 
         let exponent =
             floor(
-                log10(
-                    value
-                )
+                log10(value)
             )
 
         let power =
@@ -725,63 +776,69 @@ final class StandartBarChartRenderer: NSView {
             )
 
         let normalized =
-            value /
-            power
+            value / power
 
-        let niceNormalized:
-            Double
+        let niceNormalized: Double
 
         if normalized <= 1 {
-
             niceNormalized = 1
 
         } else if normalized <= 2 {
-
             niceNormalized = 2
 
-        } else if normalized <= 5 {
+        } else if normalized <= 2.5 {
+            niceNormalized = 2.5
 
+        } else if normalized <= 5 {
             niceNormalized = 5
 
         } else {
-
             niceNormalized = 10
         }
 
         return
-            niceNormalized *
-            power
+            niceNormalized * power
     }
+    
+
+
 
 
     // MARK: - Grid
-
     private func drawGrid(
         in rect: CGRect,
         minimumValue: Double,
         maximumValue: Double
     ) {
 
+        let scale =
+            calculateScale()
+
         let range =
             maximumValue -
             minimumValue
 
-        guard range > 0 else {
+        guard range > 0,
+              scale.gridStep > 0 else {
             return
         }
 
-        let gridCount = 4
+        let firstGridValue =
+            ceil(
+                minimumValue /
+                scale.gridStep
+            ) * scale.gridStep
 
-        for index in 0...gridCount {
+        var value =
+            firstGridValue
+
+        while value <= maximumValue + scale.gridStep * 0.001 {
 
             let ratio =
-                CGFloat(index) /
-                CGFloat(gridCount)
-
-            let value =
-                minimumValue +
-                range *
-                Double(ratio)
+                CGFloat(
+                    (value - minimumValue) /
+                    range
+                )
 
             let y =
                 rect.minY +
@@ -812,7 +869,7 @@ final class StandartBarChartRenderer: NSView {
             )
 
             if abs(value) <
-                range * 0.0001 {
+                scale.gridStep * 0.001 {
 
                 zeroLineColor.setStroke()
 
@@ -829,11 +886,12 @@ final class StandartBarChartRenderer: NSView {
 
             drawAxisValue(
                 value,
-                at:
-                    y,
-                in:
-                    rect
+                at: y,
+                in: rect
             )
+
+            value +=
+                scale.gridStep
         }
     }
 
