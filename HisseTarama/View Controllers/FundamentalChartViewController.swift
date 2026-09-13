@@ -575,6 +575,12 @@ final class FundamentalChartViewController: NSViewController {
         chartView.setCurrency(
             isUSD: isUSDMode
         )
+        
+        if items.count == 1 {
+            chartView.setTitle(
+                items[0].displayTitle
+            )
+        }
 
         updateItemTitle()
 
