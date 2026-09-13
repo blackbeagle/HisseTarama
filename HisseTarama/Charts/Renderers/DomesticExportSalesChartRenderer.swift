@@ -9,7 +9,6 @@ final class DomesticExportSalesChartRenderer: NSView {
     private var periods: [FinancialPeriod] = []
     private var isUSDMode = false
 
-    // Hover yapılan sütunun index'i.
     private var hoveredPeriodIndex: Int?
 
     // MARK: - Layout
@@ -22,7 +21,6 @@ final class DomesticExportSalesChartRenderer: NSView {
 
     // MARK: - Colors
 
-    // Yurtiçi satışlar - kahverengi
     private let domesticColor =
         NSColor(
             calibratedRed: 0.55,
@@ -31,7 +29,6 @@ final class DomesticExportSalesChartRenderer: NSView {
             alpha: 1.0
         )
 
-    // Yurtdışı satışlar - hardal
     private let exportColor =
         NSColor(
             calibratedRed: 0.78,
@@ -80,7 +77,7 @@ final class DomesticExportSalesChartRenderer: NSView {
 
     private let hoverValueFont =
         NSFont.systemFont(
-            ofSize: 12,
+            ofSize: 14,
             weight: .medium
         )
 
@@ -124,13 +121,6 @@ final class DomesticExportSalesChartRenderer: NSView {
 
         self.domesticItem = domesticItem
         self.exportItem = exportItem
-
-        // Dönemleri kronolojik sıraya sokuyoruz.
-        //
-        // Genel grafik kuralımız:
-        // soldan sağa -> eskiden yeniye
-        //
-        // Böylece en güncel çeyrek her zaman en sağda olur.
 
         self.periods = periods.sorted {
 
@@ -202,11 +192,14 @@ final class DomesticExportSalesChartRenderer: NSView {
             exportItem: exportItem
         )
 
-        let maxTotal = values
-            .map { $0.domestic + $0.export }
-            .max() ?? 0
+        let rawMaximumValue =
+            values
+                .map {
+                    $0.domestic + $0.export
+                }
+                .max() ?? 0
 
-        guard maxTotal > 0 else {
+        guard rawMaximumValue > 0 else {
 
             drawEmptyState(
                 in: plottingRect
@@ -215,35 +208,47 @@ final class DomesticExportSalesChartRenderer: NSView {
             return
         }
 
+        let gridStep =
+            niceGridStep(
+                for: rawMaximumValue
+            )
+
+        let maximumValue =
+            ceil(
+                rawMaximumValue / gridStep
+            ) * gridStep
+
+        let finalMaximumValue =
+            maximumValue <= rawMaximumValue
+            ? maximumValue + gridStep
+            : maximumValue
+
         drawGrid(
             in: plottingRect,
-            maximumValue: maxTotal
+            maximumValue: finalMaximumValue,
+            gridStep: gridStep
         )
 
         drawBars(
             values: values,
             in: plottingRect,
-            maximumValue: maxTotal
+            maximumValue: finalMaximumValue
         )
 
         drawYAxis(
             in: plottingRect,
-            maximumValue: maxTotal
+            maximumValue: finalMaximumValue,
+            gridStep: gridStep
         )
 
         drawPeriodLabels(
             in: plottingRect
         )
 
-        // Hover bilgileri en son çiziliyor.
-        //
-        // Böylece yazılar sütunların ve diğer grafik
-        // elemanlarının üzerinde kalıyor.
-
         drawHoverValues(
             values: values,
             in: plottingRect,
-            maximumValue: maxTotal
+            maximumValue: finalMaximumValue
         )
     }
 
@@ -301,6 +306,62 @@ final class DomesticExportSalesChartRenderer: NSView {
                 export: export
             )
         }
+    }
+
+    // MARK: - Scale
+
+    private func niceGridStep(
+        for maximumValue: Double
+    ) -> Double {
+
+        guard maximumValue > 0 else {
+            return 1
+        }
+
+        let targetDivisions = 5.0
+
+        let rawStep =
+            maximumValue /
+            targetDivisions
+
+        let exponent =
+            floor(
+                log10(rawStep)
+            )
+
+        let magnitude =
+            pow(
+                10,
+                exponent
+            )
+
+        let normalized =
+            rawStep / magnitude
+
+        let niceNormalized: Double
+
+        if normalized <= 1.0 {
+
+            niceNormalized = 1.0
+
+        } else if normalized <= 2.0 {
+
+            niceNormalized = 2.0
+
+        } else if normalized <= 2.5 {
+
+            niceNormalized = 2.5
+
+        } else if normalized <= 5.0 {
+
+            niceNormalized = 5.0
+
+        } else {
+
+            niceNormalized = 10.0
+        }
+
+        return niceNormalized * magnitude
     }
 
     // MARK: - Outer Border
@@ -369,8 +430,6 @@ final class DomesticExportSalesChartRenderer: NSView {
         let centerY =
             rect.maxY - 28
 
-        // Sol kare - Yurtiçi
-
         let domesticSquare = NSRect(
             x: startX,
             y: centerY - squareSize / 2,
@@ -383,8 +442,6 @@ final class DomesticExportSalesChartRenderer: NSView {
         NSBezierPath(
             rect: domesticSquare
         ).fill()
-
-        // Yurtiçi text
 
         let domesticTextX =
             domesticSquare.maxX + squareGap
@@ -399,8 +456,6 @@ final class DomesticExportSalesChartRenderer: NSView {
             ),
             withAttributes: domesticAttributes
         )
-
-        // Yurtdışı text
 
         let exportTextX =
             domesticTextX
@@ -417,8 +472,6 @@ final class DomesticExportSalesChartRenderer: NSView {
             ),
             withAttributes: domesticAttributes
         )
-
-        // Sağ kare - Yurtdışı
 
         let exportSquare = NSRect(
             x: exportTextX + exportSize.width + squareGap,
@@ -438,22 +491,42 @@ final class DomesticExportSalesChartRenderer: NSView {
 
     private func drawGrid(
         in rect: NSRect,
-        maximumValue: Double
+        maximumValue: Double,
+        gridStep: Double
     ) {
 
-        let gridCount = 4
+        guard
+            maximumValue > 0,
+            gridStep > 0
+        else {
+            return
+        }
+
+        let gridCount =
+            Int(
+                round(
+                    maximumValue / gridStep
+                )
+            )
+
+        guard gridCount > 0 else {
+            return
+        }
 
         gridColor.setStroke()
 
         for index in 0...gridCount {
 
+            let value =
+                Double(index) * gridStep
+
             let ratio =
-                CGFloat(index) /
-                CGFloat(gridCount)
+                value / maximumValue
 
             let y =
                 rect.minY +
-                rect.height * ratio
+                rect.height *
+                CGFloat(ratio)
 
             let path = NSBezierPath()
 
@@ -481,10 +554,23 @@ final class DomesticExportSalesChartRenderer: NSView {
 
     private func drawYAxis(
         in rect: NSRect,
-        maximumValue: Double
+        maximumValue: Double,
+        gridStep: Double
     ) {
 
-        let gridCount = 4
+        guard
+            maximumValue > 0,
+            gridStep > 0
+        else {
+            return
+        }
+
+        let gridCount =
+            Int(
+                round(
+                    maximumValue / gridStep
+                )
+            )
 
         let attributes:
             [NSAttributedString.Key: Any] = [
@@ -495,16 +581,16 @@ final class DomesticExportSalesChartRenderer: NSView {
 
         for index in 0...gridCount {
 
-            let ratio =
-                Double(index) /
-                Double(gridCount)
-
             let value =
-                maximumValue * ratio
+                Double(index) * gridStep
+
+            let ratio =
+                value / maximumValue
 
             let y =
                 rect.minY +
-                rect.height * CGFloat(ratio)
+                rect.height *
+                CGFloat(ratio)
 
             let text =
                 formatAxisValue(value)
@@ -620,7 +706,7 @@ final class DomesticExportSalesChartRenderer: NSView {
                 isPeriodHighlighted(index)
 
             let alpha =
-            isHighlighted ? 0.85 : 0.15
+                isHighlighted ? 0.85 : 0.15
 
             domesticColor
                 .withAlphaComponent(alpha)
@@ -643,9 +729,6 @@ final class DomesticExportSalesChartRenderer: NSView {
                     rect: exportRect
                 )
             }
-
-            // Hover korunuyor.
-            // Sadece sütun etrafındaki ekstra border kaldırıldı.
         }
     }
 
@@ -829,11 +912,11 @@ final class DomesticExportSalesChartRenderer: NSView {
         chartRect: NSRect
     ) {
 
-        let domesticText =
-            "Y.içi  \(formatValue(point.domestic))  \(formatPercentage(point.domesticPercentage))"
+        //let domesticText = "Y.içi  \(formatValue(point.domestic))  \(formatPercentage(point.domesticPercentage))"
+        let domesticText = (formatPercentage(point.domesticPercentage))
 
-        let exportText =
-            "Y.dışı  \(formatValue(point.export))  \(formatPercentage(point.exportPercentage))"
+       // let exportText = "Y.dışı  \(formatValue(point.export))  \(formatPercentage(point.exportPercentage))"
+        let exportText = (formatPercentage(point.exportPercentage))
 
         let domesticAttributes:
             [NSAttributedString.Key: Any] = [
@@ -889,7 +972,7 @@ final class DomesticExportSalesChartRenderer: NSView {
         domesticText.draw(
             at: NSPoint(
                 x: centerTextX,
-                y: firstLineY + lineHeight
+                y: firstLineY
             ),
             withAttributes:
                 domesticAttributes
@@ -898,7 +981,7 @@ final class DomesticExportSalesChartRenderer: NSView {
         exportText.draw(
             at: NSPoint(
                 x: centerTextX,
-                y: firstLineY
+                y: firstLineY + lineHeight
             ),
             withAttributes:
                 exportAttributes
