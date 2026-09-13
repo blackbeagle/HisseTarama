@@ -279,8 +279,8 @@ final class StandartBarChartRenderer: NSView {
 
         let barWidth =
             min(
-                slotWidth * 0.56,
-                54
+                slotWidth * 0.72,
+                70
             )
 
         for index in data.indices {
@@ -938,8 +938,8 @@ final class StandartBarChartRenderer: NSView {
 
         let barWidth =
             min(
-                slotWidth * 0.56,
-                54
+                slotWidth * 0.72,
+                70
             )
 
         for index in data.indices {
