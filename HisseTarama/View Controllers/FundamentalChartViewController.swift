@@ -242,26 +242,26 @@ final class FundamentalChartViewController: NSViewController {
                 constant: -20
             ),
 
-            // MARK: Standart grafik
+            // MARK: - Standart grafik
 
             chartView.topAnchor.constraint(
                 equalTo: subtitleLabel.bottomAnchor,
-                constant: 16
+                constant: 180
             ),
 
             chartView.leadingAnchor.constraint(
                 equalTo: view.leadingAnchor,
-                constant: 20
+                constant: 15
             ),
 
             chartView.trailingAnchor.constraint(
                 equalTo: view.trailingAnchor,
-                constant: -20
+                constant: -15
             ),
 
             chartView.bottomAnchor.constraint(
                 equalTo: view.bottomAnchor,
-                constant: -20
+                constant: -180
             ),
 
             // MARK: Grup grafik alanı

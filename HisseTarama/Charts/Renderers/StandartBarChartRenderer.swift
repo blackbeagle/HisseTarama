@@ -11,35 +11,31 @@ final class StandartBarChartRenderer: NSView {
 
     private var data: [DataPoint] = []
 
-    private var hoveredIndex: Int?
     private var hoveredPeriodKey: Int?
 
     private var trackingArea: NSTrackingArea?
 
     private var isUSDMode = false
 
-    private var chartTitle: String = "Finansal Grafik"
+    private var chartTitle = "Finansal Grafik"
 
 
     // MARK: - Layout
 
-    // Çerçevenin sağ ve sol kenarlardan uzaklığı.
-    // Artırırsan çerçeve daha dar olur.
+    // Çerçevenin sağ ve sol boşluğu.
+    // Artırılırsa çerçeve daralır.
     private let outerHorizontalMargin: CGFloat = 34
 
-    // Çerçevenin üst ve alt kenarlardan uzaklığı.
-    // Artırırsan çerçeve biraz daha kısa olur.
+    // Çerçevenin üst ve alt boşluğu.
     private let outerVerticalMargin: CGFloat = 14
 
-    // Grafik çizim alanının iç boşlukları.
-
+    // Grafik alanının çerçeve içindeki boşlukları.
     private let leftMargin: CGFloat = 66
     private let rightMargin: CGFloat = 28
 
     private let topMargin: CGFloat = 68
     private let bottomMargin: CGFloat = 68
 
-    // Çizim alanının kendisine ek küçük boşluk.
     private let plotHorizontalInset: CGFloat = 10
     private let plotVerticalInset: CGFloat = 10
 
@@ -68,7 +64,7 @@ final class StandartBarChartRenderer: NSView {
         NSColor.secondaryLabelColor
 
 
-    // MARK: - Data API
+    // MARK: - Public API
 
     func setData(
         _ data: [DataPoint]
@@ -85,12 +81,9 @@ final class StandartBarChartRenderer: NSView {
                 )
             }
 
-        hoveredIndex = nil
         hoveredPeriodKey = nil
 
         needsDisplay = true
-
-        updateTrackingArea()
     }
 
 
@@ -98,8 +91,9 @@ final class StandartBarChartRenderer: NSView {
 
         data.removeAll()
 
-        hoveredIndex = nil
         hoveredPeriodKey = nil
+
+        needsDisplay = true
     }
 
 
@@ -113,8 +107,6 @@ final class StandartBarChartRenderer: NSView {
     }
 
 
-    // MARK: - Title
-
     func setTitle(
         _ title: String
     ) {
@@ -122,6 +114,205 @@ final class StandartBarChartRenderer: NSView {
         chartTitle = title
 
         needsDisplay = true
+    }
+
+
+    // MARK: - View Lifecycle
+
+    override func viewDidMoveToWindow() {
+
+        super.viewDidMoveToWindow()
+
+        updateTrackingArea()
+    }
+
+
+    override func updateTrackingAreas() {
+
+        super.updateTrackingAreas()
+
+        updateTrackingArea()
+    }
+
+
+    private func updateTrackingArea() {
+
+        if let trackingArea = trackingArea {
+
+            removeTrackingArea(
+                trackingArea
+            )
+
+            self.trackingArea = nil
+        }
+
+        guard window != nil else {
+            return
+        }
+
+        let area =
+            NSTrackingArea(
+                rect: bounds,
+                options: [
+                    .mouseEnteredAndExited,
+                    .mouseMoved,
+                    .activeInKeyWindow,
+                    .inVisibleRect
+                ],
+                owner: self,
+                userInfo: nil
+            )
+
+        trackingArea = area
+
+        addTrackingArea(
+            area
+        )
+    }
+
+
+    // MARK: - Mouse
+
+    override func mouseEntered(
+        with event: NSEvent
+    ) {
+
+        updateHover(
+            with: event
+        )
+    }
+
+
+    override func mouseMoved(
+        with event: NSEvent
+    ) {
+
+        updateHover(
+            with: event
+        )
+    }
+
+
+    override func mouseExited(
+        with event: NSEvent
+    ) {
+
+        if hoveredPeriodKey != nil {
+
+            hoveredPeriodKey = nil
+
+            needsDisplay = true
+        }
+    }
+
+
+    private func updateHover(
+        with event: NSEvent
+    ) {
+
+        guard !data.isEmpty else {
+            return
+        }
+
+        let location =
+            convert(
+                event.locationInWindow,
+                from: nil
+            )
+
+        guard let index =
+            barIndex(
+                at: location
+            )
+        else {
+
+            if hoveredPeriodKey != nil {
+
+                hoveredPeriodKey = nil
+
+                needsDisplay = true
+            }
+
+            return
+        }
+
+        let newPeriodKey =
+            periodGroupKey(
+                data[index].periodTitle
+            )
+
+        if hoveredPeriodKey != newPeriodKey {
+
+            hoveredPeriodKey =
+                newPeriodKey
+
+            needsDisplay = true
+        }
+    }
+
+
+    private func barIndex(
+        at point: NSPoint
+    ) -> Int? {
+
+        guard !data.isEmpty else {
+            return nil
+        }
+
+        let outerRect =
+            makeOuterRect()
+
+        let plottingRect =
+            makePlottingRect(
+                in: outerRect
+            )
+
+        guard plottingRect.width > 0,
+              plottingRect.height > 0
+        else {
+            return nil
+        }
+
+        let slotWidth =
+            plottingRect.width /
+            CGFloat(data.count)
+
+        let barWidth =
+            min(
+                slotWidth * 0.56,
+                54
+            )
+
+        for index in data.indices {
+
+            let centerX =
+                plottingRect.minX +
+                slotWidth *
+                CGFloat(index) +
+                slotWidth / 2
+
+            let hitRect =
+                CGRect(
+                    x:
+                        centerX -
+                        barWidth / 2,
+
+                    y:
+                        plottingRect.minY,
+
+                    width:
+                        barWidth,
+
+                    height:
+                        plottingRect.height
+                )
+
+            if hitRect.contains(point) {
+                return index
+            }
+        }
+
+        return nil
     }
 
 
@@ -143,6 +334,7 @@ final class StandartBarChartRenderer: NSView {
                 }
 
         guard numbers.count >= 2 else {
+
             return (
                 Int.max,
                 Int.max
@@ -155,19 +347,14 @@ final class StandartBarChartRenderer: NSView {
         let period =
             numbers[1]
 
-        let quarter =
+        return (
+            year,
             normalizedQuarter(
                 period
             )
-
-        return (
-            year,
-            quarter
         )
     }
 
-
-    // MARK: - Quarter Group
 
     private func normalizedQuarter(
         _ period: Int
@@ -218,218 +405,7 @@ final class StandartBarChartRenderer: NSView {
     }
 
 
-    // MARK: - Tracking
-
-    override func updateTrackingAreas() {
-
-        super.updateTrackingAreas()
-
-        if let trackingArea =
-            trackingArea {
-
-            removeTrackingArea(
-                trackingArea
-            )
-        }
-
-        let area =
-            NSTrackingArea(
-                rect: bounds,
-                options: [
-                    .mouseEnteredAndExited,
-                    .mouseMoved,
-                    .activeInKeyWindow,
-                    .inVisibleRect
-                ],
-                owner: self,
-                userInfo: nil
-            )
-
-        trackingArea = area
-
-        addTrackingArea(
-            area
-        )
-    }
-
-
-    private func updateTrackingArea() {
-
-        if let trackingArea =
-            trackingArea {
-
-            removeTrackingArea(
-                trackingArea
-            )
-        }
-
-        let area =
-            NSTrackingArea(
-                rect: bounds,
-                options: [
-                    .mouseEnteredAndExited,
-                    .mouseMoved,
-                    .activeInKeyWindow,
-                    .inVisibleRect
-                ],
-                owner: self,
-                userInfo: nil
-            )
-
-        trackingArea = area
-
-        addTrackingArea(
-            area
-        )
-    }
-
-
-    override func mouseEntered(
-        with event: NSEvent
-    ) {
-
-        updateHover(
-            with: event
-        )
-    }
-
-
-    override func mouseMoved(
-        with event: NSEvent
-    ) {
-
-        updateHover(
-            with: event
-        )
-    }
-
-
-    override func mouseExited(
-        with event: NSEvent
-    ) {
-
-        if hoveredIndex != nil ||
-            hoveredPeriodKey != nil {
-
-            hoveredIndex = nil
-            hoveredPeriodKey = nil
-
-            needsDisplay = true
-        }
-    }
-
-
-    private func updateHover(
-        with event: NSEvent
-    ) {
-
-        let location =
-            convert(
-                event.locationInWindow,
-                from: nil
-            )
-
-        let index =
-            barIndex(
-                at: location
-            )
-
-        guard let index = index else {
-
-            if hoveredIndex != nil ||
-                hoveredPeriodKey != nil {
-
-                hoveredIndex = nil
-                hoveredPeriodKey = nil
-
-                needsDisplay = true
-            }
-
-            return
-        }
-
-        let newPeriodKey =
-            periodGroupKey(
-                data[index].periodTitle
-            )
-
-        if hoveredIndex != index ||
-            hoveredPeriodKey != newPeriodKey {
-
-            hoveredIndex = index
-            hoveredPeriodKey = newPeriodKey
-
-            needsDisplay = true
-        }
-    }
-
-
-    private func barIndex(
-        at point: NSPoint
-    ) -> Int? {
-
-        guard !data.isEmpty else {
-            return nil
-        }
-
-        let outerRect =
-            makeOuterRect()
-
-        let plottingRect =
-            makePlottingRect(
-                in: outerRect
-            )
-
-        guard plottingRect.width > 0,
-              plottingRect.height > 0 else {
-
-            return nil
-        }
-
-        let slotWidth =
-            plottingRect.width /
-            CGFloat(data.count)
-
-        let barWidth =
-            min(
-                slotWidth * 0.56,
-                54
-            )
-
-        for index in data.indices {
-
-            let centerX =
-                plottingRect.minX +
-                slotWidth *
-                CGFloat(index) +
-                slotWidth / 2
-
-            let hitRect =
-                CGRect(
-                    x:
-                        centerX -
-                        barWidth / 2,
-
-                    y:
-                        plottingRect.minY,
-
-                    width:
-                        barWidth,
-
-                    height:
-                        plottingRect.height
-                )
-
-            if hitRect.contains(point) {
-                return index
-            }
-        }
-
-        return nil
-    }
-
-
-    // MARK: - Draw
+    // MARK: - Drawing
 
     override func draw(
         _ dirtyRect: NSRect
@@ -452,12 +428,10 @@ final class StandartBarChartRenderer: NSView {
     }
 
 
-    // MARK: - Outer Rect
-
     private func makeOuterRect()
         -> CGRect {
 
-        CGRect(
+        return CGRect(
             x:
                 bounds.minX +
                 outerHorizontalMargin,
@@ -493,8 +467,8 @@ final class StandartBarChartRenderer: NSView {
             )
 
         guard plottingRect.width > 0,
-              plottingRect.height > 0 else {
-
+              plottingRect.height > 0
+        else {
             return
         }
 
@@ -511,14 +485,18 @@ final class StandartBarChartRenderer: NSView {
 
         drawGrid(
             in: plottingRect,
-            minimumValue: scale.minimum,
-            maximumValue: scale.maximum
+            minimumValue:
+                scale.minimum,
+            maximumValue:
+                scale.maximum
         )
 
         drawBars(
             in: plottingRect,
-            minimumValue: scale.minimum,
-            maximumValue: scale.maximum
+            minimumValue:
+                scale.minimum,
+            maximumValue:
+                scale.maximum
         )
 
         drawPeriodLabels(
@@ -561,8 +539,11 @@ final class StandartBarChartRenderer: NSView {
             )
 
         return baseRect.insetBy(
-            dx: plotHorizontalInset,
-            dy: plotVerticalInset
+            dx:
+                plotHorizontalInset,
+
+            dy:
+                plotVerticalInset
         )
     }
 
@@ -598,22 +579,23 @@ final class StandartBarChartRenderer: NSView {
     ) {
 
         let title =
-            chartTitle
-                .uppercased(
-                    with:
-                        Locale(
-                            identifier:
-                                "tr_TR"
-                        )
-                )
+            chartTitle.uppercased(
+                with:
+                    Locale(
+                        identifier:
+                            "tr_TR"
+                    )
+            )
 
         let attributes:
             [NSAttributedString.Key: Any] = [
 
                 .font:
                     NSFont.systemFont(
-                        ofSize: 14,
-                        weight: .semibold
+                        ofSize:
+                            14,
+                        weight:
+                            .semibold
                     ),
 
                 .foregroundColor:
@@ -653,6 +635,7 @@ final class StandartBarChartRenderer: NSView {
         ) {
 
         guard !data.isEmpty else {
+
             return (
                 0,
                 1
@@ -677,7 +660,8 @@ final class StandartBarChartRenderer: NSView {
         }
 
         let paddedMaximum =
-            maximumAbsoluteValue * 1.18
+            maximumAbsoluteValue *
+            1.18
 
         let magnitude =
             niceAxisMagnitude(
@@ -870,7 +854,8 @@ final class StandartBarChartRenderer: NSView {
 
                 .font:
                     NSFont.systemFont(
-                        ofSize: 9
+                        ofSize:
+                            9
                     ),
 
                 .foregroundColor:
@@ -976,8 +961,6 @@ final class StandartBarChartRenderer: NSView {
             let isPositive =
                 item.value >= 0
 
-            // Aynı çeyrek bütün yıllarda
-            // birlikte vurgulanır.
             let isHovered =
                 hoveredPeriodKey != nil &&
                 periodGroupKey(
@@ -1077,22 +1060,14 @@ final class StandartBarChartRenderer: NSView {
 
             drawValueLabel(
                 item.value,
-
                 centerX:
                     centerX,
-
                 valueY:
                     valueY,
-
-                zeroY:
-                    zeroY,
-
                 isPositive:
                     isPositive,
-
                 highlighted:
                     isHovered,
-
                 dimmed:
                     dimmed
             )
@@ -1106,7 +1081,6 @@ final class StandartBarChartRenderer: NSView {
         _ value: Double,
         centerX: CGFloat,
         valueY: CGFloat,
-        zeroY: CGFloat,
         isPositive: Bool,
         highlighted: Bool,
         dimmed: Bool
@@ -1121,14 +1095,12 @@ final class StandartBarChartRenderer: NSView {
 
         let font =
             highlighted
-
             ? NSFont.systemFont(
                 ofSize:
                     10,
                 weight:
                     .semibold
             )
-
             : NSFont.systemFont(
                 ofSize:
                     9,
@@ -1171,7 +1143,7 @@ final class StandartBarChartRenderer: NSView {
                     attributes
             )
 
-        let verticalSpacing:
+        let spacing:
             CGFloat = 5
 
         let y:
@@ -1181,14 +1153,14 @@ final class StandartBarChartRenderer: NSView {
 
             y =
                 valueY +
-                verticalSpacing
+                spacing
 
         } else {
 
             y =
                 valueY -
                 size.height -
-                verticalSpacing
+                spacing
         }
 
         (text as NSString).draw(
@@ -1274,7 +1246,6 @@ final class StandartBarChartRenderer: NSView {
                         NSFont.systemFont(
                             ofSize:
                                 9,
-
                             weight:
                                 isHovered
                                 ? .medium
@@ -1422,7 +1393,6 @@ final class StandartBarChartRenderer: NSView {
                 )
             }
 
-        hoveredIndex = nil
         hoveredPeriodKey = nil
 
         needsDisplay = true
