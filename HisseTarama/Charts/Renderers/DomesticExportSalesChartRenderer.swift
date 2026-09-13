@@ -27,17 +27,17 @@ final class DomesticExportSalesChartRenderer: NSView {
     // Kullanıcı tarafından onaylanan yavruağzı tonları.
     private let domesticColor =
         NSColor(
-            calibratedRed: 0.86,
-            green: 0.47,
-            blue: 0.47,
+            calibratedRed: 0.55,
+            green: 0.36,
+            blue: 0.20,
             alpha: 1.0
         )
 
     private let exportColor =
         NSColor(
-            calibratedRed: 0.96,
-            green: 0.68,
-            blue: 0.68,
+            calibratedRed: 0.78,
+            green: 0.62,
+            blue: 0.20,
             alpha: 1.0
         )
 
