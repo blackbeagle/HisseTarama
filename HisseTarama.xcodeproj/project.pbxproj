@@ -16,6 +16,7 @@
 		1C17341030338E3C00EEF972 /* SideBarItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C17340F30338E3C00EEF972 /* SideBarItem.swift */; };
 		1C1734123033903B00EEF972 /* SidebarSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C1734113033903B00EEF972 /* SidebarSelection.swift */; };
 		1C2006B13055BC4800F4AFCE /* FundamentalChartHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C2006B03055BC4800F4AFCE /* FundamentalChartHostView.swift */; };
+		1C27EB4C3056D8830086F6C8 /* StandartBarChartRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C27EB4B3056D8830086F6C8 /* StandartBarChartRenderer.swift */; };
 		1C3246DC30027FEB00C2230B /* AdaptiveGridCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3246DB30027FEB00C2230B /* AdaptiveGridCalculator.swift */; };
 		1C3246DE3002801700C2230B /* GridRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C3246DD3002801700C2230B /* GridRenderer.swift */; };
 		1C42C459303A45720069583B /* FinancialStatementItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C42C458303A45720069583B /* FinancialStatementItem.swift */; };
@@ -76,6 +77,7 @@
 		1C17340F30338E3C00EEF972 /* SideBarItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideBarItem.swift; sourceTree = "<group>"; };
 		1C1734113033903B00EEF972 /* SidebarSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarSelection.swift; sourceTree = "<group>"; };
 		1C2006B03055BC4800F4AFCE /* FundamentalChartHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FundamentalChartHostView.swift; sourceTree = "<group>"; };
+		1C27EB4B3056D8830086F6C8 /* StandartBarChartRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StandartBarChartRenderer.swift; sourceTree = "<group>"; };
 		1C3246DB30027FEB00C2230B /* AdaptiveGridCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdaptiveGridCalculator.swift; sourceTree = "<group>"; };
 		1C3246DD3002801700C2230B /* GridRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridRenderer.swift; sourceTree = "<group>"; };
 		1C42C458303A45720069583B /* FinancialStatementItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FinancialStatementItem.swift; sourceTree = "<group>"; };
@@ -249,6 +251,7 @@
 				1C3246DD3002801700C2230B /* GridRenderer.swift */,
 				1CD6322B304C8C4B00C3BD49 /* RevenueCostChartRenderer.swift */,
 				1C6B5758304D76C8006211A1 /* DomesticExportSalesChartRenderer.swift */,
+				1C27EB4B3056D8830086F6C8 /* StandartBarChartRenderer.swift */,
 			);
 			path = Renderers;
 			sourceTree = "<group>";
@@ -446,6 +449,7 @@
 				1C9726FB3034EAFA0078AC24 /* DashboardViewController.swift in Sources */,
 				1C17340A30338C5700EEF972 /* Scan.swift in Sources */,
 				1C645C9A2F773189007E1F5C /* AppDelegate.swift in Sources */,
+				1C27EB4C3056D8830086F6C8 /* StandartBarChartRenderer.swift in Sources */,
 				1C645CAC2F77360F007E1F5C /* DetailViewController.swift in Sources */,
 				1C645CB92F78210E007E1F5C /* CandlestickChartView.swift in Sources */,
 				1CD6322E304CA62B00C3BD49 /* FundamentalGroup.swift in Sources */,

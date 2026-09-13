@@ -5,7 +5,9 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Display Mode
 
     private enum DisplayMode {
+
         case item
+
         case group(template: FundamentalChartTemplate)
     }
 
@@ -14,6 +16,7 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Data
 
     private var items: [FinancialStatementItem] = []
+
     private var periods: [FinancialPeriod] = []
 
     // MARK: - Currency
@@ -23,6 +26,7 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - UI
 
     private let titleLabel: NSTextField = {
+
         let label = NSTextField(
             labelWithString: "Finansal Grafik"
         )
@@ -38,6 +42,7 @@ final class FundamentalChartViewController: NSViewController {
     }()
 
     private let subtitleLabel: NSTextField = {
+
         let label = NSTextField(
             labelWithString: ""
         )
@@ -47,6 +52,7 @@ final class FundamentalChartViewController: NSViewController {
         )
 
         label.textColor = .secondaryLabelColor
+
         label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
@@ -54,23 +60,30 @@ final class FundamentalChartViewController: NSViewController {
 
     // MARK: - Standard Chart
 
-    private let chartView: FundamentalBarChartView = {
-        let chart = FundamentalBarChartView()
+    private let chartView: StandartBarChartRenderer = {
+
+        let chart = StandartBarChartRenderer()
+
         chart.translatesAutoresizingMaskIntoConstraints = false
+
         return chart
     }()
 
     // MARK: - Group Charts Container
 
     private let groupChartsContainer: NSView = {
+
         let view = NSView()
+
         view.translatesAutoresizingMaskIntoConstraints = false
+
         return view
     }()
 
     // MARK: - Sales Charts
 
     private let revenueCostChartView: FundamentalChartHostView = {
+
         let view = FundamentalChartHostView(
             renderer: RevenueCostChartRenderer()
         )
@@ -81,12 +94,16 @@ final class FundamentalChartViewController: NSViewController {
     }()
 
     private let domesticExportSalesChart: DomesticExportSalesChartRenderer = {
+
         let chart = DomesticExportSalesChartRenderer()
+
         chart.translatesAutoresizingMaskIntoConstraints = false
+
         return chart
     }()
 
     private let lowerRevenueCostChartView: FundamentalChartHostView = {
+
         let view = FundamentalChartHostView(
             renderer: RevenueCostChartRenderer()
         )
@@ -99,6 +116,7 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Empty State
 
     private let emptyStateLabel: NSTextField = {
+
         let label = NSTextField(
             labelWithString:
                 "Görüntülenecek finansal veri yok."
@@ -111,6 +129,7 @@ final class FundamentalChartViewController: NSViewController {
         )
 
         label.textColor = .secondaryLabelColor
+
         label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
@@ -119,6 +138,7 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Group State Label
 
     private let groupStateLabel: NSTextField = {
+
         let label = NSTextField(
             labelWithString: ""
         )
@@ -131,6 +151,7 @@ final class FundamentalChartViewController: NSViewController {
         )
 
         label.textColor = .secondaryLabelColor
+
         label.translatesAutoresizingMaskIntoConstraints = false
 
         return label
@@ -139,13 +160,16 @@ final class FundamentalChartViewController: NSViewController {
     // MARK: - Lifecycle
 
     override func loadView() {
+
         view = NSView()
     }
 
     override func viewDidLoad() {
+
         super.viewDidLoad()
 
         setupView()
+
         updateDisplay()
     }
 
@@ -156,10 +180,15 @@ final class FundamentalChartViewController: NSViewController {
         view.wantsLayer = true
 
         view.addSubview(titleLabel)
+
         view.addSubview(subtitleLabel)
+
         view.addSubview(chartView)
+
         view.addSubview(groupChartsContainer)
+
         view.addSubview(emptyStateLabel)
+
         view.addSubview(groupStateLabel)
 
         // -------------------------------------------------
@@ -369,7 +398,9 @@ final class FundamentalChartViewController: NSViewController {
         groupChartsContainer.isHidden = true
 
         revenueCostChartView.isHidden = false
+
         domesticExportSalesChart.isHidden = false
+
         lowerRevenueCostChartView.isHidden = false
     }
 
@@ -384,7 +415,9 @@ final class FundamentalChartViewController: NSViewController {
     ) {
 
         self.displayMode = .item
+
         self.items = items
+
         self.periods = periods
 
         updateDisplay()
@@ -403,6 +436,7 @@ final class FundamentalChartViewController: NSViewController {
         )
 
         self.items = items
+
         self.periods = periods
 
         updateDisplay()
@@ -440,14 +474,12 @@ final class FundamentalChartViewController: NSViewController {
     func clearChart() {
 
         items.removeAll()
+
         periods.removeAll()
 
         displayMode = .item
 
-        chartView.setData(
-            items: [],
-            periods: []
-        )
+        chartView.clear()
 
         revenueCostChartView.clear()
 
@@ -479,6 +511,7 @@ final class FundamentalChartViewController: NSViewController {
     private func updateItemDisplay() {
 
         groupStateLabel.isHidden = true
+
         groupChartsContainer.isHidden = true
 
         guard
@@ -486,10 +519,7 @@ final class FundamentalChartViewController: NSViewController {
             !periods.isEmpty
         else {
 
-            chartView.setData(
-                items: [],
-                periods: []
-            )
+            chartView.clear()
 
             titleLabel.stringValue =
                 "Finansal Grafik"
@@ -497,14 +527,49 @@ final class FundamentalChartViewController: NSViewController {
             subtitleLabel.stringValue = ""
 
             chartView.isHidden = true
+
             emptyStateLabel.isHidden = false
 
             return
         }
 
+        // -------------------------------------------------
+        // StandartBarChartRenderer için veri hazırlanıyor.
+        //
+        // Şimdilik yalnızca tek finansal kalem
+        // standart grafik olarak gösteriliyor.
+        // -------------------------------------------------
+
+        var chartData:
+            [StandartBarChartRenderer.DataPoint] = []
+
+        if items.count == 1 {
+
+            let item = items[0]
+
+            for period in periods {
+
+                let value =
+                    item.value(
+                        for: period
+                    ) ?? 0
+
+                chartData.append(
+
+                    StandartBarChartRenderer.DataPoint(
+
+                        periodTitle:
+                            period.title,
+
+                        value:
+                            value
+                    )
+                )
+            }
+        }
+
         chartView.setData(
-            items: items,
-            periods: periods
+            chartData
         )
 
         chartView.setCurrency(
@@ -512,9 +577,11 @@ final class FundamentalChartViewController: NSViewController {
         )
 
         updateItemTitle()
+
         updateItemSubtitle()
 
         chartView.isHidden = false
+
         emptyStateLabel.isHidden = true
     }
 
@@ -525,7 +592,9 @@ final class FundamentalChartViewController: NSViewController {
     ) {
 
         chartView.isHidden = true
+
         emptyStateLabel.isHidden = true
+
         groupStateLabel.isHidden = true
 
         groupChartsContainer.isHidden = false
@@ -545,6 +614,7 @@ final class FundamentalChartViewController: NSViewController {
         default:
 
             groupChartsContainer.isHidden = true
+
             groupStateLabel.isHidden = false
 
             groupStateLabel.stringValue =
@@ -619,10 +689,17 @@ final class FundamentalChartViewController: NSViewController {
                     ) ?? 0
 
                 revenueCostData.append(
+
                     RevenueCostChartRenderer.DataPoint(
-                        periodTitle: period.title,
-                        revenue: revenue,
-                        cost: cost
+
+                        periodTitle:
+                            period.title,
+
+                        revenue:
+                            revenue,
+
+                        cost:
+                            cost
                     )
                 )
             }
@@ -680,7 +757,9 @@ final class FundamentalChartViewController: NSViewController {
         // -------------------------------------------------
 
         revenueCostChartView.isHidden = false
+
         domesticExportSalesChart.isHidden = false
+
         lowerRevenueCostChartView.isHidden = false
     }
 
