@@ -35,7 +35,9 @@ final class AppStockState {
                 Stock(symbol: "ISCTR", name: "İş Bankası C"),
                 Stock(symbol: "AKBNK", name: "Akbank"),
                 Stock(symbol: "YKBNK", name: "Yapı Kredi"),
-                Stock(symbol: "GARAN", name: "Garanti BBVA")
+                Stock(symbol: "GARAN", name: "Garanti BBVA"),
+                Stock(symbol: "YATAS", name: "YATAS"),
+                Stock(symbol: "CCOLA", name: "CCOLA")
             ]
         )
     ]
