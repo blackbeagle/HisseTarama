@@ -59,25 +59,25 @@ final class DomesticExportSalesChartRenderer: NSView {
 
     private let periodFont =
         NSFont.systemFont(
-            ofSize: 12,
+            ofSize: 13,
             weight: .regular
         )
 
     private let axisFont =
         NSFont.systemFont(
-            ofSize: 12,
+            ofSize: 13,
             weight: .regular
         )
 
     private let legendFont =
         NSFont.systemFont(
-            ofSize: 12,
+            ofSize: 13,
             weight: .medium
         )
 
     private let hoverValueFont =
         NSFont.systemFont(
-            ofSize: 14,
+            ofSize: 13,
             weight: .medium
         )
 

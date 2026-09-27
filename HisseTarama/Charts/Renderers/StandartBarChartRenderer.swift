@@ -593,7 +593,7 @@ final class StandartBarChartRenderer: NSView {
                 .font:
                     NSFont.systemFont(
                         ofSize:
-                            14,
+                            13,
                         weight:
                             .semibold
                     ),
@@ -913,7 +913,7 @@ final class StandartBarChartRenderer: NSView {
                 .font:
                     NSFont.systemFont(
                         ofSize:
-                            9
+                            13
                     ),
 
                 .foregroundColor:
@@ -1155,13 +1155,13 @@ final class StandartBarChartRenderer: NSView {
             highlighted
             ? NSFont.systemFont(
                 ofSize:
-                    10,
+                    13,
                 weight:
                     .semibold
             )
             : NSFont.systemFont(
                 ofSize:
-                    9,
+                    13,
                 weight:
                     .regular
             )
@@ -1303,7 +1303,7 @@ final class StandartBarChartRenderer: NSView {
                     .font:
                         NSFont.systemFont(
                             ofSize:
-                                9,
+                                13,
                             weight:
                                 isHovered
                                 ? .medium

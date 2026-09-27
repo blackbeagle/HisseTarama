@@ -412,7 +412,7 @@ final class RevenueCostChartRenderer: NSView {
 
         let font =
             NSFont.systemFont(
-                ofSize: 10,
+                ofSize: 13,
                 weight: .medium
             )
 
@@ -964,11 +964,11 @@ final class RevenueCostChartRenderer: NSView {
         let font =
             highlighted
             ? NSFont.systemFont(
-                ofSize: 10,
+                ofSize: 13,
                 weight: .semibold
             )
             : NSFont.systemFont(
-                ofSize: 9,
+                ofSize: 13,
                 weight: .regular
             )
 

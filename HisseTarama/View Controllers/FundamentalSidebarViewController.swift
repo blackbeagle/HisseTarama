@@ -47,10 +47,17 @@ final class FundamentalSidebarNode {
             [FundamentalSidebarNode] = [],
         isGroup: Bool = false
     ) {
+
         self.title = title
-        self.selection = selection
-        self.children = children
-        self.isGroup = isGroup
+
+        self.selection =
+            selection
+
+        self.children =
+            children
+
+        self.isGroup =
+            isGroup
     }
 }
 
@@ -62,6 +69,7 @@ final class FundamentalSidebarViewController:
     // MARK: - UI
 
     private let modeToggle: NSSegmentedControl = {
+
         let control =
             NSSegmentedControl(
                 labels:
@@ -86,7 +94,25 @@ final class FundamentalSidebarViewController:
         return control
     }()
 
+    private let searchField: NSSearchField = {
+
+        let field =
+            NSSearchField()
+
+        field.placeholderString =
+            "Kalem Ara"
+
+        field.sendsSearchStringImmediately =
+            true
+
+        field.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        return field
+    }()
+
     private let modeSeparator: NSBox = {
+
         let box =
             NSBox()
 
@@ -101,34 +127,36 @@ final class FundamentalSidebarViewController:
 
     private let outlineView:
         NSOutlineView = {
-            let outlineView =
-                NSOutlineView()
 
-            outlineView.translatesAutoresizingMaskIntoConstraints =
-                false
+        let outlineView =
+            NSOutlineView()
 
-            return outlineView
-        }()
+        outlineView.translatesAutoresizingMaskIntoConstraints =
+            false
+
+        return outlineView
+    }()
 
     private let scrollView:
         NSScrollView = {
-            let scrollView =
-                NSScrollView()
 
-            scrollView.translatesAutoresizingMaskIntoConstraints =
-                false
+        let scrollView =
+            NSScrollView()
 
-            scrollView.hasVerticalScroller =
-                true
+        scrollView.translatesAutoresizingMaskIntoConstraints =
+            false
 
-            scrollView.hasHorizontalScroller =
-                false
+        scrollView.hasVerticalScroller =
+            true
 
-            scrollView.autohidesScrollers =
-                true
+        scrollView.hasHorizontalScroller =
+            false
 
-            return scrollView
-        }()
+        scrollView.autohidesScrollers =
+            true
+
+        return scrollView
+    }()
 
     // MARK: - Delegate
 
@@ -139,6 +167,9 @@ final class FundamentalSidebarViewController:
 
     private var nodes:
         [FundamentalSidebarNode] = []
+
+    private var allFinancialItems:
+        [FinancialStatementItem] = []
 
     private(set) var currentStockSymbol:
         String?
@@ -152,16 +183,22 @@ final class FundamentalSidebarViewController:
     // MARK: - Lifecycle
 
     override func loadView() {
-        view = NSView()
+
+        view =
+            NSView()
 
         view.translatesAutoresizingMaskIntoConstraints =
             false
     }
 
     override func viewDidLoad() {
+
         super.viewDidLoad()
 
         setupModeToggle()
+
+        setupSearchField()
+
         setupOutlineView()
     }
 
@@ -179,10 +216,6 @@ final class FundamentalSidebarViewController:
 
         view.addSubview(
             modeToggle
-        )
-
-        view.addSubview(
-            modeSeparator
         )
 
         NSLayoutConstraint.activate([
@@ -211,31 +244,168 @@ final class FundamentalSidebarViewController:
             modeToggle.heightAnchor.constraint(
                 equalToConstant:
                     28
-            ),
+            )
+        ])
+    }
 
-            modeSeparator.topAnchor.constraint(
+    // MARK: - Search Field
+
+    private func setupSearchField() {
+
+        searchField.target =
+            self
+
+        searchField.action =
+            #selector(
+                searchFieldChanged(_:)
+            )
+
+        view.addSubview(
+            searchField
+        )
+
+        NSLayoutConstraint.activate([
+
+            searchField.topAnchor.constraint(
                 equalTo:
                     modeToggle.bottomAnchor,
+                constant:
+                    8
+            ),
+
+            searchField.leadingAnchor.constraint(
+                equalTo:
+                    view.leadingAnchor,
                 constant:
                     12
             ),
 
-            modeSeparator.leadingAnchor.constraint(
+            searchField.trailingAnchor.constraint(
                 equalTo:
-                    view.leadingAnchor
+                    view.trailingAnchor,
+                constant:
+                    -12
             ),
 
-            modeSeparator.trailingAnchor.constraint(
-                equalTo:
-                    view.trailingAnchor
-            ),
-
-            modeSeparator.heightAnchor.constraint(
+            searchField.heightAnchor.constraint(
                 equalToConstant:
-                    1
+                    24
             )
         ])
     }
+
+    @objc private func searchFieldChanged(
+        _ sender:
+            NSSearchField
+    ) {
+
+        filterFinancialItems(
+            searchText:
+                sender.stringValue
+        )
+    }
+
+    // MARK: - Search / Filtering
+
+    private func filterFinancialItems(
+        searchText:
+            String
+    ) {
+
+        let trimmedText =
+            searchText
+                .trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+
+        if trimmedText.isEmpty {
+
+            rebuildNodes(
+                from:
+                    allFinancialItems
+            )
+
+            return
+        }
+
+        let filteredItems =
+            allFinancialItems.filter {
+
+                let title =
+                    $0.titleTR.isEmpty
+                        ? $0.itemCode
+                        : $0.titleTR
+
+                return title.range(
+                    of:
+                        trimmedText,
+                    options:
+                        [
+                            .caseInsensitive,
+                            .diacriticInsensitive
+                        ],
+                    locale:
+                        Locale(identifier: "tr_TR")
+                ) != nil
+            }
+
+        rebuildNodes(
+            from:
+                filteredItems
+        )
+    }
+
+    private func rebuildNodes(
+        from items:
+            [FinancialStatementItem]
+    ) {
+
+        nodes.removeAll(
+            keepingCapacity:
+                true
+        )
+
+        let sortedItems =
+            items.sorted {
+
+                $0.itemCode.localizedStandardCompare(
+                    $1.itemCode
+                ) ==
+                    .orderedAscending
+            }
+
+        for item in sortedItems {
+
+            let title =
+                item.titleTR.isEmpty
+                    ? item.itemCode
+                    : item.titleTR
+
+            let node =
+                FundamentalSidebarNode(
+                    title:
+                        title,
+
+                    selection:
+                        .single(
+                            itemCode:
+                                item.itemCode
+                        ),
+
+                    isGroup:
+                        false
+                )
+
+            nodes.append(
+                node
+            )
+        }
+
+        outlineView.reloadData()
+    }
+
+    // MARK: - Mode Change
 
     @objc private func modeToggleChanged(
         _ sender:
@@ -245,12 +415,15 @@ final class FundamentalSidebarViewController:
         switch sender.selectedSegment {
 
         case 0:
+
             switchToItemMode()
 
         case 1:
+
             switchToGroupMode()
 
         default:
+
             break
         }
     }
@@ -296,6 +469,7 @@ final class FundamentalSidebarViewController:
             let itemCode =
                 lastSelectedItemCode
         else {
+
             showNoSelectedItemAlert()
 
             modeToggle.selectedSegment =
@@ -317,8 +491,6 @@ final class FundamentalSidebarViewController:
                     itemCode
             )
 
-            // Grup modu seçilemez.
-            // Kullanıcı Kalem modunda kalır.
             modeToggle.selectedSegment =
                 0
 
@@ -434,22 +606,53 @@ final class FundamentalSidebarViewController:
         outlineView.rowSizeStyle =
             .default
 
+        // Her satırın yüksekliğini açıkça belirliyoruz.
+        // Böylece metinler birbirine girmeyecek.
+        outlineView.rowHeight =
+            22
+
         outlineView.intercellSpacing =
             NSSize(
                 width:
                     0,
                 height:
-                    2
+                    0
             )
 
         scrollView.documentView =
             outlineView
 
         view.addSubview(
+            modeSeparator
+        )
+
+        view.addSubview(
             scrollView
         )
 
         NSLayoutConstraint.activate([
+
+            modeSeparator.topAnchor.constraint(
+                equalTo:
+                    searchField.bottomAnchor,
+                constant:
+                    8
+            ),
+
+            modeSeparator.leadingAnchor.constraint(
+                equalTo:
+                    view.leadingAnchor
+            ),
+
+            modeSeparator.trailingAnchor.constraint(
+                equalTo:
+                    view.trailingAnchor
+            ),
+
+            modeSeparator.heightAnchor.constraint(
+                equalToConstant:
+                    1
+            ),
 
             scrollView.leadingAnchor.constraint(
                 equalTo:
@@ -482,49 +685,16 @@ final class FundamentalSidebarViewController:
             [FinancialStatementItem]
     ) {
 
-        nodes.removeAll()
+        allFinancialItems =
+            items
 
-        let sortedItems =
-            items.sorted {
-                lhs, rhs in
-
-                lhs.itemCode.localizedStandardCompare(
-                    rhs.itemCode
-                ) ==
-                    .orderedAscending
-            }
-
-        for item in sortedItems {
-
-            let title =
-                item.titleTR.isEmpty
-                    ? item.itemCode
-                    : item.titleTR
-
-            let node =
-                FundamentalSidebarNode(
-                    title:
-                        title,
-
-                    selection:
-                        .single(
-                            itemCode:
-                                item.itemCode
-                        ),
-
-                    isGroup:
-                        false
-                )
-
-            nodes.append(
-                node
-            )
-        }
-
-        outlineView.reloadData()
+        rebuildNodes(
+            from:
+                items
+        )
 
         print(
-            "Fundamental sidebar güncellendi. Kalem sayısı: \(nodes.count)"
+            "Fundamental sidebar güncellendi. Kalem sayısı: \(items.count)"
         )
     }
 
@@ -532,8 +702,13 @@ final class FundamentalSidebarViewController:
 
         nodes.removeAll()
 
+        allFinancialItems.removeAll()
+
         lastSelectedItemCode =
             nil
+
+        searchField.stringValue =
+            ""
 
         outlineView.deselectAll(
             nil
@@ -564,6 +739,8 @@ extension FundamentalSidebarViewController:
     NSOutlineViewDataSource,
     NSOutlineViewDelegate {
 
+    // MARK: Number Of Children
+
     func outlineView(
         _ outlineView:
             NSOutlineView,
@@ -573,13 +750,15 @@ extension FundamentalSidebarViewController:
 
         if let node =
             item as?
-            FundamentalSidebarNode {
+                FundamentalSidebarNode {
 
             return node.children.count
         }
 
         return nodes.count
     }
+
+    // MARK: Expandable
 
     func outlineView(
         _ outlineView:
@@ -599,6 +778,8 @@ extension FundamentalSidebarViewController:
         return !node.children.isEmpty
     }
 
+    // MARK: Child
+
     func outlineView(
         _ outlineView:
             NSOutlineView,
@@ -610,13 +791,15 @@ extension FundamentalSidebarViewController:
 
         if let node =
             item as?
-            FundamentalSidebarNode {
+                FundamentalSidebarNode {
 
             return node.children[index]
         }
 
         return nodes[index]
     }
+
+    // MARK: Cell View
 
     func outlineView(
         _ outlineView:
@@ -647,25 +830,47 @@ extension FundamentalSidebarViewController:
                 owner:
                     self
             ) as?
-            NSTableCellView
+                NSTableCellView
             ??
             NSTableCellView()
 
         cell.identifier =
             identifier
 
-        let textField =
-            cell.textField
-            ??
-            NSTextField(
-                labelWithString:
-                    ""
-            )
+        // --------------------------------------------------
+        // KRİTİK NOKTA:
+        //
+        // NSOutlineView hücreleri yeniden kullanır.
+        // NSTextField oluşturduktan sonra bunu
+        // cell.textField'e atıyoruz.
+        //
+        // Böylece aynı hücreye her kullanımda yeni
+        // NSTextField eklenmez.
+        // --------------------------------------------------
 
-        if textField.superview == nil {
+        let textField:
+            NSTextField
+
+        if let existingTextField =
+            cell.textField {
+
+            textField =
+                existingTextField
+
+        } else {
+
+            textField =
+                NSTextField(
+                    labelWithString:
+                        ""
+                )
 
             textField.translatesAutoresizingMaskIntoConstraints =
                 false
+
+            // Çok önemli:
+            cell.textField =
+                textField
 
             cell.addSubview(
                 textField
@@ -690,9 +895,16 @@ extension FundamentalSidebarViewController:
                 textField.centerYAnchor.constraint(
                     equalTo:
                         cell.centerYAnchor
+                ),
+
+                textField.heightAnchor.constraint(
+                    equalToConstant:
+                        18
                 )
             ])
         }
+
+        // MARK: Text
 
         textField.stringValue =
             node.title
@@ -710,8 +922,33 @@ extension FundamentalSidebarViewController:
                         13
                 )
 
+        // MARK: Single Line
+
+        textField.usesSingleLineMode =
+            true
+
+        textField.maximumNumberOfLines =
+            1
+
+        textField.lineBreakMode =
+            .byTruncatingTail
+
+        textField.isEditable =
+            false
+
+        textField.isSelectable =
+            false
+
+        textField.drawsBackground =
+            false
+
+        textField.isBordered =
+            false
+
         return cell
     }
+
+    // MARK: Selection
 
     func outlineViewSelectionDidChange(
         _ notification:
@@ -749,8 +986,6 @@ extension FundamentalSidebarViewController:
             let itemCode
         ):
 
-            // Her durumda son seçilen kalemi
-            // güncelliyoruz.
             lastSelectedItemCode =
                 itemCode
 
@@ -758,7 +993,8 @@ extension FundamentalSidebarViewController:
                 "SON SEÇİLEN FİNANSAL KALEM: \(itemCode)"
             )
 
-            // Kalem modu
+            // KALEM MODU
+
             if modeToggle.selectedSegment == 0 {
 
                 delegate?.fundamentalSidebar(
@@ -773,7 +1009,8 @@ extension FundamentalSidebarViewController:
                 return
             }
 
-            // Grup modu
+            // GRUP MODU
+
             guard
                 let group =
                     FundamentalGroup.group(
@@ -818,5 +1055,3 @@ extension FundamentalSidebarViewController:
         }
     }
 }
-
-
