@@ -156,7 +156,7 @@ final class FundamentalsViewController: NSViewController {
 
             sidebarView.widthAnchor.constraint(
                 equalToConstant:
-                    250
+                    400
             ),
 
             separatorView.leadingAnchor.constraint(

@@ -72,7 +72,7 @@ class MainSplitViewController: NSSplitViewController,
         if let sidebarItem = splitViewItems.first {
 
             sidebarItem.minimumThickness = 150
-            sidebarItem.maximumThickness = 400
+            sidebarItem.maximumThickness = 250
             sidebarItem.canCollapse = true
         }
 
@@ -149,10 +149,10 @@ class MainSplitViewController: NSSplitViewController,
 
         let sidebarWidth =
             max(
-                150,
+                250,
                 min(
-                    400,
-                    windowWidth / 5
+                    150,
+                    windowWidth / 8
                 )
             )
 
